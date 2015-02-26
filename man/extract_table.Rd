@@ -6,6 +6,10 @@
 \usage{
 extract_table(type)
 }
+\arguments{
+\item{type}{The type of table to extract from ENCODE rest api.
+Examples: "biosample", "file", "experiment", etc...}
+}
 \value{
 a \code{data.frame} corresponding to the table asked. If no match is
   found, returns an empty \code{data.frame}
