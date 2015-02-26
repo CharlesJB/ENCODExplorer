@@ -12,7 +12,7 @@ data(tables)
 The tables were generated with the \code{prepare_ENCODEdb} function.
 }
 \details{
-List of available tables:
+Available tables:
 \describe{
   \item{biosample}{}
   \item{experiment}{}
