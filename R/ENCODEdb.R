@@ -5,14 +5,25 @@
 NULL
 
 #' List of selected tables from ENCODE rest api.
+#' 
+#' The tables were generated with the \code{prepare_ENCODEdb} function.
 #'
-#' /itemize{
-#'   \item biosample
-#'   \item experiment
-#'   \item lab
-#'   \item dataset
-#'   \item files
-#'   \item target
+#' Available tables:
+#' \describe{
+#'   \item{biosample}{}
+#'   \item{experiment}{}
+#'   \item{lab}{}
+#'   \item{dataset}{}
+#'   \item{files}{}
+#'   \item{target}{}
+#'   \item{organism}{}
+#'   \item{replicate}{}
+#'   \item{award}{}
+#'   \item{treatment}{}
+#'   \item{human_donor}{}
+#'   \item{library}{}
+#'   \item{platform}{}
+#'   \item{document}{}
 #' }
 #'
 #' @docType data
