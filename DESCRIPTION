@@ -12,4 +12,5 @@ License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODEdb/issues
 VignetteBuilder: knitr
 Suggests: jsonlite
+Imports: RSQLite
 LazyData: true
