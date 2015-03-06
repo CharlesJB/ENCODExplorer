@@ -11,24 +11,10 @@ data(tables)
 \description{
 The tables were generated with the \code{prepare_ENCODEdb} function.
 }
-\details{
-Available tables:
-\describe{
-  \item{biosample}{}
-  \item{experiment}{}
-  \item{lab}{}
-  \item{dataset}{}
-  \item{files}{}
-  \item{target}{}
-  \item{organism}{}
-  \item{replicate}{}
-  \item{award}{}
-  \item{treatment}{}
-  \item{human_donor}{}
-  \item{library}{}
-  \item{platform}{}
-  \item{document}{}
-}
+\seealso{
+\code{\link{get_encode_type}} to get a list of possible types. Note
+  that some of the types are empty tables that are not included in the
+  database created with \code{\link{prepare_ENCODEdb}} function.
 }
 \keyword{datasets}
 
