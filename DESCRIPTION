@@ -11,5 +11,5 @@ Description: This package allows user to quickly access ENCODE project files
 License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODEdb/issues
 VignetteBuilder: knitr
-Imports: jsonlite, tools
+Imports: RSQLite, jsonlite, tools
 LazyData: true
