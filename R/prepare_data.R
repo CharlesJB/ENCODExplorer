@@ -41,8 +41,12 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 
 #' A list of known tables from ENCODE database.
 #'
-#' The list was extracted from:
+#' The type (table) names are extracted from the schema list from ENCODE-DCC
+#' github repository:
 #'   https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'
+#' The data is extracted using the github api:
+#'   https://developer.github.com/guides/getting-started/
 #'
 #' @return a vector of \code{character} with the names of the known tables in
 #'   the ENCODE database.
@@ -51,50 +55,10 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #'   types <- get_encode_types()
 #'
 #'  @export
-# TODO: find a way to fetch this info from the github
 get_encode_types <- function() {
-  c("access_key",
-    "analysis_step",
-    "analysis_step_run",
-    "antibody_approval",
-    "antibody_characterization",
-    "antibody_lot",
-    "award",
-    "biosample",
-    "biosample_characterization",
-    "characterization",
-    "construct",
-    "construct_characterization",
-    "dataset",
-    "document",
-    "donor",
-    "donor_characterization",
-    "experiment",
-    "file",
-    "fly_donor",
-    "human_donor",
-    "image",
-    "lab",
-    "library",
-    "mixins",
-    "mouse_donor",
-    "namespaces",
-    "organism",
-    "page",
-    "pipeline",
-    "platform",
-    "publication",
-    "quality_metric",
-    "replicate",
-    "rnai",
-    "rnai_characterization",
-    "software",
-    "software_version",
-    "source",
-    "talen",
-    "target",
-    "treatment",
-    "user",
-    "workflow_run",
-    "worm_donor")
+  encode_api_url <- "https://api.github.com/repos"
+  encoded_repo <- "encode-dcc/encoded"
+  schemas <- "src/encoded/schemas"
+  url <- paste(encode_api_url, encoded_repo, "contents", schemas, sep = "/")
+  tools::file_path_sans_ext(jsonlite::fromJSON(url)$name)
 }
