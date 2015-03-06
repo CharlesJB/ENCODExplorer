@@ -5,9 +5,7 @@
 \title{Create the RSQLite databse for the tables in ENCODE}
 \usage{
 prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
-  types = c("biosample", "experiment", "lab", "dataset", "file", "target",
-  "organism", "replicate", "award", "treatment", "human_donor", "library",
-  "platform", "document"), overwrite = FALSE)
+  types = get_encode_types(), overwrite = FALSE)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.
@@ -16,30 +14,14 @@ Default: \code{\"ENCODEdb.sqlite\"}.}
 \item{overwrite}{Should tables already present in database be overwrited?
 Default: \code{FALSE}.}
 
-\item{type}{The tables to extract from ENCODE rest api.}
+\item{type}{The names of the tables to extract from ENCODE rest api.}
 }
 \value{
 a \code{list} with selected tables from ENCODE that were used to
 create the \code{RSQLite} database.
 }
 \description{
-The following table are extracted by default:
-\describe{
-  \item{biosample}{}
-  \item{experiment}{}
-  \item{lab}{}
-  \item{dataset}{}
-  \item{files}{}
-  \item{target}{}
-  \item{organism}{}
-  \item{replicate}{}
-  \item{award}{}
-  \item{treatment}{}
-  \item{human_donor}{}
-  \item{library}{}
-  \item{platform}{}
-  \item{document}{}
-}
+Create the RSQLite databse for the tables in ENCODE
 }
 \examples{
 \dontrun{
