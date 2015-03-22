@@ -1,13 +1,8 @@
-#' Create the RSQLite databse for the tables in ENCODE and extract basic 
-#' informations in a \code{list} of \code{data.frame}s
+#' Create the RSQLite databse for the tables in ENCODE
 #' 
 #'
-#' @return a \code{list} containing three elements. The first one 'tables' is a 
-#' \code{list} with selected tables from ENCODE that were used to
-#' create the \code{RSQLite} database ; the second one 'experiment' is a 
-#' \code{data.frame} containing basic informations for each file part of an 
-#' experiment ; the third one 'dataset' is a \code{data.frame} containing basic 
-#' informations for each file part of a dataset.
+#' @return is a \code{list} with selected tables from ENCODE that were used to
+#' create the \code{RSQLite} database.
 #'
 #' @param database_filename The name of the file to save the database into.
 #' Default: \code{\"ENCODEdb.sqlite\"}.
@@ -57,16 +52,10 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
     Tdiff = Sys.time() - T1
     print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " min"))
     
-    T2 = Sys.time()
+    
     # Extract data from the DB
     if(length(tables) > 0) {
-      matrices = export_ENCODEdb_matrix(database_filename)
-      print(format(Sys.time(), "%a %b %d %X %Y"))
-      Tdiff = Sys.time() - T2
-      print(paste0("Extract data from the DB : ",Tdiff, " min"))
-      
-      invisible(list(tables = tables, experiment = matrices[[1]], 
-                     dataset = matrices[[2]]))
+      invisible(tables)
     }
     else
     {
@@ -79,10 +68,29 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
   }
 }
 
+#' Extract essential informations from the RSQLite databse in a \code{list} of 
+#' \code{data.frame}s
+#' 
+#'
+#' @return a \code{list} containing two elements. The first one 'experiment' is 
+#' a \code{data.frame} containing essential informations for each file part of  
+#' an experiment ; the second one 'dataset' is a \code{data.frame} containing 
+#' essential informations for each file part of a dataset.
+#'
+#' @param database_filename The name of the file to save the database into.
+#' Default: \code{\"ENCODEdb.sqlite\"}.
+#'
+#' @examples
+#' \dontrun{
+#'   matrices <- export_ENCODEdb_matrix("encode.sqlite")
+#'  }
+#'  
+#'  @export
 export_ENCODEdb_matrix <- function(database_filename) {
+  T2 = Sys.time()
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, e.run_type, f.accession as file_accession, f.file_format, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
-  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, d.related_files, f.href from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
+  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, e.run_type, f.accession as file_accession, f.file_format, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
+  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, d.related_files, f.href, f.md5sum from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
   
   rs <- RSQLite::dbSendQuery(con, query_exp)
   encode_exp <- RSQLite::dbFetch(rs, n = -1)
@@ -149,8 +157,10 @@ export_ENCODEdb_matrix <- function(database_filename) {
       rs <- RSQLite::dbSendQuery(con, query_rep)
       res2 <- RSQLite::dbFetch(rs, n = -1)
       RSQLite::dbClearResult(rs)
-      technical_replicate_number = c(technical_replicate_number,res2$technical_replicate_number)
-      biological_replicate_number = c(biological_replicate_number,res2$biological_replicate_number)
+      technical_replicate_number = 
+        c(technical_replicate_number,res2$technical_replicate_number)
+      biological_replicate_number = 
+        c(biological_replicate_number,res2$biological_replicate_number)
       
     } else {
       
@@ -161,7 +171,8 @@ export_ENCODEdb_matrix <- function(database_filename) {
       
     }
   }
-  encode_exp = cbind(encode_exp, organism, treatment, technical_replicate_number, biological_replicate_number)
+  encode_exp = cbind(encode_exp, organism, treatment, 
+                     technical_replicate_number, biological_replicate_number)
   
   RSQLite::dbDisconnect(con)
   
@@ -170,7 +181,8 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   dataset_accession = rep(NA, nrow(encode_exp))
   names(dataset_accession) = as.character(encode_exp$file_accession)
-  dataset_with_file = subset(encode_ds, ! is.na(encode_ds$related_files), select = c(accession, related_files))
+  dataset_with_file = subset(encode_ds, ! is.na(encode_ds$related_files), 
+                             select = c(accession, related_files))
   dataset_with_file = unique(dataset_with_file)
   
   for (i in (1:nrow(dataset_with_file))) {
@@ -186,6 +198,10 @@ export_ENCODEdb_matrix <- function(database_filename) {
   }
   
   encode_exp = cbind(encode_exp, dataset_accession)
+  
+  print(format(Sys.time(), "%a %b %d %X %Y"))
+  Tdiff = Sys.time() - T2
+  print(paste0("Extract data from the DB : ",Tdiff, " min"))
   
   list(experiment = encode_exp, dataset = encode_ds)
 }

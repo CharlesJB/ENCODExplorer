@@ -161,177 +161,218 @@ search <- function(searchTerm, limit = "10") {
 #'
 #' @examples
 #' matrices = ENCODEdb:export_ENCODEDB_matrix(database_filename)
-#' encode_exp = ENCODEdb::matrices[[1]]
-#' encode_ds = ENCODEdb::matrices[[2]]
-#' res = ENCODEdb::query(fileFormat = "GTF", biosample = "mcf-7", fixed = F)
-query <- function(acces = NULL, assayName = NULL, biosample = NULL, 
-                  dataset_access = NULL, fileAccess = NULL, fileFormat = NULL, 
-                  labo = NULL, organism = NULL, target = NULL, treatment = NULL,
+#' encode_exp = matrices[[1]]
+#' encode_ds = matrices[[2]]
+#' res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
+query <- function(accession = NULL, assay = NULL, biosample = NULL, 
+                  dataset_access = NULL, file_accession = NULL, file_format = NULL, 
+                  lab = NULL, organism = NULL, target = NULL, treatment = NULL,
                   fixed = TRUE) {
   
-  s1 = encode_exp
-  s2 = encode_ds
-  
-  if(fixed) {
+  if(is.null(accession) && is.null(assay) && is.null(biosample) && is.null(dataset_access) &&
+       is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
+       is.null(target) && is.null(treatment))
+  {
+    warning("Please provide at least one valid criteria", call. = F)
+    NULL
     
-    if(!is.null(acces)) {
-      s1 <- subset(s1, s1$accession == acces)
-      s2 <- subset(s2, s2$accession == acces)
-    }
-    
-    if(!is.null(assayName)) {
-      s1 <- subset(s1, s1$assay == assayName)
-    }
-    
-    if(!is.null(biosample)) {
-      s1 <- subset(s1, s1$biosample_name == biosample)
-    }
-    
-    if(!is.null(dataset_access)) {
-      s1 <- subset(s1, s1$dataset_accession == dataset_access)
-      s2 <- subset(s2, s2$accession == dataset_access)
-    }
-    
-    if(!is.null(fileAccess)) {
-      s1 <- subset(s1, s1$file_accession == fileAccess)
-      s2 <- subset(s2, s2$file_accession == fileAccess)
-    }
-    
-    if(!is.null(fileFormat)) {
-      s1 <- subset(s1, s1$file_format == fileFormat)
-      s2 <- subset(s2, s2$file_format == fileFormat)
-    }
-    
-    if(!is.null(labo)) {
-      s1 <- subset(s1, s1$lab == labo)
-      s2 <- subset(s2, s2$lab == labo)
-    }
-    
-    if(!is.null(organism)) {
-      s1 <- subset(s1, s1$organism == organism)
-    }
-    
-    if(!is.null(target)) {
-      s1 <- subset(s1, s1$target == target)
-    }
-    
-    if(!is.null(treatment)) {
-      s1 <- subset(s1, s1$treatment == treatment)
-    }
   }
   else
   {
-    # retirer ignorer les espaces, les tirets et la casse
-    # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
+    s1 = encode_exp
+    s2 = encode_ds
     
-    if(!is.null(acces)) {
-      query.transfo = query_transform(access)
-      select.entries = grepl(x = s1$accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
+    ac = accession
+    as = assay
+    bs = biosample
+    da = dataset_access
+    fa = file_accession
+    ff = file_format
+    lb = lab
+    og = organism
+    tg = target
+    tr = treatment
+    
+    if(fixed) {
       
-      select.entries = grepl(x = s2$accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s2 = s2[select.entries,]
-    }
-    
-    if(!is.null(assayName)) {
-      query.transfo = query_transform(assayName)
-      select.entries = grepl(x = s1$assay, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
-    }
-    
-    if(!is.null(biosample)) {
-      query.transfo = query_transform(biosample)
-      select.entries = grepl(x = s1$biosample_name, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
-    }
-    
-    if(!is.null(dataset_access)) {
-      query.transfo = query_transform(dataset_access)
-      select.entries = grepl(x = s1$dataset_accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
+      if(!is.null(ac)) {
+        s1 <- subset(s1, s1$accession == ac)
+        s2 <- subset(s2, s2$accession == ac)
+      }
       
-      select.entries = grepl(x = s2$accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s2 = s2[select.entries,]
-    }
-    
-    if(!is.null(fileAccess)) {
-      query.transfo = query_transform(fileAccess)
-      select.entries = grepl(x = s1$file_accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
+      if(!is.null(as)) {
+        s1 <- subset(s1, s1$assay == as)
+        s2 <- subset(s2, s2$assay == as)
+      }
       
-      select.entries = grepl(x = s2$file_accession, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s2 = s2[select.entries,]
-    }
-    
-    if(!is.null(fileFormat)) {
-      query.transfo = query_transform(fileFormat)
-      select.entries = grepl(x = s1$file_format, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
+      if(!is.null(bs)) {
+        s1 <- subset(s1, s1$biosample_name == bs)
+        s2 <- subset(s2, s2$biosample_name == bs)
+      }
       
-      select.entries = grepl(x = s2$file_format, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s2 = s2[select.entries,]
-    }
-    
-    if(!is.null(labo)) {
-      query.transfo = query_transform(labo)
-      select.entries = grepl(x = s1$lab, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
+      if(!is.null(da)) {
+        s1 <- subset(s1, s1$dataset_accession == da)
+        s2 <- subset(s2, s2$accession == da)
+      }
       
-      select.entries = grepl(x = s2$lab, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s2 = s2[select.entries,]
+      if(!is.null(fa)) {
+        s1 <- subset(s1, s1$file_accession == fa)
+        s2 <- subset(s2, s2$file_accession == fa)
+      }
+      
+      if(!is.null(ff)) {
+        s1 <- subset(s1, s1$file_format == ff)
+        s2 <- subset(s2, s2$file_format == ff)
+      }
+      
+      if(!is.null(lb)) {
+        s1 <- subset(s1, s1$lab == lb)
+        s2 <- subset(s2, s2$lab == lb)
+      }
+      
+      if(!is.null(og)) {
+        s1 <- subset(s1, s1$organism == og)
+        s2 <- subset(s2, s2$organism == og)
+      }
+      
+      if(!is.null(tg)) {
+        s1 <- subset(s1, s1$target == tg)
+        s2 <- subset(s2, s2$target == tg)
+      }
+      
+      if(!is.null(tr)) {
+        s1 <- subset(s1, s1$treatment == tr)
+        s2 <- subset(s2, s1$treatment == tr)
+      }
+    }
+    else
+    {
+      # retirer ignorer les espaces, les tirets et la casse
+      # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
+      
+      if(!is.null(ac)) {
+        query.transfo = query_transform(ac)
+        select.entries = grepl(x = s1$accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(as)) {
+        query.transfo = query_transform(as)
+        select.entries = grepl(x = s1$assay, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$assay, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(bs)) {
+        query.transfo = query_transform(bs)
+        select.entries = grepl(x = s1$biosample_name, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$biosample_name, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(da)) {
+        query.transfo = query_transform(da)
+        select.entries = grepl(x = s1$dataset_accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(fa)) {
+        query.transfo = query_transform(fa)
+        select.entries = grepl(x = s1$file_accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$file_accession, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(ff)) {
+        query.transfo = query_transform(ff)
+        select.entries = grepl(x = s1$file_format, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$file_format, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(lb)) {
+        query.transfo = query_transform(lb)
+        select.entries = grepl(x = s1$lab, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$lab, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(og)) {
+        query.transfo = query_transform(og)
+        select.entries = grepl(x = s1$organism, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$organism, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(tg)) {
+        query.transfo = query_transform(tg)
+        select.entries = grepl(x = s1$target, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$target, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(!is.null(tr)) {
+        query.transfo = query_transform(tr)
+        select.entries = grepl(x = s1$treatment, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$treatment, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
     }
     
-    if(!is.null(organism)) {
-      query.transfo = query_transform(organism)
-      select.entries = grepl(x = s1$organism, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
-    }
     
-    if(!is.null(target)) {
-      query.transfo = query_transform(target)
-      select.entries = grepl(x = s1$target, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
-    }
     
-    if(!is.null(treatment)) {
-      query.transfo = query_transform(treatment)
-      select.entries = grepl(x = s1$treatment, pattern = query.transfo, 
-                             ignore.case = T, perl = T)
-      s1 = s1[select.entries,]
-    }
-    
-  }
-  
-  
-  
-  if((nrow(s1) + nrow(s2)) == 0) {
-    warning("No result found. You can try the <search>", call. = F)
-    list()
-  }
-  else
-  {
-    if(nrow(s1) == nrow(encode_exp) || nrow(s2) == nrow(encode_ds)) {
-      warning("Please provide at least one valid criteria", call. = F)
-      list()
+    if((nrow(s1) + nrow(s2)) == 0) {
+      warning("No result found. You can try the <search> function or set the fixed option to FALSE", call. = F)
+      NULL
     }
     else
     {
       list(experiment = s1, dataset = s2)
     }
+    
   }
   
   
@@ -371,8 +412,8 @@ query_transform <- function(my.term) {
 downloadFile <- function(searchResult = NULL , resultOrigin = NULL, 
                          format = "all", dir = "/tmp") {
   if(is.null(searchResult) || is.null(resultOrigin)) {
-    warning("You have to provide both results set and its origin to use the 
-            download function", call. = F)
+    warning("You have to provide both results set and its origin to use the download function", call. = F)
+    NULL
   }
   else
   {
@@ -386,29 +427,41 @@ downloadFile <- function(searchResult = NULL , resultOrigin = NULL,
         temp = subset(encode_exp, encode_exp$file_accession %in% filesId)
         temp2 = subset(encode_ds, encode_ds$file_accession %in% filesId)
         urls = c(as.character(temp$href), as.character(temp2$href))
-        urls
-        for (url in urls) {
+        md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
+          
+        for (i in seq_along(urls)) {
+          url = urls[i]
+          md5 = md5sums[i]
+          
           fileName = strsplit(x = url, split = "@@download",fixed = T)[[1]][2]
-          ret = download.file(url = paste0(encode_root,url), quiet = T,
-                              destfile = paste0(dir,fileName), method = "wget" )
+          download.file(url = paste0(encode_root,url), quiet = T,
+                              destfile = paste0(dir,fileName), method = "wget")
+          md5sum_file = md5sum(paste0(dir,fileName))
+          if(md5sum_file != md5) {
+            warning(paste0("Error while downloading the file ", fileName), call. = F)
+            NULL
+          }
         }
         
       }
       else
       {
         warning(paste0("Can't write in ", dir), call. = F)
+        NULL
       }
     }
     # origin farfelue 
     else
     {
-      warning("You have to provide a valid results set origin to use the 
-            download function : search or query", call. = F)
+      warning("You have to provide a valid results set origin to use the download function : search or query", call. = F)
+      NULL
     }
   }
 }
 
 getFileId <- function(searchResult, resultOrigin, format = "all") {
+  
+  d = NULL
   
   if(resultOrigin == "search") {
     if(class(searchResult) == "data.frame")
@@ -417,8 +470,9 @@ getFileId <- function(searchResult, resultOrigin, format = "all") {
     }
     else
     {
-      warning("Unexpected format for a result set coming from our search 
-              function", call. = F)
+      warning("Unexpected format for a result set coming from our search function", 
+              call. = F)
+      NULL
     }
     
   }
@@ -430,42 +484,47 @@ getFileId <- function(searchResult, resultOrigin, format = "all") {
     }
     else
     {
-      warning("Unexpected format for a result set coming from our query 
-              function", call. = F)
+      warning("Unexpected format for a result set coming from our query function", 
+              call. = F)
+      NULL
     }
   }
   
-  
-  r = c()
-  formats = c(levels(d$experiment$file_format),levels(d$dataset$file_format))
-  if(format != "all") {
-    if(!(format %in% formats)) {
-      warning("Unknown file format", call. = F)
-    }
-    else
-    {
-      avail_format =  unique(c(as.character(d$experiment$file_format),
-                               as.character(d$dataset$file_format)))
-      if(!(format %in% avail_format)) {
-        warning("This file format is not available in your dataset", call. = F)
+  if (! is.null(d)) {
+    r = c()
+    formats = unique(c(as.character(encode_exp$file_format),
+                       as.character(encode_ds$file_format)))
+    if(format != "all") {
+      if(!(format %in% formats)) {
+        warning("Unknown file format", call. = F)
+        NULL
       }
       else
       {
-        temp = subset(d$experiment, d$experiment$file_format == format)
-        temp2 = subset(d$dataset, d$dataset$file_format == format)
-        r = c(as.character(temp$file_accession), 
-              as.character(temp2$file_accession))
+        avail_format =  unique(c(as.character(d$experiment$file_format),
+                                 as.character(d$dataset$file_format)))
+        if(!(format %in% avail_format)) {
+          warning("This file format is not available in your dataset", call. = F)
+          NULL
+        }
+        else
+        {
+          temp = subset(d$experiment, d$experiment$file_format == format)
+          temp2 = subset(d$dataset, d$dataset$file_format == format)
+          r = c(as.character(temp$file_accession), 
+                as.character(temp2$file_accession))
+        }
       }
     }
+    else {
+      r = c(as.character(d$experiment$file_accession), 
+            as.character(d$dataset$file_accession))
+    }
+    
+    r
   }
-  else {
-    r = c(as.character(d$experiment$file_accession), 
-          as.character(d$dataset$file_accession))
-  }
-  
-  r
 }
-
+# to use with search results
 getFileDetails <- function(searchResult) {
   details = list(
     experiment = getExperimentDetails(searchResult),
@@ -474,11 +533,13 @@ getFileDetails <- function(searchResult) {
   details
 }
 
+# to use with search results
 getExperimentDetails <- function(searchResult) {
   exp = searchResult$accession
   subset(encode_exp,encode_exp$accession %in% exp)
 }
 
+# to use with search results
 getDatasetDetails <- function(searchResult) {
   ds = searchResult$accession
   subset(encode_ds,encode_ds$accession %in% ds)
