@@ -162,6 +162,8 @@ test_downloadFile <- function() {
   
   checkEquals(as.character(md5sum("ENCODE/ENCODEdb/R/tests/ENCFF001VCK.broadPeak.gz")),
               md5sum_test_file)
+  
+  file.remove("ENCODE/ENCODEdb/R/tests/ENCFF001VCK.broadPeak.gz")
 }
 
 test_getFileId <- function() {
