@@ -223,7 +223,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
 #' @examples
 #'   types <- get_encode_types()
 #'
-#'  @export
+#'
 get_encode_types <- function() {
   encode_api_url <- "https://api.github.com/repos"
   encoded_repo <- "encode-dcc/encoded"

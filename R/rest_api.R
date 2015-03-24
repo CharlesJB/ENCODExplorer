@@ -127,11 +127,14 @@ clean_table <- function(table) {
 #'
 #' @examples
 #' res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
-search <- function(searchTerm, limit = "10") {
-  filters = paste0("searchTerm=",searchTerm, "&limit=", limit)
+#' @export
+search <- function(searchTerm = NULL, limit = 10) {
+  searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
+  
+  filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
-  
+
   res <- jsonlite::fromJSON(url)
   if (res[["notification"]] != "Success") {
     warning("No result found", call. = F)
@@ -140,8 +143,9 @@ search <- function(searchTerm, limit = "10") {
     r = res[["@graph"]]
   }
   
-  r = clean_table(r)
-  r
+  search_results = clean_table(r)
+  print(paste0("results : ",length(unique(search_results$accession)), " entries"))
+  search_results
 }
 
 #' Produce a subset of data following predefined criteria
@@ -161,13 +165,13 @@ search <- function(searchTerm, limit = "10") {
 #'
 #' @examples
 #' matrices = ENCODEdb:export_ENCODEDB_matrix(database_filename)
-#' encode_exp = matrices[[1]]
-#' encode_ds = matrices[[2]]
 #' res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
+#' @export
 query <- function(accession = NULL, assay = NULL, biosample = NULL, 
                   dataset_access = NULL, file_accession = NULL, file_format = NULL, 
                   lab = NULL, organism = NULL, target = NULL, treatment = NULL,
                   fixed = TRUE) {
+  if(!can_run()) stop("Please complete the data preparation before running the this function")
   
   if(is.null(accession) && is.null(assay) && is.null(biosample) && is.null(dataset_access) &&
        is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
@@ -179,8 +183,8 @@ query <- function(accession = NULL, assay = NULL, biosample = NULL,
   }
   else
   {
-    s1 = encode_exp
-    s2 = encode_ds
+    s1 = matrices$experiment
+    s2 = matrices$dataset
     
     ac = accession
     as = assay
@@ -370,7 +374,9 @@ query <- function(accession = NULL, assay = NULL, biosample = NULL,
     }
     else
     {
-      list(experiment = s1, dataset = s2)
+      query_results = list(experiment = s1, dataset = s2)
+      print(paste0("experiment results : ",nrow(query_results$experiment)," files in ",length(unique(query_results$experiment$accession))," experiments ; dataset results : ",nrow(query_results$dataset), " files"))
+      query_results
     }
     
   }
@@ -399,7 +405,7 @@ query_transform <- function(my.term) {
 #' set, its origin (search or query), the file format and finally the destination
 #' directory.
 #'
-#' @param searchResult the results set
+#' @param resultSet the results set
 #' @param resultOrigin name of the function used to generate the result set 
 #' (\code{search} or \code{query})
 #' @param format file format, default = all
@@ -409,9 +415,12 @@ query_transform <- function(my.term) {
 #'
 #' @examples
 #' res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
-downloadFile <- function(searchResult = NULL , resultOrigin = NULL, 
+#' @export
+download <- function(resultSet = NULL , resultOrigin = NULL, 
                          format = "all", dir = "/tmp") {
-  if(is.null(searchResult) || is.null(resultOrigin)) {
+  if(!can_run()) stop("Please complete the data preparation before running the this function")
+  
+  if(is.null(resultSet) || is.null(resultOrigin)) {
     warning("You have to provide both results set and its origin to use the download function", call. = F)
     NULL
   }
@@ -421,11 +430,11 @@ downloadFile <- function(searchResult = NULL , resultOrigin = NULL,
     {
       encode_root = "https://www.encodeproject.org"
       if(file.access(dir, mode = 2) == 0) {
-        filesId = getFileId(searchResult = searchResult, 
+        filesId = getFileId(resultSet = resultSet, 
                             resultOrigin = resultOrigin, format = format)
         
-        temp = subset(encode_exp, encode_exp$file_accession %in% filesId)
-        temp2 = subset(encode_ds, encode_ds$file_accession %in% filesId)
+        temp = subset(matrices$experiment, matrices$experiment$file_accession %in% filesId)
+        temp2 = subset(matrices$dataset, matrices$dataset$file_accession %in% filesId)
         urls = c(as.character(temp$href), as.character(temp2$href))
         md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
           
@@ -436,10 +445,14 @@ downloadFile <- function(searchResult = NULL , resultOrigin = NULL,
           fileName = strsplit(x = url, split = "@@download",fixed = T)[[1]][2]
           download.file(url = paste0(encode_root,url), quiet = T,
                               destfile = paste0(dir,fileName), method = "wget")
-          md5sum_file = md5sum(paste0(dir,fileName))
+          md5sum_file = tools::md5sum(paste0(dir,fileName))
           if(md5sum_file != md5) {
-            warning(paste0("Error while downloading the file ", fileName), call. = F)
+            warning(paste0("Error while downloading the file : ", fileName), call. = F)
             NULL
+          }
+          else
+          {
+            print(paste0("Success downloading the file : ", fileName))
           }
         }
         
@@ -459,14 +472,14 @@ downloadFile <- function(searchResult = NULL , resultOrigin = NULL,
   }
 }
 
-getFileId <- function(searchResult, resultOrigin, format = "all") {
+getFileId <- function(resultSet, resultOrigin, format = "all") {
   
   d = NULL
   
   if(resultOrigin == "search") {
-    if(class(searchResult) == "data.frame")
+    if(class(resultSet) == "data.frame")
     {
-      d = getFileDetails(searchResult)
+      d = getFileDetails(resultSet)
     }
     else
     {
@@ -478,9 +491,9 @@ getFileId <- function(searchResult, resultOrigin, format = "all") {
   }
   else
   {
-    if(class(searchResult) == "list" && length(searchResult) == 2)
+    if(class(resultSet) == "list" && length(resultSet) == 2)
     {
-      d = searchResult
+      d = resultSet
     }
     else
     {
@@ -492,8 +505,8 @@ getFileId <- function(searchResult, resultOrigin, format = "all") {
   
   if (! is.null(d)) {
     r = c()
-    formats = unique(c(as.character(encode_exp$file_format),
-                       as.character(encode_ds$file_format)))
+    formats = unique(c(as.character(matrices$experiment$file_format),
+                       as.character(matrices$dataset$file_format)))
     if(format != "all") {
       if(!(format %in% formats)) {
         warning("Unknown file format", call. = F)
@@ -525,22 +538,29 @@ getFileId <- function(searchResult, resultOrigin, format = "all") {
   }
 }
 # to use with search results
-getFileDetails <- function(searchResult) {
+getFileDetails <- function(resultSet) {
   details = list(
-    experiment = getExperimentDetails(searchResult),
-    dataset = getDatasetDetails(searchResult)
+    experiment = getExperimentDetails(resultSet),
+    dataset = getDatasetDetails(resultSet)
   )
   details
 }
 
 # to use with search results
-getExperimentDetails <- function(searchResult) {
-  exp = searchResult$accession
-  subset(encode_exp,encode_exp$accession %in% exp)
+getExperimentDetails <- function(resultSet) {
+  exp = resultSet$accession
+  subset(matrices$experiment,matrices$experiment$accession %in% exp)
 }
 
 # to use with search results
-getDatasetDetails <- function(searchResult) {
-  ds = searchResult$accession
-  subset(encode_ds,encode_ds$accession %in% ds)
+getDatasetDetails <- function(resultSet) {
+  ds = resultSet$accession
+  subset(matrices$dataset,matrices$dataset$accession %in% ds)
 }
+
+# check if the needed dataset is avalable
+can_run <- function() {
+  return(exists("matrices"))
+}
+
+

@@ -1,16 +1,16 @@
 Package: ENCODEdb
-
 Type: Package
 Title: A compilation of ENCODE metadata
 Version: 0.99.0
 Date: 2015-02-25
-Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>
-    and Audrey Lemacon <lemacon.audrey@gmail.com>
+Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
+      Audrey Lemacon <lemacon.audrey@gmail.com> and Arnaud Droit <arnaud.droit@crchudequebec.ulaval.ca >
 Maintainer: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>
 Description: This package allows user to quickly access ENCODE project files
     metadata and give access to helper functions to query the ENCODE rest api.
 License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODEdb/issues
 VignetteBuilder: knitr
-Imports: RSQLite, jsonlite, tools
+Imports: RSQLite,jsonlite,tools
+Suggests:RUnit,BiocGenerics,knitr
 LazyData: true

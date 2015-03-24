@@ -14,7 +14,7 @@
 #' @examples
 #'   schema <- get_schemas()
 #'
-#'  @export
+#'
 get_schemas <- function() {
   # 1. Extract the description of the schemas
   encode_api_url <- "https://api.github.com/repos"
