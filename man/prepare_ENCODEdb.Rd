@@ -17,7 +17,7 @@ Default: \code{FALSE}.}
 \item{type}{The names of the tables to extract from ENCODE rest api.}
 }
 \value{
-a \code{list} with selected tables from ENCODE that were used to
+is a \code{list} with selected tables from ENCODE that were used to
 create the \code{RSQLite} database.
 }
 \description{
