@@ -5,7 +5,7 @@
 \title{Simulate a query on ENCODE website and return the result as a
 \code{data.frame}}
 \usage{
-search(searchTerm, limit)
+search(searchTerm = NULL, limit = 10)
 }
 \arguments{
 \item{searchTerm}{a search term}
@@ -24,5 +24,8 @@ and/or columns that are \code{data.frames}.
 }
 \details{
 This function simulates a basic query on ENCODE website
+}
+\examples{
+search("ChIP-Seq+H3K4me1")
 }
 

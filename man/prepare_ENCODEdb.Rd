@@ -4,11 +4,12 @@
 \alias{prepare_ENCODEdb}
 \title{Create the RSQLite databse for the tables in ENCODE}
 \usage{
-prepare_ENCODEdb(database_filename)
+prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
+  types = get_encode_types(), overwrite = FALSE)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.
-Default: \code{\"ENCODEdb.sqlite\"}.}
+Default: \code{ENCODEdb.sqlite}.}
 
 \item{types}{The names of the tables to extract from ENCODE rest api.}
 
@@ -21,5 +22,10 @@ create the \code{RSQLite} database.
 }
 \description{
 Create the RSQLite databse for the tables in ENCODE
+}
+\examples{
+\dontrun{
+    prepare_ENCODEdb("ENCODEdb.sqlite")
+  }
 }
 

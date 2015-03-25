@@ -4,8 +4,10 @@
 \alias{query}
 \title{Produce a subset of data following predefined criteria}
 \usage{
-query(accession, assay, biosample, dataset_access, file_accession,
-file_format, lab, organism, target, treatment, fixed)
+query(accession = NULL, assay = NULL, biosample = NULL,
+  dataset_access = NULL, file_accession = NULL, file_format = NULL,
+  lab = NULL, organism = NULL, target = NULL, treatment = NULL,
+  fixed = TRUE)
 }
 \arguments{
 \item{accession}{character string to select the experiment or dataset accession}
@@ -43,5 +45,8 @@ file format, laboratory, donor organism, target and treatment.
 \details{
 By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
+}
+\examples{
+query(biosample = "A549", file_format = "bam")
 }
 

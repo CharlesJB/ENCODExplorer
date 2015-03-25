@@ -121,8 +121,8 @@ clean_table <- function(table) {
 #' @return a \code{data.frame} corresponding Every object that matches the 
 #' search term
 #'
-#' @usage search(searchTerm, limit)
-#' 
+#' @examples
+#'  search("ChIP-Seq+H3K4me1")
 #' 
 #' @export
 search <- function(searchTerm = NULL, limit = 10) {
@@ -170,8 +170,8 @@ search <- function(searchTerm = NULL, limit = 10) {
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
 #'
-#' @usage query(accession, assay, biosample, dataset_access, file_accession, 
-#' file_format, lab, organism, target, treatment, fixed)
+#' @examples
+#'   query(biosample = "A549", file_format = "bam")
 #'
 #' @export
 query <- function(accession = NULL, assay = NULL, biosample = NULL, 
@@ -187,9 +187,8 @@ query <- function(accession = NULL, assay = NULL, biosample = NULL,
     warning("Please provide at least one valid criteria", call. = F)
     NULL
     
-  }
-  else
-  {
+  } else {
+    data(matrices)
     s1 = matrices$experiment
     s2 = matrices$dataset
     
@@ -255,9 +254,7 @@ query <- function(accession = NULL, assay = NULL, biosample = NULL,
         s1 <- subset(s1, s1$treatment == tr)
         s2 <- subset(s2, s1$treatment == tr)
       }
-    }
-    else
-    {
+    } else {
       # retirer ignorer les espaces, les tirets et la casse
       # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
       
@@ -387,8 +384,6 @@ query <- function(accession = NULL, assay = NULL, biosample = NULL,
     }
     
   }
-  
-  
 }
 
 query_transform <- function(my.term) {
@@ -418,7 +413,9 @@ query_transform <- function(my.term) {
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved. Default = /tmp
 #'
-#' @usage download(resultSet, resultOrigin, format, dir)
+#' @examples
+#'   resultSet <- query(biosample = "A549", file_format = "bam")
+#'   download(resultSet = resultSet, dir = ".")
 #' 
 #' @export
 download <- function(resultSet = NULL , resultOrigin = NULL, 

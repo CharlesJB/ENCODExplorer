@@ -1,19 +1,20 @@
 #' Create the RSQLite databse for the tables in ENCODE
 #' 
-#'
 #' @return is a \code{list} with selected tables from ENCODE that were used to
 #' create the \code{RSQLite} database.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' Default: \code{\"ENCODEdb.sqlite\"}.
+#' Default: \code{ENCODEdb.sqlite}.
 #' 
 #' @param types The names of the tables to extract from ENCODE rest api.
 #' 
 #' @param overwrite Should tables already present in database be overwrited?
 #' Default: \code{FALSE}.
 #' 
-#' @usage prepare_ENCODEdb(database_filename)
-#'  
+#' @examples
+#'   \dontrun{
+#'     prepare_ENCODEdb("ENCODEdb.sqlite")
+#'   }
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
                              types = get_encode_types(), overwrite = FALSE) {
@@ -75,10 +76,16 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #' essential informations for each file part of a dataset.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' Default: \code{\"ENCODEdb.sqlite\"}.
+#' Default: \code{ENCODEdb.sqlite}.
 #'
-#'  
-#'  @export
+#' @examples
+#'   database_filename <- system.file("extdata/ENCODEdb.sqlite",
+#'                                    package = "ENCODEdb")
+#'   \dontrun{
+#'     export_ENCODEdb_matrix(database_filename = database_filename)
+#'   }
+#'
+#' @export
 export_ENCODEdb_matrix <- function(database_filename) {
   T2 = Sys.time()
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)

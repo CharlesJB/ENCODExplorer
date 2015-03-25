@@ -9,7 +9,7 @@ export_ENCODEdb_matrix(database_filename)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.
-Default: \code{\"ENCODEdb.sqlite\"}.}
+Default: \code{ENCODEdb.sqlite}.}
 }
 \value{
 a \code{list} containing two elements. The first one 'experiment' is
@@ -20,5 +20,12 @@ essential informations for each file part of a dataset.
 \description{
 Extract essential informations from the RSQLite databse in a \code{list} of
 \code{data.frame}s
+}
+\examples{
+database_filename <- system.file("extdata/ENCODEdb.sqlite",
+                                   package = "ENCODEdb")
+  \dontrun{
+    export_ENCODEdb_matrix(database_filename = database_filename)
+  }
 }
 

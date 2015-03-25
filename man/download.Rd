@@ -4,7 +4,8 @@
 \alias{download}
 \title{Download files from the Internet.}
 \usage{
-download(resultSet, resultOrigin, format, dir)
+download(resultSet = NULL, resultOrigin = NULL, format = "all",
+  dir = "/tmp")
 }
 \arguments{
 \item{resultSet}{the results set}
@@ -25,5 +26,9 @@ downloading of all the corresponding files.
 This function can be used to download a set of files by providing the results
 set, its origin (search or query), the file format and finally the destination
 directory.
+}
+\examples{
+resultSet <- query(biosample = "A549", file_format = "bam")
+  download(resultSet = resultSet, dir = ".")
 }
 
