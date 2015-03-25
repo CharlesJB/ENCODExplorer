@@ -25,7 +25,4 @@ and/or columns that are \code{data.frames}.
 \details{
 This function simulates a basic query on ENCODE website
 }
-\examples{
-res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
-}
 

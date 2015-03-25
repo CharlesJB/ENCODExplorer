@@ -7,8 +7,7 @@
 extract_table(type)
 }
 \arguments{
-\item{type}{The type of table to extract from ENCODE rest api.
-Examples: "biosample", "file", "experiment", etc...}
+\item{type}{The type of table to extract from ENCODE rest api.}
 }
 \value{
 a \code{data.frame} corresponding to the table asked. If no match is
@@ -16,8 +15,5 @@ a \code{data.frame} corresponding to the table asked. If no match is
 }
 \description{
 Extract a data.frame corresponding to a table in ENCODE database
-}
-\examples{
-lab <- ENCODEdb::extract_table("lab")
 }
 

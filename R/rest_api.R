@@ -1,13 +1,11 @@
 #' Extract a data.frame corresponding to a table in ENCODE database
 #'
 #' @param type The type of table to extract from ENCODE rest api.
-#' Examples: "biosample", "file", "experiment", etc...
 #'
 #' @return a \code{data.frame} corresponding to the table asked. If no match is
 #'   found, returns an empty \code{data.frame}
+#'   
 #'
-#' @examples
-#' lab <- ENCODEdb::extract_table("lab")
 extract_table <- function(type) {
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object")
@@ -37,9 +35,7 @@ extract_table <- function(type) {
 #' @return a \code{data.frame} corresponding to the cleaned version of the
 #' input \code{data.frame}.
 #'
-#' @examples
-#' lab <- ENCODEdb::extract_table("lab")
-#' lab <- ENCODEdb::clean_table(lab)
+#'
 clean_table <- function(table) {
   
   clean_column <- function(column_name) {
@@ -127,8 +123,6 @@ clean_table <- function(table) {
 #'
 #' @usage search(searchTerm, limit)
 #' 
-#' @examples
-#' res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
 #' 
 #' @export
 search <- function(searchTerm = NULL, limit = 10) {
@@ -179,9 +173,6 @@ search <- function(searchTerm = NULL, limit = 10) {
 #' @usage query(accession, assay, biosample, dataset_access, file_accession, 
 #' file_format, lab, organism, target, treatment, fixed)
 #'
-#' @examples
-#' res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
-#' 
 #' @export
 query <- function(accession = NULL, assay = NULL, biosample = NULL, 
                   dataset_access = NULL, file_accession = NULL, file_format = NULL, 
@@ -428,10 +419,6 @@ query_transform <- function(my.term) {
 #' @param dir the name of the directory where the downloaded file will be saved. Default = /tmp
 #'
 #' @usage download(resultSet, resultOrigin, format, dir)
-#'
-#' @examples
-#' query_results <- query(assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
-#' download(resultSet = query_results, resultOrigin = "query")
 #' 
 #' @export
 download <- function(resultSet = NULL , resultOrigin = NULL, 

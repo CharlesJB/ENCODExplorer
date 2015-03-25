@@ -44,7 +44,4 @@ file format, laboratory, donor organism, target and treatment.
 By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
-\examples{
-res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
-}
 

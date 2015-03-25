@@ -19,7 +19,4 @@ github repository:
 The data is extracted using the github api:
   https://developer.github.com/guides/getting-started/
 }
-\examples{
-types <- get_encode_types()
-}
 

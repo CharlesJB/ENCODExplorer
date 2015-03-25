@@ -11,9 +11,6 @@
 #'
 #' @return a \code{list} of JSON converted in \code{data.frame}.
 #'
-#' @examples
-#'   schema <- get_schemas()
-#'
 #'
 get_schemas <- function() {
   # 1. Extract the description of the schemas

@@ -26,8 +26,4 @@ This function can be used to download a set of files by providing the results
 set, its origin (search or query), the file format and finally the destination
 directory.
 }
-\examples{
-query_results <- query(assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
-download(resultSet = query_results, resultOrigin = "query")
-}
 

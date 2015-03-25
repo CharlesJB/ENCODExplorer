@@ -21,9 +21,4 @@ essential informations for each file part of a dataset.
 Extract essential informations from the RSQLite databse in a \code{list} of
 \code{data.frame}s
 }
-\examples{
-\dontrun{
-  matrices <- ENCODEdb::export_ENCODEdb_matrix("encode.sqlite")
- }
-}
 

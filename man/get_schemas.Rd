@@ -20,7 +20,4 @@ The data is extracted using the github api:
 The data is then converted in \code{data.frame} using the \code{jsonlite}
 package.
 }
-\examples{
-schema <- get_schemas()
-}
 

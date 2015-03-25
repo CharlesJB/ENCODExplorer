@@ -22,9 +22,4 @@ create the \code{RSQLite} database.
 \description{
 Create the RSQLite databse for the tables in ENCODE
 }
-\examples{
-\dontrun{
-  lab <- ENCODEdb::prepare_ENCODEdb("encode.sqlite")
- }
-}
 

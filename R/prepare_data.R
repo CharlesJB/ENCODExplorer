@@ -13,10 +13,6 @@
 #' Default: \code{FALSE}.
 #' 
 #' @usage prepare_ENCODEdb(database_filename)
-#' @examples
-#' \dontrun{
-#'   lab <- ENCODEdb::prepare_ENCODEdb("encode.sqlite")
-#'  }
 #'  
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
@@ -81,10 +77,6 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #' @param database_filename The name of the file to save the database into.
 #' Default: \code{\"ENCODEdb.sqlite\"}.
 #'
-#' @examples
-#' \dontrun{
-#'   matrices <- ENCODEdb::export_ENCODEdb_matrix("encode.sqlite")
-#'  }
 #'  
 #'  @export
 export_ENCODEdb_matrix <- function(database_filename) {
@@ -220,9 +212,6 @@ export_ENCODEdb_matrix <- function(database_filename) {
 #'
 #' @return a vector of \code{character} with the names of the known tables in
 #'   the ENCODE database.
-#'
-#' @examples
-#'   types <- get_encode_types()
 #'
 #'
 get_encode_types <- function() {
