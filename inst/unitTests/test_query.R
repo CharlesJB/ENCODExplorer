@@ -3,12 +3,11 @@ if(FALSE) {
   library( "ENCODEdb" )
 }
 
-load(file = "inst/extdata/test_matrices.rda") # matrices
-
 res_exact = query(target = "rabbit iGG", fixed=T)
 res_regexp = query(target = "rabbit iGG", fixed=F)
 res_combo = query(biosample = "A549", assay = "chipseq", 
                   file_format = "bigwig", fixed = F)
+
 res_dataset_only = query(accession = "ENCSR685AIQ")
 res_exp_dataset = query(dataset_access = "ENCSR403MYH")
 
@@ -23,8 +22,8 @@ checkTrue(nrow(res_regexp$experiment) > 0,
           msg = "query with approximative target name and fixed = F should return at least one result" )
 
 # check combined query
-checkEquals(as.character(res_combo$experiment$file_accession), "ENCFF000VPN", 
-            msg = "this combined query should return this precise result")
+checkTrue("ENCFF000VPN" %in% as.character(res_combo$experiment$file_accession), 
+            msg = "this combined query should return a results set containing the id ENCFF000VPN")
 
 # check result for dataset only
 checkEquals(nrow(res_dataset_only$experiment), 0,

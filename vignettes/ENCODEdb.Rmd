@@ -11,7 +11,9 @@ Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
 This package and the underlying ENCODEdb code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
 
-## Introduction
+## The main ENCODEdb Features
+
+### Introduction
 
 This package xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -23,14 +25,14 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 This vignette will introduce all the main features of the ENCODEdb package.
 
-## Loading ENCODEdb package
+### Loading ENCODEdb package
 
 ```{r libraryLoad}
 suppressMessages(library(ENCODEdb))
 ```
  
  
-## Data preparation
+### Data preparation
 
 This package comes with a up-to-date list of dataframe containing the essential 
 of ENCODE files metadata: `matrices`. This list contains two elements.
@@ -60,113 +62,13 @@ database_filename = "encode.sqlite"
 The whole process will take several minutes (5 to 15 minutes depending on your
 work environment)
 
-### Database model
-You can also use the SQL database for own purpose. Here is the imputed database 
-model.
+You can also use the SQL database for own purpose. The imputed database 
+model is available in XXXXXXXXX
 
-#### Schema
-![imputed model of the ENCODE database](img/model.png)
 
-The edges indicate relationship between two tables : an origin and a destination. The relation is made between a column of the origin table and the *id* of the destination table.
+### Main functions
 
-Those relations are described in the following table :
-
-#### Relations table
-|origin| destination|origin column|
-|---------|------------|-------------|
-|access_key|user|user|
-|analysis_step|analysis_step|parents|
-|analysis_step|document|documents|
-|analysis_step_run|analysis_step|analysis_step|
-|analysis_step_run|workflow_run|workflow_run|
-|analysis_step|software_version|software_versions|
-|antibody_approval|antibody_characterization|characterizations|
-|antibody_approval|antibody_lot|antibody|
-|antibody_approval|target|target|
-|antibody_characterization|antibody_lot|characterizes|
-|antibody_characterization|target|target|
-|antibody_characterization|user|reviewed_by|
-|antibody_lot|organism|host_organism|
-|antibody_lot|target|targets|
-|award|user|pi|
-|biosample|biosample|derived_from|
-|biosample|biosample|part_of|
-|biosample|biosample|pooled_from|
-|biosample_characterization|biosample|characterizes|
-|biosample|construct|constructs|
-|biosample|document|protocol_documents|
-|biosample|donor|donor|
-|biosample|organism|organism|
-|biosample|rnai|rnais|
-|biosample|talen|talens|
-|biosample|treatment|treatments|
-|characterization|document|documents|
-|construct_characterization|construct|characterizes|
-|construct|document|documents|
-|construct|target|promoter_used|
-|construct|target|target|
-|dataset|document|documents|
-|dataset|file|related_files|
-|donor_characterization|donor|characterizes|
-|donor|organism|organism|
-|experiment|experiment|possible_controls|
-|experiment|target|target|
-|file|analysis_step_run|step_run|
-|file|dataset|dataset|
-|file|experiment|dataset|
-|file|file|controlled_by|
-|file|file|derived_from|
-|file|file|paired_with|
-|file|file|supercedes|
-|file|platform|platform|
-|file|replicate|replicate|
-|fly_donor|document|documents|
-|human_donor|human_donor|children|
-|human_donor|human_donor|fraternal_twin|
-|human_donor|human_donor|identical_twin|
-|human_donor|human_donor|parents|
-|human_donor|human_donor|siblings|
-|lab|award|awards|
-|lab|user|pi|
-|library|biosample|biosample|
-|library|dataset|spikeins_used|
-|library|document|documents|
-|library|treatment|treatments|
-|mouse_donor|mouse_donor|littermates|
-|page|page|parent|
-|pipeline|analysis_step|analysis_steps|
-|pipeline|analysis_step|end_points|
-|pipeline|document|documents|
-|publication|dataset|datasets|
-|quality_metric|analysis_step_run|step_run|
-|quality_metric|file|files|
-|replicate|antibody_lot|antibody|
-|replicate|experiment|experiment|
-|replicate|library|library|
-|replicate|platform|platform|
-|rnai_characterization|rnai|characterizes|
-|rnai|document|documents|
-|rnai|target|target|
-|software|publication|references|
-|software_version|software|software|
-|talen|document|documents|
-|target|organism|organism|
-|treatment|document|protocols|
-|treatment|lab|lab|
-|user|lab|lab|
-|user|lab|submits_for|
-|workflow_run|file|input_files|
-|workflow_run|pipeline|pipeline|
-|workflow_run|software_version|software_version|
-|worm_donor|document|documents|
-|worm_donor|worm_donor|outcrossed_strain|
-
-For example :
-[**file** ---> **replicate** ---> *replicate*] enables to impute the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
-
-## Main functions
-
-### Query
+#### Query
 
 The `query` function allow the user to find the subset of files corresponding to
 a precise query define following 10 criteria :
@@ -216,7 +118,7 @@ These criteria correspond to the filters that you can find on ENCODE portal :
 dismissed the dataset results because this information isn't available for that type of data.*
 
 
-### Search
+#### Search
 This function simulates a key word search that you could perform through the 
 ENCODE web portal.
 
@@ -236,7 +138,7 @@ search_results <- search(searchTerm = "a549 chip-seq homo sapiens", limit = "all
 ```
 
 
-### Download
+#### Download
 
 Following a search or a query, you may want to download the corresponding files.
 When using, the ENCODE portal you have to select the experiments one after an 

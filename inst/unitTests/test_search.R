@@ -1,12 +1,8 @@
 
-print(paste0("ON EST LA : ",getwd()))
-
 if(FALSE) {
   library( "RUnit" )
   library( "ENCODEdb" )
 }
-
-load(file = "extdata/test_matrices.rda") # matrices
 
 limit = 4
 searchTerm = "MCF7"
