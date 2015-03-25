@@ -23,7 +23,7 @@ This function will either remove columns that are not relevant and convert
 columns to a vector.
 }
 \examples{
-lab <- ENCODEdb:::extract_table("lab")
-lab <- ENCODEdb:::clean_table(lab)
+lab <- ENCODEdb::extract_table("lab")
+lab <- ENCODEdb::clean_table(lab)
 }
 

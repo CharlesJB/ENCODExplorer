@@ -4,8 +4,7 @@
 \alias{download}
 \title{Download files from the Internet.}
 \usage{
-download(resultSet = NULL, resultOrigin = NULL, format = "all",
-  dir = "/tmp")
+download(resultSet, resultOrigin, format, dir)
 }
 \arguments{
 \item{resultSet}{the results set}
@@ -15,8 +14,7 @@ download(resultSet = NULL, resultOrigin = NULL, format = "all",
 
 \item{format}{file format, default = all}
 
-\item{dir}{the name of the directory where the downloaded file will be saved.
-Default = /tmp}
+\item{dir}{the name of the directory where the downloaded file will be saved. Default = /tmp}
 }
 \description{
 After processing to a basic search with the \code{search} function or a
@@ -29,6 +27,7 @@ set, its origin (search or query), the file format and finally the destination
 directory.
 }
 \examples{
-res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
+query_results <- query(assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
+download(resultSet = query_results, resultOrigin = "query")
 }
 

@@ -23,7 +23,7 @@ Extract essential informations from the RSQLite databse in a \code{list} of
 }
 \examples{
 \dontrun{
-  matrices <- export_ENCODEdb_matrix("encode.sqlite")
+  matrices <- ENCODEdb::export_ENCODEdb_matrix("encode.sqlite")
  }
 }
 

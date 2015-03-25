@@ -18,6 +18,6 @@ a \code{data.frame} corresponding to the table asked. If no match is
 Extract a data.frame corresponding to a table in ENCODE database
 }
 \examples{
-lab <- ENCODEdb:::extract_table("lab")
+lab <- ENCODEdb::extract_table("lab")
 }
 

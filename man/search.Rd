@@ -5,7 +5,7 @@
 \title{Simulate a query on ENCODE website and return the result as a
 \code{data.frame}}
 \usage{
-search(searchTerm, limit = 10)
+search(searchTerm, limit)
 }
 \arguments{
 \item{searchTerm}{a search term}

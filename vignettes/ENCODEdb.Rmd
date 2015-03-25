@@ -23,7 +23,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 This vignette will introduce all the main features of the ENCODEdb package.
 
-## Loading metagene package
+## Loading ENCODEdb package
 
 ```{r libraryLoad}
 suppressMessages(library(ENCODEdb))

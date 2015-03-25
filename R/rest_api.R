@@ -7,7 +7,7 @@
 #'   found, returns an empty \code{data.frame}
 #'
 #' @examples
-#' lab <- ENCODEdb:::extract_table("lab")
+#' lab <- ENCODEdb::extract_table("lab")
 extract_table <- function(type) {
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object")
@@ -38,8 +38,8 @@ extract_table <- function(type) {
 #' input \code{data.frame}.
 #'
 #' @examples
-#' lab <- ENCODEdb:::extract_table("lab")
-#' lab <- ENCODEdb:::clean_table(lab)
+#' lab <- ENCODEdb::extract_table("lab")
+#' lab <- ENCODEdb::clean_table(lab)
 clean_table <- function(table) {
   
   clean_column <- function(column_name) {
@@ -125,8 +125,11 @@ clean_table <- function(table) {
 #' @return a \code{data.frame} corresponding Every object that matches the 
 #' search term
 #'
+#' @usage search(searchTerm, limit)
+#' 
 #' @examples
 #' res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
+#' 
 #' @export
 search <- function(searchTerm = NULL, limit = 10) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
@@ -137,7 +140,7 @@ search <- function(searchTerm = NULL, limit = 10) {
 
   res <- jsonlite::fromJSON(url)
   if (res[["notification"]] != "Success") {
-    warning("No result found", call. = F)
+    warning("No result found", call. = T)
     r = data.frame()
   } else {
     r = res[["@graph"]]
@@ -158,14 +161,27 @@ search <- function(searchTerm = NULL, limit = 10) {
 #' By default, the query can be made on an exact match term. This behaviour can 
 #' be modified by setting the \code{fixed} argument at \code{TRUE}
 #' 
-#' @param selection criteria.
+#' @param  accession character string to select the experiment or dataset accession
+#' @param  assay character string to select the assay type
+#' @param  biosample character string to select the biosample name
+#' @param  dataset_access character string to select the dataset accession
+#' @param  file_accession character string to select the file accesion
+#' @param  file_format character string to select the file format
+#' @param  lab character string to select the laboratory 
+#' @param  organism character string to select the donor organism
+#' @param  target character string to select the experimental target
+#' @param  treatment character string to select the treatment
+#' @param  fixed logical. If TRUE, pattern is a string to be matched as it is.
 #'
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
 #'
+#' @usage query(accession, assay, biosample, dataset_access, file_accession, 
+#' file_format, lab, organism, target, treatment, fixed)
+#'
 #' @examples
-#' matrices = ENCODEdb:export_ENCODEDB_matrix(database_filename)
 #' res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
+#' 
 #' @export
 query <- function(accession = NULL, assay = NULL, biosample = NULL, 
                   dataset_access = NULL, file_accession = NULL, file_format = NULL, 
@@ -409,12 +425,14 @@ query_transform <- function(my.term) {
 #' @param resultOrigin name of the function used to generate the result set 
 #' (\code{search} or \code{query})
 #' @param format file format, default = all
-#' @param dir the name of the directory where the downloaded file will be saved.
-#' Default = /tmp
+#' @param dir the name of the directory where the downloaded file will be saved. Default = /tmp
 #'
+#' @usage download(resultSet, resultOrigin, format, dir)
 #'
 #' @examples
-#' res = ENCODEdb::search(searchTerm = "mcf7", limit = 2)
+#' query_results <- query(assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
+#' download(resultSet = query_results, resultOrigin = "query")
+#' 
 #' @export
 download <- function(resultSet = NULL , resultOrigin = NULL, 
                          format = "all", dir = "/tmp") {

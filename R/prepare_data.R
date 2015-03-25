@@ -7,17 +7,18 @@
 #' @param database_filename The name of the file to save the database into.
 #' Default: \code{\"ENCODEdb.sqlite\"}.
 #' 
-#' @param type The names of the tables to extract from ENCODE rest api.
+#' @param types The names of the tables to extract from ENCODE rest api.
 #' 
 #' @param overwrite Should tables already present in database be overwrited?
 #' Default: \code{FALSE}.
-#'
+#' 
+#' @usage prepare_ENCODEdb(database_filename)
 #' @examples
 #' \dontrun{
-#'   lab <- prepare_ENCODEdb("encode.sqlite")
+#'   lab <- ENCODEdb::prepare_ENCODEdb("encode.sqlite")
 #'  }
 #'  
-#'  @export
+#' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
                              types = get_encode_types(), overwrite = FALSE) {
   
@@ -82,7 +83,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #'
 #' @examples
 #' \dontrun{
-#'   matrices <- export_ENCODEdb_matrix("encode.sqlite")
+#'   matrices <- ENCODEdb::export_ENCODEdb_matrix("encode.sqlite")
 #'  }
 #'  
 #'  @export

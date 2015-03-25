@@ -4,13 +4,31 @@
 \alias{query}
 \title{Produce a subset of data following predefined criteria}
 \usage{
-query(accession = NULL, assay = NULL, biosample = NULL,
-  dataset_access = NULL, file_accession = NULL, file_format = NULL,
-  lab = NULL, organism = NULL, target = NULL, treatment = NULL,
-  fixed = TRUE)
+query(accession, assay, biosample, dataset_access, file_accession,
+file_format, lab, organism, target, treatment, fixed)
 }
 \arguments{
-\item{selection}{criteria.}
+\item{accession}{character string to select the experiment or dataset accession}
+
+\item{assay}{character string to select the assay type}
+
+\item{biosample}{character string to select the biosample name}
+
+\item{dataset_access}{character string to select the dataset accession}
+
+\item{file_accession}{character string to select the file accesion}
+
+\item{file_format}{character string to select the file format}
+
+\item{lab}{character string to select the laboratory}
+
+\item{organism}{character string to select the donor organism}
+
+\item{target}{character string to select the experimental target}
+
+\item{treatment}{character string to select the treatment}
+
+\item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.}
 }
 \value{
 a \code{list} of two \code{data.frame}s containing data about ENCODE
@@ -27,7 +45,6 @@ By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
 \examples{
-matrices = ENCODEdb:export_ENCODEDB_matrix(database_filename)
 res = ENCODEdb::query(file_format = "GTF", biosample = "mcf-7", fixed = F)
 }
 

@@ -4,17 +4,16 @@
 \alias{prepare_ENCODEdb}
 \title{Create the RSQLite databse for the tables in ENCODE}
 \usage{
-prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
-  types = get_encode_types(), overwrite = FALSE)
+prepare_ENCODEdb(database_filename)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.
 Default: \code{\"ENCODEdb.sqlite\"}.}
 
+\item{types}{The names of the tables to extract from ENCODE rest api.}
+
 \item{overwrite}{Should tables already present in database be overwrited?
 Default: \code{FALSE}.}
-
-\item{type}{The names of the tables to extract from ENCODE rest api.}
 }
 \value{
 is a \code{list} with selected tables from ENCODE that were used to
@@ -25,7 +24,7 @@ Create the RSQLite databse for the tables in ENCODE
 }
 \examples{
 \dontrun{
-  lab <- prepare_ENCODEdb("encode.sqlite")
+  lab <- ENCODEdb::prepare_ENCODEdb("encode.sqlite")
  }
 }
 
