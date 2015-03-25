@@ -3,7 +3,7 @@ output: html_document
 ---
 
 
-ENCODEdb: xxxxxxxxxxxxxxxxx
+ENCODEdb: A compilation of metadata from ENCODE
 ====================================================================
 
 Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
@@ -11,17 +11,28 @@ Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
 This package and the underlying ENCODEdb code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
 
-## The main ENCODEdb Features
+"The ENCODE (Encyclopedia of DNA Elements) Consortium is an international 
+collaboration of research groups funded by the National Human Genome Research 
+Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
+functional elements in the human genome, including elements that act at the 
+protein and RNA levels, and regulatory elements that control cells and 
+circumstances in which a gene is active"[^1].
 
-### Introduction
+However, data retrieval and downloading can be really time consuming using 
+current web portal. 
 
-This package xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+This package has been designed to facilitate the data access by compiling the 
+metadata associated with file, experiment, dataset, biosample, and treatment. 
 
+We first extract ENCODE schema from its public github repository to rebuild 
+the ENCODE database into an SQLite database. Thanks to this package, the user 
+will be enable to generate, store and query ENCODE database locally. We also 
+developped a function which can extract the essential metadata in a R object to 
+aid data exploration.
+We implemented time-saving features to select ENCODE files by querying their 
+metadata and download them.
+
+The SQLite database can be regenerated at will to keep it up-to-date.
 
 This vignette will introduce all the main features of the ENCODEdb package.
 
@@ -30,41 +41,16 @@ This vignette will introduce all the main features of the ENCODEdb package.
 ```{r libraryLoad}
 suppressMessages(library(ENCODEdb))
 ```
- 
- 
-### Data preparation
+
+### Introduction
 
 This package comes with a up-to-date list of dataframe containing the essential 
-of ENCODE files metadata: `matrices`. This list contains two elements.
-The first one `matrices$experiment` is a data.frame containing essential 
-information for each file part of an experiment ; the second one `matrices$dataset`
+of ENCODE files metadata: `encode_df`. This list contains two elements.
+The first one `encode_df$experiment` is a data.frame containing essential 
+information for each file part of an experiment ; the second one `encode_df$dataset`
 is a data.frame containing essential information for each file part of a dataset.
 
-This `matrices` is **mandatory** to use the functions provided in this package.
-
-If you want regenerate this list, you have to process the following steps :
-
-* generate the SQL database from ENCODE 
-
-```{r tables}
-# the path (relative or absolute) to the future database
-database_filename = "encode.sqlite"
-#tables = prepare_ENCODEdb(database_filename)
-#tables
-```
-
-* generate the metadata matrices from the SQL database
-```{r matrices}
-#matrices <- export_ENCODEdb_matrix(database_filename)
-```
-
-
-The whole process will take several minutes (5 to 15 minutes depending on your
-work environment)
-
-You can also use the SQL database for own purpose. The imputed database 
-model is available in XXXXXXXXX
-
+This `encode_df` is **mandatory** to use the functions provided in this package.
 
 ### Main functions
 
@@ -78,7 +64,7 @@ a precise query define following 10 criteria :
 |accession|*the experiment or dataset accession*|experiment / dataset|
 |assay|*the assay type*|experiment|
 |biosample|*the biosample name*|experiment|
-|dataset_access[^1]|*the dataset accession*|experiment / dataset|
+|dataset_access[^2]|*the dataset accession*|experiment / dataset|
 |file_accession|*the file accesion*|experiment / dataset|
 |file_format|*the file format*|experiment / dataset|
 |lab|*the laboratory*|experiment / dataset|
@@ -91,7 +77,7 @@ By default, the query use the exact string matching to perform the selection of
 the relevant entries. This behavior can be changed by setting the `fixed` option 
 to **FALSE**.
 
-The structure of the result set is similar to the `matrices` structure : a list 
+The structure of the result set is similar to the `encode_df` structure : a list 
 of two elements *experiment* and *dataset*.
 
 For example, to select fastq files produced by RNA-seq assay on human cell MCF-7 :
@@ -180,8 +166,33 @@ download(resultSet = query_results, resultOrigin = "query")
 download(resultSet = search_results, resultOrigin = "search", format = "bed_broadPeak")
 ```
 
+### Data update
 
-[^1]:There is a subtle difference between the parameters **accession** and 
+If you want regenerate this list, you have to process the following steps :
+
+* generate the SQL database from ENCODE 
+
+```{r tables, eval=FALSE}
+# the path (relative or absolute) to the future database
+database_filename = "encode.sqlite"
+tables = prepare_ENCODEdb(database_filename)
+```
+
+* generate the metadata encode_df from the SQL database
+```{r encode_df, eval = FALSE}
+encode_df <- export_ENCODEdb_matrix(database_filename)
+```
+
+
+The whole process will take several minutes (5 to 15 minutes depending on your
+work environment)
+
+You can also use the SQL database for own purpose. The imputed database 
+model is available in XXXXXXXXX
+
+[^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
+
+[^2]:There is a subtle difference between the parameters **accession** and 
 **dataset_accession**. In fact, some files can be part of experiment, dataset or 
 both.
 When using **accession**, you will get all the files directly link to this accession 

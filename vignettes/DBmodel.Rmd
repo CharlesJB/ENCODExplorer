@@ -3,25 +3,35 @@ output: html_document
 ---
 
 
-ENCODEdb: xxxxxxxxxxxxxxxxx
+ENCODEdb: A compilation of metadata from ENCODE
 ====================================================================
 Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODEdb code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
 
+"The ENCODE (Encyclopedia of DNA Elements) Consortium is an international 
+collaboration of research groups funded by the National Human Genome Research 
+Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
+functional elements in the human genome, including elements that act at the 
+protein and RNA levels, and regulatory elements that control cells and 
+circumstances in which a gene is active"[^1].
 
-## The imputed ENCODE Database Model
+However, data retrieval and downloading can be really time consuming using 
+current web portal. 
 
-### Introduction
+This package has been designed to facilitate the data access by compiling the 
+metadata associated with file, experiment, dataset, biosample, and treatment. 
 
-This package xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+We first extract ENCODE schema from its public github repository to rebuild 
+the ENCODE database into an SQLite database. Thanks to this package, the user 
+will be enable to generate, store and query ENCODE database locally. We also 
+developped a function which can extract the essential metadata in a R object to 
+aid data exploration.
+We implemented time-saving features to select ENCODE files by querying their 
+metadata and download them.
 
+The SQLite database can be regenerated at will to keep it up-to-date.
 
 This vignette will introduce all the main features of the ENCODEdb package.
 
@@ -142,3 +152,5 @@ Those relations are described in the following table :
 
 For example :
 [**file** ---> **replicate** ---> *replicate*] enables to impute the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
+
+[^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)

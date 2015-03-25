@@ -182,7 +182,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   dataset_accession = rep(NA, nrow(encode_exp))
   names(dataset_accession) = as.character(encode_exp$file_accession)
   dataset_with_file = subset(encode_ds, ! is.na(encode_ds$related_files), 
-                             select = c(accession, related_files))
+                             select = c(encode_ds$accession, encode_ds$related_files))
   dataset_with_file = unique(dataset_with_file)
   
   for (i in (1:nrow(dataset_with_file))) {
