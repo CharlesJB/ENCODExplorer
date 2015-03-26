@@ -4,22 +4,22 @@
 \alias{query}
 \title{Produce a subset of data following predefined criteria}
 \usage{
-query(df = NULL, accession = NULL, assay = NULL, biosample = NULL,
-  dataset_access = NULL, file_accession = NULL, file_format = NULL,
+query(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL,
+  dataset_accession = NULL, file_accession = NULL, file_format = NULL,
   lab = NULL, organism = NULL, target = NULL, treatment = NULL,
-  fixed = TRUE)
+  file_status = "released", status = "released", fixed = TRUE)
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE
 experiment and dataset metadata}
 
-\item{accession}{character string to select the experiment or dataset accession}
+\item{set_accession}{character string to select the experiment or dataset accession}
 
 \item{assay}{character string to select the assay type}
 
 \item{biosample}{character string to select the biosample name}
 
-\item{dataset_access}{character string to select the dataset accession}
+\item{dataset_accession}{character string to select the dataset accession}
 
 \item{file_accession}{character string to select the file accesion}
 
@@ -32,6 +32,11 @@ experiment and dataset metadata}
 \item{target}{character string to select the experimental target}
 
 \item{treatment}{character string to select the treatment}
+
+\item{file_status}{character string to select the file status
+("released", "revoked", "all"). Default "released"}
+
+\item{status}{character string to select the dataset/experiment status}
 
 \item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.}
 }

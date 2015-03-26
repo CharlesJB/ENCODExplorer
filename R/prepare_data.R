@@ -89,8 +89,8 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 export_ENCODEdb_matrix <- function(database_filename) {
   T2 = Sys.time()
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, e.run_type, f.accession as file_accession, f.file_format, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
-  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, d.related_files, f.href, f.md5sum from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
+  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, e.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
+  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, f.status as file_status, d.related_files, f.href, f.md5sum from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
   
   rs <- RSQLite::dbSendQuery(con, query_exp)
   encode_exp <- RSQLite::dbFetch(rs, n = -1)
@@ -141,26 +141,26 @@ export_ENCODEdb_matrix <- function(database_filename) {
         ### GET TREATMENT 
         query_treat = paste0("select treatment_term_name from treatment where id = (select treatments from library where id=\"",rep.library,"\");")
         rs <- RSQLite::dbSendQuery(con, query_treat)
-        res2 <- RSQLite::dbFetch(rs, n = -1)
+        res3 <- RSQLite::dbFetch(rs, n = -1)
         RSQLite::dbClearResult(rs)
         
-        if(length(res2$treatment_term_name) == 0) {
+        if(length(res3$treatment_term_name) == 0) {
           treatment = c(treatment,NA)
         }
         else
         {
-          treatment = c(treatment,res2$treatment_term_name)
+          treatment = c(treatment,res3$treatment_term_name)
         }
       }
       ### GET REPLICATE INFOS 
       query_rep = paste0("select technical_replicate_number,biological_replicate_number from replicate where id=\"",replicate,"\";")
       rs <- RSQLite::dbSendQuery(con, query_rep)
-      res2 <- RSQLite::dbFetch(rs, n = -1)
+      res4 <- RSQLite::dbFetch(rs, n = -1)
       RSQLite::dbClearResult(rs)
       technical_replicate_number = 
-        c(technical_replicate_number,res2$technical_replicate_number)
+        c(technical_replicate_number,res4$technical_replicate_number)
       biological_replicate_number = 
-        c(biological_replicate_number,res2$biological_replicate_number)
+        c(biological_replicate_number,res4$biological_replicate_number)
       
     } else {
       
@@ -182,10 +182,11 @@ export_ENCODEdb_matrix <- function(database_filename) {
   dataset_accession = rep(NA, nrow(encode_exp))
   names(dataset_accession) = as.character(encode_exp$file_accession)
   dataset_with_file = subset(encode_ds, ! is.na(encode_ds$related_files), 
-                             select = c(encode_ds$accession, encode_ds$related_files))
+                             select = c("accession", "related_files" ))
   dataset_with_file = unique(dataset_with_file)
   
   for (i in (1:nrow(dataset_with_file))) {
+    
     ds = dataset_with_file[i,]
     dsId = as.character(ds$accession)
     related_files = strsplit(ds$related_files, split = ";")[[1]]
@@ -199,7 +200,6 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   encode_exp = cbind(encode_exp, dataset_accession)
   
-  print(format(Sys.time(), "%a %b %d %X %Y"))
   Tdiff = Sys.time() - T2
   print(paste0("Extract data from the DB : ",Tdiff, " min"))
   

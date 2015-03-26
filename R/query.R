@@ -10,16 +10,19 @@
 #' 
 #' @param  df \code{list} of two \code{data.frame} containing ENCODE 
 #' experiment and dataset metadata 
-#' @param  accession character string to select the experiment or dataset accession
+#' @param  set_accession character string to select the experiment or dataset accession
 #' @param  assay character string to select the assay type
 #' @param  biosample character string to select the biosample name
-#' @param  dataset_access character string to select the dataset accession
+#' @param  dataset_accession character string to select the dataset accession
 #' @param  file_accession character string to select the file accesion
 #' @param  file_format character string to select the file format
 #' @param  lab character string to select the laboratory 
 #' @param  organism character string to select the donor organism
 #' @param  target character string to select the experimental target
 #' @param  treatment character string to select the treatment
+#' @param  file_status character string to select the file status 
+#' ("released", "revoked", "all"). Default "released"
+#' @param  status character string to select the dataset/experiment status
 #' @param  fixed logical. If TRUE, pattern is a string to be matched as it is.
 #'
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
@@ -29,13 +32,13 @@
 #'   query(biosample = "A549", file_format = "bam")
 #'
 #' @export
-query <- function(df = NULL, accession = NULL, assay = NULL, biosample = NULL, 
-                  dataset_access = NULL, file_accession = NULL, file_format = NULL, 
+query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL, 
+                  dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
                   lab = NULL, organism = NULL, target = NULL, treatment = NULL,
-                  fixed = TRUE) {
+                  file_status = "released", status = "released", fixed = TRUE) {
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
-  if(is.null(accession) && is.null(assay) && is.null(biosample) && is.null(dataset_access) &&
+  if(is.null(set_accession) && is.null(assay) && is.null(biosample) && is.null(dataset_accession) &&
        is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
        is.null(target) && is.null(treatment))
   {
@@ -46,16 +49,18 @@ query <- function(df = NULL, accession = NULL, assay = NULL, biosample = NULL,
     s1 = encode_df$experiment
     s2 = encode_df$dataset
     
-    ac = accession
+    ac = set_accession
     as = assay
     bs = biosample
-    da = dataset_access
+    da = dataset_accession
     fa = file_accession
     ff = file_format
     lb = lab
     og = organism
     tg = target
     tr = treatment
+    es = status
+    fs = file_status
     
     if(fixed) {
       
@@ -108,6 +113,17 @@ query <- function(df = NULL, accession = NULL, assay = NULL, biosample = NULL,
         s1 <- subset(s1, s1$treatment == tr)
         s2 <- subset(s2, s1$treatment == tr)
       }
+      
+      if(fs != "all") {
+        s1 <- subset(s1, s1$file_status == fs)
+        s2 <- subset(s2, s2$file_status == fs)
+      }
+      
+      if(es != "all") {
+        s1 <- subset(s1, s1$status == es)
+        s2 <- subset(s2, s2$status == es)
+      }
+      
     } else {
       # retirer ignorer les espaces, les tirets et la casse
       # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
@@ -218,6 +234,28 @@ query <- function(df = NULL, accession = NULL, assay = NULL, biosample = NULL,
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$treatment, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(fs != "all") {
+        query.transfo = query_transform(fs)
+        select.entries = grepl(x = s1$file_status, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$file_status, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s2 = s2[select.entries,]
+      }
+      
+      if(es != "all") {
+        query.transfo = query_transform(es)
+        select.entries = grepl(x = s1$status, pattern = query.transfo, 
+                               ignore.case = T, perl = T)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$status, pattern = query.transfo, 
                                ignore.case = T, perl = T)
         s2 = s2[select.entries,]
       }

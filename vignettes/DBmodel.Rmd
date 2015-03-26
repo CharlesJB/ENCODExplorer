@@ -1,11 +1,13 @@
----
-output: html_document
----
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{A package to produce Metafeature plots}
+-->
+
 
 
 ENCODEdb: A compilation of metadata from ENCODE
 ====================================================================
-Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODEdb code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 

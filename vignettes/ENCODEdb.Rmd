@@ -1,12 +1,15 @@
----
-output: html_document
----
+
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{A package to produce Metafeature plots}
+-->
+
 
 
 ENCODEdb: A compilation of metadata from ENCODE
 ====================================================================
 
-Audrey Lemaçon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODEdb code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -61,12 +64,14 @@ a precise query defined according to the following criteria :
 
 |parameter| description|available for|
 |---------|------------|-------------|
-|accession|*the experiment or dataset accession*|experiment / dataset|
+|set_accession|*the experiment or dataset accession*|experiment / dataset|
 |assay|*the assay type*|experiment|
 |biosample|*the biosample name*|experiment|
+|status|*the experiment or dataset status*|experiment / dataset|
 |dataset_access[^2]|*the dataset accession*|experiment / dataset|
 |file_accession|*the file accesion*|experiment / dataset|
 |file_format|*the file format*|experiment / dataset|
+|file_status|*the file status*|experiment / dataset|
 |lab|*the laboratory*|experiment / dataset|
 |organism|*the donor organism*|experiment|
 |target|*the experimental target*|experiment|
@@ -168,11 +173,11 @@ download(resultSet = search_results, resultOrigin = "search", format = "bed_broa
 
 [^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
 
-[^2]:There is a subtle difference between the parameters **accession** and 
+[^2]:There is a subtle difference between the parameters **set_accession** and 
 **dataset_accession**. In fact, some files can be part of experiment, dataset or 
 both.
-When using **accession**, you will get all the files directly link to this accession 
+When using **set_accession**, you will get all the files directly link to this accession 
 (experiment or dataset). While the usage of **dataset_accesstion** will get the 
 files directly link to the requested dataset **AND** those which are part of an 
 experiment and indirectly link to a dataset (reported as related_files in the 
-dataset and related_dataset in experiment)
+dataset and dataset_accession in experiment)
