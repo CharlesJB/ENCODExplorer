@@ -3,7 +3,7 @@ if(FALSE) {
   library( "ENCODEdb" )
 }
 load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODEdb"))
-
+cd 
 res_exact = query(target = "rabbit iGG", fixed=T)
 res_regexp = query(target = "rabbit iGG", fixed=F)
 res_combo = query(biosample = "A549", assay = "chipseq", 

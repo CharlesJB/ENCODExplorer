@@ -17,23 +17,24 @@ functional elements in the human genome, including elements that act at the
 protein and RNA levels, and regulatory elements that control cells and 
 circumstances in which a gene is active"[^1].
 
-However, data retrieval and downloading can be really time consuming using 
-current web portal. 
+However, data retrieval and downloading can be really time-consuming using 
+the current web portal. 
 
-This package has been designed to facilitate the data access by compiling the 
-metadata associated with file, experiment, dataset, biosample, and treatment. 
+This package has been designed to facilitate data access by compiling the 
+metadata associated with file, experiment and dataset. 
 
-We first extract ENCODE schema from its public github repository to rebuild 
-the ENCODE database into an SQLite database. Thanks to this package, the user 
-will be enable to generate, store and query ENCODE database locally. We also 
-developped a function which can extract the essential metadata in a R object to 
-aid data exploration.
+We first extract ENCODE schema from its public github repository. 
+Then we identify the main entities and their relationship with each other to 
+rebuild the ENCODE database into an SQLite database. 
+We also developped a function which can extract the essential metadata in a R 
+object to aid data exploration.
 We implemented time-saving features to select ENCODE files by querying their 
 metadata and download them.
 
-The SQLite database can be regenerated at will to keep it up-to-date.
+The SQLite database can be regenerated at will to query ENCODE database locally 
+keep it up-to-date.
 
-This vignette will introduce all the main features of the ENCODEdb package.
+This vignette will introduce the imputed ENCODE database model.
 
 ### Loading ENCODEdb package
 
@@ -43,21 +44,24 @@ suppressMessages(library(ENCODEdb))
 
 ### Data preparation
 
-To generate the SQL database from ENCODE 
+To generate the SQL database from ENCODE: 
 
-```{r tables}
+```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
 database_filename = "encode.sqlite"
-#tables = prepare_ENCODEdb(database_filename)
-#tables
+tables = prepare_ENCODEdb(database_filename)
 ```
+
+The process can take a few minutes.
 
 ### Schema
 ![imputed model of the ENCODE database](img/model.png)
 
-The edges indicate relationship between two tables : an origin and a destination. The relation is made between a column of the origin table and the *id* of the destination table.
+The edges indicate relationship between two tables : an origin and a destination.
+The relation is made between a column of the origin table and the *id* of the 
+destination table.
 
-Those relations are described in the following table :
+Those relations are described in the following table:
 
 ### Relations table
 
@@ -150,7 +154,7 @@ Those relations are described in the following table :
 |worm_donor|document|documents|
 |worm_donor|worm_donor|outcrossed_strain|
 
-For example :
-[**file** ---> **replicate** ---> *replicate*] enables to impute the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
+For example:
+[**file** ---> **replicate** ---> *replicate*] enables to write the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
 
 [^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
