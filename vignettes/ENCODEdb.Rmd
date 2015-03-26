@@ -57,7 +57,7 @@ This `encode_df` is **mandatory** to use the functions provided in this package.
 #### Query
 
 The `query` function allow the user to find the subset of files corresponding to
-a precise query define following 10 criteria :
+a precise query defined according to the following criteria :
 
 |parameter| description|available for|
 |---------|------------|-------------|
@@ -165,30 +165,6 @@ download(resultSet = query_results, resultOrigin = "query")
 ```{r collapse=TRUE}
 download(resultSet = search_results, resultOrigin = "search", format = "bed_broadPeak")
 ```
-
-### Data update
-
-If you want regenerate this list, you have to process the following steps :
-
-* generate the SQL database from ENCODE 
-
-```{r tables, eval=FALSE}
-# the path (relative or absolute) to the future database
-database_filename = "encode.sqlite"
-tables = prepare_ENCODEdb(database_filename)
-```
-
-* generate the metadata encode_df from the SQL database
-```{r encode_df, eval = FALSE}
-encode_df <- export_ENCODEdb_matrix(database_filename)
-```
-
-
-The whole process will take several minutes (5 to 15 minutes depending on your
-work environment)
-
-You can also use the SQL database for own purpose. The imputed database 
-model is available in XXXXXXXXX
 
 [^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
 
