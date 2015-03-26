@@ -2,14 +2,17 @@ if(FALSE) {
   library( "RUnit" )
   library( "ENCODEdb" )
 }
+load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODEdb"))
 
 res_exact = query(target = "rabbit iGG", fixed=T)
 res_regexp = query(target = "rabbit iGG", fixed=F)
 res_combo = query(biosample = "A549", assay = "chipseq", 
                   file_format = "bigwig", fixed = F)
-
+res_combo_custom = query(df = small_encode_df, biosample = "A549", assay = "chipseq", 
+                  file_format = "bigwig", fixed = F)
 res_dataset_only = query(accession = "ENCSR685AIQ")
 res_exp_dataset = query(dataset_access = "ENCSR403MYH")
+
 
 # check resuls
 checkTrue(expr = is.null(res_exact),
@@ -38,3 +41,9 @@ checkTrue(nrow(res_exp_dataset$dataset) > 0,
 
 checkTrue(nrow(res_exp_dataset$experiment) > 0,
           msg = "this query should return at least one experiment result")
+
+
+# check combined query in custom dataframe list small_encode_df
+checkEquals(as.character(res_combo_custom$experiment$file_accession), "ENCFF000VPN", 
+            msg = "this combined query should return this precise result")
+
