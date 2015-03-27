@@ -14,8 +14,10 @@
 #' @param resultOrigin name of the function used to generate the result set 
 #' (\code{search} or \code{query})
 #' @param format file format, default = all
-#' @param dir the name of the directory where the downloaded file will be saved. Default = /tmp
+#' @param dir the name of the directory where the downloaded file will be saved.
+#' Default = current directory
 #'
+#' @return void
 #' @examples
 #'   resultSet <- query(biosample = "A549", file_format = "bam")
 #'   \dontrun{
@@ -24,12 +26,12 @@
 #' 
 #' @export
 download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL, 
-                     format = "all", dir = "/tmp") {
+                     format = "all", dir = ".") {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
-    warning("You have to provide both results set and its origin to use the download function", call. = F)
+    warning("You have to provide both results set and its origin to use the download function", call. = FALSE)
     NULL
   }
   else
@@ -43,19 +45,20 @@ download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         
         temp = subset(encode_df$experiment, encode_df$experiment$file_accession %in% filesId)
         temp2 = subset(encode_df$dataset, encode_df$dataset$file_accession %in% filesId)
-        urls = c(as.character(temp$href), as.character(temp2$href))
+        hrefs = c(as.character(temp$href), as.character(temp2$href))
         md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
         
-        for (i in seq_along(urls)) {
-          url = urls[i]
-          md5 = md5sums[i]
+        current_dir = getwd()
+        
+        for (i in seq_along(hrefs)) {
           
-          fileName = strsplit(x = url, split = "@@download",fixed = T)[[1]][2]
-          download.file(url = paste0(encode_root,url), quiet = T,
-                        destfile = paste0(dir,fileName), method = "wget")
-          md5sum_file = tools::md5sum(paste0(dir,fileName))
-          if(md5sum_file != md5) {
-            warning(paste0("Error while downloading the file : ", fileName), call. = F)
+          setwd(dir)
+          fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
+          utils::download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+                               destfile = fileName, method =  "curl", extra = "-L" )
+          md5sum_file = tools::md5sum(paste0(fileName))
+          if(md5sum_file != md5sums[i]) {
+            warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
             NULL
           }
           else
@@ -64,17 +67,18 @@ download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           }
         }
         
+        setwd(current_dir)
       }
       else
       {
-        warning(paste0("Can't write in ", dir), call. = F)
+        warning(paste0("Can't write in ", dir), call. = FALSE)
         NULL
       }
     }
     # origin farfelue 
     else
     {
-      warning("You have to provide a valid results set origin to use the download function : search or query", call. = F)
+      warning("You have to provide a valid results set origin to use the download function : search or query", call. = FALSE)
       NULL
     }
   }
@@ -91,7 +95,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
     else
     {
       warning("Unexpected format for a result set coming from our search function", 
-              call. = F)
+              call. = FALSE)
       NULL
     }
     
@@ -105,7 +109,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
     else
     {
       warning("Unexpected format for a result set coming from our query function", 
-              call. = F)
+              call. = FALSE)
       NULL
     }
   }
@@ -116,7 +120,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
                        as.character(encode_df$dataset$file_format)))
     if(format != "all") {
       if(!(format %in% formats)) {
-        warning("Unknown file format", call. = F)
+        warning("Unknown file format", call. = FALSE)
         NULL
       }
       else
@@ -124,7 +128,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
         avail_format =  unique(c(as.character(d$experiment$file_format),
                                  as.character(d$dataset$file_format)))
         if(!(format %in% avail_format)) {
-          warning("This file format is not available in your dataset", call. = F)
+          warning("This file format is not available in your dataset", call. = FALSE)
           NULL
         }
         else
@@ -164,5 +168,4 @@ getDatasetDetails <- function(encode_df,resultSet) {
   ds = resultSet$accession
   subset(encode_df$dataset,encode_df$dataset$accession %in% ds)
 }
-
 

@@ -4,14 +4,22 @@
 \name{encode_df}
 \alias{encode_df}
 \title{Metadata from the ENCODE database in a R object.
-Super list de la mort qui tue !!}
+The tables were generated with the \code{prepare_ENCODEdb} function.}
 \format{A list of data frames}
 \usage{
 data(encode_df)
 }
+\value{
+A list of data frames
+}
 \description{
 Metadata from the ENCODE database in a R object.
-Super list de la mort qui tue !!
+The tables were generated with the \code{prepare_ENCODEdb} function.
+}
+\seealso{
+\code{\link{get_encode_types}} to get a list of possible types. Note
+  that some of the types are empty tables that are not included in the
+  database created with \code{\link{prepare_ENCODEdb}} function.
 }
 \keyword{datasets}
 

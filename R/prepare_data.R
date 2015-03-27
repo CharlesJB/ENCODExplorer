@@ -12,6 +12,8 @@
 #' Default: \code{FALSE}.
 #' 
 #' @examples
+#' prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
+#' file.remove("platform.sql")
 #'   \dontrun{
 #'     prepare_ENCODEdb("ENCODEdb.sqlite")
 #'   }

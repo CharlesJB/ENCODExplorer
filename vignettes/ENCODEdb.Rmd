@@ -170,7 +170,7 @@ To select a particular file format you can:
 
 1) add this filter to your query and then run the `download` function
 
-```{r query_results_5, collapse=TRUE, eval=FALSE}
+```{r query_results_5, collapse=TRUE, eval=TRUE}
 query_results <- query(assay = "switchgear", target ="elavl1",
                        file_format = "bed_broadPeak" , fixed = FALSE)
 download(resultSet = query_results, resultOrigin = "query")
@@ -178,7 +178,7 @@ download(resultSet = query_results, resultOrigin = "query")
 
 2) specify the format to the `download` function
 
-```{r collapse=TRUE, eval=FALSE}
+```{r collapse=TRUE, eval=TRUE}
 download(resultSet = search_results, resultOrigin = "search", format = "bed_broadPeak")
 ```
 

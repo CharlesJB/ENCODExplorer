@@ -4,8 +4,8 @@
 \name{ENCODEdb}
 \alias{ENCODEdb}
 \alias{ENCODEdb-package}
-\title{ENCODEdb.}
+\title{ENCODEdb}
 \description{
-ENCODEdb.
+ENCODEdb
 }
 

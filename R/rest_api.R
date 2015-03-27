@@ -8,7 +8,7 @@
 #'
 extract_table <- function(type) {
   filters = "&limit=all"
-  filters = paste0(filters, "&frame=object")
+  filters = paste0(filters, "&frame=object&format=json")
   
   url <- "https://www.encodeproject.org/search/?type="
   url <- paste0(url, type, filters)
@@ -134,7 +134,7 @@ search <- function(searchTerm = NULL, limit = 10) {
 
   res <- jsonlite::fromJSON(url)
   if (res[["notification"]] != "Success") {
-    warning("No result found", call. = T)
+    warning("No result found", call. = TRUE)
     r = data.frame()
   } else {
     r = res[["@graph"]]

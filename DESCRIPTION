@@ -14,6 +14,7 @@ Description: This package allows user to quickly access ENCODE project files
 License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODEdb/issues
 VignetteBuilder: knitr
-Depends: R (>= 2.10), utils (>= 3.1.2), tools (>= 3.1.2), jsonlite (>=0.9.14), RSQLite(>= 1.0.0)
+Depends: R (>= 3.0.0), utils (>= 3.1.2), tools (>= 3.1.2), jsonlite (>= 0.9.14), RSQLite (>= 1.0.0), curl (>= 0.5.0), httr (>= 0.6.1)
 Suggests:RUnit,BiocGenerics,knitr
 LazyData: true
+biocViews: Infrastructure, DataImport

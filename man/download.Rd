@@ -5,7 +5,7 @@
 \title{Download files from the Internet.}
 \usage{
 download(df = NULL, resultSet = NULL, resultOrigin = NULL,
-  format = "all", dir = "/tmp")
+  format = "all", dir = ".")
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE
@@ -18,7 +18,11 @@ experiment and dataset metadata}
 
 \item{format}{file format, default = all}
 
-\item{dir}{the name of the directory where the downloaded file will be saved. Default = /tmp}
+\item{dir}{the name of the directory where the downloaded file will be saved.
+Default = current directory}
+}
+\value{
+void
 }
 \description{
 After processing to a basic search with the \code{search} function or a

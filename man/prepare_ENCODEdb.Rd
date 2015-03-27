@@ -24,7 +24,9 @@ create the \code{RSQLite} database.
 Create the RSQLite databse for the tables in ENCODE
 }
 \examples{
-\dontrun{
+prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
+file.remove("platform.sql")
+  \dontrun{
     prepare_ENCODEdb("ENCODEdb.sqlite")
   }
 }

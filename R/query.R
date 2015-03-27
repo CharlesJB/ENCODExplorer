@@ -42,7 +42,7 @@ query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NUL
        is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
        is.null(target) && is.null(treatment))
   {
-    warning("Please provide at least one valid criteria", call. = F)
+    warning("Please provide at least one valid criteria", call. = FALSE)
     NULL
     
   } else {
@@ -131,132 +131,132 @@ query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NUL
       if(!is.null(ac)) {
         query.transfo = query_transform(ac)
         select.entries = grepl(x = s1$accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(as)) {
         query.transfo = query_transform(as)
         select.entries = grepl(x = s1$assay, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$assay, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(bs)) {
         query.transfo = query_transform(bs)
         select.entries = grepl(x = s1$biosample_name, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$biosample_name, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(da)) {
         query.transfo = query_transform(da)
         select.entries = grepl(x = s1$dataset_accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(fa)) {
         query.transfo = query_transform(fa)
         select.entries = grepl(x = s1$file_accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$file_accession, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(ff)) {
         query.transfo = query_transform(ff)
         select.entries = grepl(x = s1$file_format, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$file_format, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(lb)) {
         query.transfo = query_transform(lb)
         select.entries = grepl(x = s1$lab, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$lab, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(og)) {
         query.transfo = query_transform(og)
         select.entries = grepl(x = s1$organism, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$organism, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(tg)) {
         query.transfo = query_transform(tg)
         select.entries = grepl(x = s1$target, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$target, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(!is.null(tr)) {
         query.transfo = query_transform(tr)
         select.entries = grepl(x = s1$treatment, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$treatment, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(fs != "all") {
         query.transfo = query_transform(fs)
         select.entries = grepl(x = s1$file_status, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$file_status, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
       if(es != "all") {
         query.transfo = query_transform(es)
         select.entries = grepl(x = s1$status, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
         select.entries = grepl(x = s2$status, pattern = query.transfo, 
-                               ignore.case = T, perl = T)
+                               ignore.case =TRUE, perl =TRUE)
         s2 = s2[select.entries,]
       }
       
@@ -265,7 +265,7 @@ query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NUL
     
     
     if((nrow(s1) + nrow(s2)) == 0) {
-      warning("No result found. You can try the <search> function or set the fixed option to FALSE", call. = F)
+      warning("No result found. You can try the <search> function or set the fixed option to FALSE", call. = FALSE)
       NULL
     }
     else
@@ -279,9 +279,9 @@ query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NUL
 }
 
 query_transform <- function(my.term) {
-  my.term = gsub(my.term, pattern = " ", replacement = "", fixed = T)
-  my.term = gsub(my.term, pattern = "-", replacement = "", fixed = T)
-  my.term = gsub(my.term, pattern = ",", replacement = "", fixed = T)
+  my.term = gsub(my.term, pattern = " ", replacement = "", fixed =TRUE)
+  my.term = gsub(my.term, pattern = "-", replacement = "", fixed =TRUE)
+  my.term = gsub(my.term, pattern = ",", replacement = "", fixed =TRUE)
   my.term = strsplit(my.term, split = "")[[1]]
   my.term.4.grep = paste0("^",paste(my.term, collapse = "[ ,-]?"))
   
