@@ -5,7 +5,7 @@
 #' @return a \code{data.frame} corresponding to the table asked. If no match is
 #'   found, returns an empty \code{data.frame}
 #'   
-#'
+#' @import jsonlite
 extract_table <- function(type) {
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object&format=json")
@@ -123,7 +123,7 @@ clean_table <- function(table) {
 #'
 #' @examples
 #'  search("ChIP-Seq+H3K4me1")
-#' 
+#' @import jsonlite
 #' @export
 search <- function(searchTerm = NULL, limit = 10) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
@@ -158,8 +158,8 @@ search <- function(searchTerm = NULL, limit = 10) {
 #' package.
 #'
 #' @return a \code{list} of JSON converted in \code{data.frame}.
-#'
-#'
+#' 
+#' @import jsonlite
 get_schemas <- function() {
   # 1. Extract the description of the schemas
   encode_api_url <- "https://api.github.com/repos"

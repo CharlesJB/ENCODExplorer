@@ -17,6 +17,8 @@
 #'   \dontrun{
 #'     prepare_ENCODEdb("ENCODEdb.sqlite")
 #'   }
+#'   
+#' @import jsonlite
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
                              types = get_encode_types(), overwrite = FALSE) {
@@ -86,7 +88,8 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #'   \dontrun{
 #'     export_ENCODEdb_matrix(database_filename = database_filename)
 #'   }
-#'
+#' @import RSQLite
+#' 
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
   T2 = Sys.time()
@@ -222,7 +225,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
 #' @return a vector of \code{character} with the names of the known tables in
 #'   the ENCODE database.
 #'
-#'
+#' @import tools
 get_encode_types <- function() {
   encode_api_url <- "https://api.github.com/repos"
   encoded_repo <- "encode-dcc/encoded"

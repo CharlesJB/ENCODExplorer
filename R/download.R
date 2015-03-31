@@ -23,6 +23,7 @@
 #'   \dontrun{
 #'   download(resultSet = resultSet, dir = ".")
 #'   }
+#' @import tools
 #' 
 #' @export
 download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL, 
@@ -54,7 +55,7 @@ download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           
           setwd(dir)
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
-          utils::download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+          download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
                                destfile = fileName, method =  "curl", extra = "-L" )
           md5sum_file = tools::md5sum(paste0(fileName))
           if(md5sum_file != md5sums[i]) {
