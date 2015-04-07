@@ -1,6 +1,6 @@
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 load(file = "inst/extdata/test_rest_search_experiment.rda") #search_experiment

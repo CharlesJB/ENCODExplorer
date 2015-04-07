@@ -1,12 +1,12 @@
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 
 md5sum_test_file = "b58b4847e8d71d95471c4c017b4a5dc7"
 
-load(file = system.file("extdata/test_rest_query_file.rda", package = "ENCODEdb")) #query_file
+load(file = system.file("extdata/test_rest_query_file.rda", package = "ENCODExplorer")) #query_file
 
 # check when arguments are missing
 test.mandatory_args_missing <- function() {
@@ -57,17 +57,17 @@ test.argument_consistency_dir <- function() {
 # check download file
 
 test.download_small_file <- function() {
-  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODEdb"))  
-  checkTrue(file.exists(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODEdb")), 
+  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODExplorer"))  
+  checkTrue(file.exists(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer")), 
             msg = "the file ENCFF001VCK.broadPeak.gz is missing")
-  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODEdb"))
+  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))
 }
 
 test.md5sum <- function() {
-  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODEdb"))
-  checkEquals(as.character(tools::md5sum(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODEdb"))),
+  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODExplorer"))
+  checkEquals(as.character(tools::md5sum(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))),
               md5sum_test_file)
-  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODEdb"))
+  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))
 }
 
 

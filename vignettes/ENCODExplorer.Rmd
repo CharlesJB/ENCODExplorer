@@ -6,12 +6,12 @@
 
 
 
-ENCODEdb: A compilation of metadata from ENCODE
+ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
 
 Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
 
-This package and the underlying ENCODEdb code are distributed under 
+This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
 
 "The ENCODE (Encyclopedia of DNA Elements) Consortium is an international 
@@ -39,12 +39,12 @@ downloaded.
 
 The SQLite database can be regenerated at will to keep it up-to-date.
 
-This vignette will introduce all the main features of the ENCODEdb package.
+This vignette will introduce all the main features of the ENCODExplorer package.
 
-### Loading ENCODEdb package
+### Loading ENCODExplorer package
 
 ```{r libraryLoad}
-suppressMessages(library(ENCODEdb))
+suppressMessages(library(ENCODExplorer))
 ```
 
 ### Introduction

@@ -1,6 +1,6 @@
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 
@@ -47,7 +47,7 @@ test.query_4_dataset_and_exp <- function() {
 }
 
 test.combined_query_on_custom_df <- function() {
-  load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODEdb"))
+  load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODExplorer"))
   res_combo_custom = queryEncode(df = small_encode_df, target = "ELAVL1-human", 
                            fixed = F, file_status = "all")
   

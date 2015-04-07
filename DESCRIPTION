@@ -1,5 +1,5 @@
-Package: ENCODEdb
-Name: ENCODEdb
+Package: ENCODExplorer
+Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
 Version: 0.99.0
@@ -17,7 +17,7 @@ Description: This package allows user to quickly access ENCODE project files
     metadata and give access to helper functions to query the ENCODE rest api,
     download ENCODE datasets and save the database in SQLite format.
 License: Artistic-2.0
-BugReports: https://github.com/CharlesJB/ENCODEdb/issues
+BugReports: https://github.com/CharlesJB/ENCODExplorer/issues
 VignetteBuilder: knitr
 Depends: R (>= 3.2)
 Imports: tools, jsonlite, RSQLite

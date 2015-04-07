@@ -1,6 +1,6 @@
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 my.term = "mcf7"

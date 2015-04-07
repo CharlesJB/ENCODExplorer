@@ -1,7 +1,7 @@
 
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 limit = 4

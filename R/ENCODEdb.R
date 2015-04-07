@@ -1,6 +1,6 @@
-#' ENCODEdb
+#' ENCODExplorer
 #'
-#' @name ENCODEdb
+#' @name ENCODExplorer
 #' @docType package
 NULL
 

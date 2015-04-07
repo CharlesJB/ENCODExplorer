@@ -1,6 +1,6 @@
 if(FALSE) {
   library( "RUnit" )
-  library( "ENCODEdb" )
+  library( "ENCODExplorer" )
 }
 
 load(file = "inst/extdata/test_matrices.rda") # matrices

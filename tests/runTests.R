@@ -1,2 +1,2 @@
-#Run all tests in the ENCODEdb package
-BiocGenerics:::testPackage("ENCODEdb")
+#Run all tests in the ENCODExplorer package
+BiocGenerics:::testPackage("ENCODExplorer")
