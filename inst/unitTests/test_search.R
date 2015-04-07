@@ -6,7 +6,7 @@ if(FALSE) {
 
 limit = 4
 searchTerm = "MCF7"
-res = search(searchTerm, limit)
+res = searchEncode(searchTerm, limit)
 
 test.ret_type <- function() {
   checkTrue(expr = is.data.frame(res), msg = "res should be a data.frame")
@@ -24,7 +24,7 @@ test.ret_content <- function() {
 
 test.ret_warning <- function() {
   searchTerm = "AABBCC"
-  obs = tryCatch(search(searchTerm, limit),error=function(e) e, warning=conditionMessage)
+  obs = tryCatch(searchEncode(searchTerm, limit),error=function(e) e, warning=conditionMessage)
   exp = "No result found"
   msg = "The function shouldn't return any results for the search AABBCC"
   

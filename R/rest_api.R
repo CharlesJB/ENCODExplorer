@@ -122,10 +122,10 @@ clean_table <- function(table) {
 #' search term
 #'
 #' @examples
-#'  search("ChIP-Seq+H3K4me1")
+#'  searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
-search <- function(searchTerm = NULL, limit = 10) {
+searchEncode <- function(searchTerm = NULL, limit = 10) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)

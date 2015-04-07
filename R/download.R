@@ -1,43 +1,43 @@
 #' Download files from the Internet.
 #'
-#' After processing to a basic search with the \code{search} function or a 
-#' precise search thanks to the \code{query} function, you can proceed to the
-#' downloading of all the corresponding files.
+#' After processing to a basic search with the \code{searchEncode} function or a
+#' precise search thanks to the \code{queryEncode} function, you can proceed to
+#' the downloading of all the corresponding files.
 #'
 #' This function can be used to download a set of files by providing the results
-#' set, its origin (search or query), the file format and finally the destination
-#' directory.
+#' set, its origin (searchEncode or queryEncode), the file format and finally
+#' the destination directory.
 #' 
-#' @param  df \code{list} of two \code{data.frame} containing ENCODE 
-#' experiment and dataset metadata 
-#' @param resultSet the results set
-#' @param resultOrigin name of the function used to generate the result set 
-#' (\code{search} or \code{query})
+#' @param  df \code{list} of two \code{data.frame} containing ENCODE experiment
+#' and dataset metadata.
+#' @param resultSet the results set.
+#' @param resultOrigin name of the function used to generate the result set
+#' (\code{searchEncode} or \code{queryEncode})
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved.
 #' Default = current directory
 #'
 #' @return void
 #' @examples
-#'   resultSet <- query(biosample = "A549", file_format = "bam")
+#'   resultSet <- queryEncode(biosample = "A549", file_format = "bam")
 #'   \dontrun{
-#'   download(resultSet = resultSet, dir = ".")
+#'   downloadEncode(resultSet = resultSet, dir = ".")
 #'   }
 #' @import tools
 #' 
 #' @export
-download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL, 
+downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
                      format = "all", dir = ".") {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
-    warning("You have to provide both results set and its origin to use the download function", call. = FALSE)
+    warning("You have to provide both results set and its origin to use the downloadEncode function", call. = FALSE)
     NULL
   }
   else
   {
-    if(resultOrigin %in% c("search", "query"))
+    if(resultOrigin %in% c("searchEncode", "queryEncode"))
     {
       encode_root = "https://www.encodeproject.org"
       if(file.access(dir, mode = 2) == 0) {
@@ -79,7 +79,7 @@ download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
     # origin farfelue 
     else
     {
-      warning("You have to provide a valid results set origin to use the download function : search or query", call. = FALSE)
+      warning("You have to provide a valid results set origin to use the downloadEncode function : searchEncode or queryEncode", call. = FALSE)
       NULL
     }
   }
@@ -88,14 +88,14 @@ download <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
 getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
   d = NULL
   
-  if(resultOrigin == "search") {
+  if(resultOrigin == "searchEncode") {
     if(class(resultSet) == "data.frame")
     {
       d = getFileDetails(encode_df,resultSet)
     }
     else
     {
-      warning("Unexpected format for a result set coming from our search function", 
+      warning("Unexpected format for a result set coming from our searchEncode function",
               call. = FALSE)
       NULL
     }
@@ -109,7 +109,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
     }
     else
     {
-      warning("Unexpected format for a result set coming from our query function", 
+      warning("Unexpected format for a result set coming from our queryEncode function",
               call. = FALSE)
       NULL
     }

@@ -29,10 +29,10 @@
 #' experiments and datasets
 #'
 #' @examples
-#'   query(biosample = "A549", file_format = "bam")
+#'   queryEncode(biosample = "A549", file_format = "bam")
 #'
 #' @export
-query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL, 
+queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL,
                   dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
                   lab = NULL, organism = NULL, target = NULL, treatment = NULL,
                   file_status = "released", status = "released", fixed = TRUE) {
@@ -265,7 +265,7 @@ query <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NUL
     
     
     if((nrow(s1) + nrow(s2)) == 0) {
-      warning("No result found. You can try the <search> function or set the fixed option to FALSE", call. = FALSE)
+      warning("No result found. You can try the <searchEncode> function or set the fixed option to FALSE", call. = FALSE)
       NULL
     }
     else
