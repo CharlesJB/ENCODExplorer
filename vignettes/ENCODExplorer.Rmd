@@ -69,7 +69,7 @@ a precise query defined according to the following criteria :
 |set_accession|experiment / dataset|The experiment or dataset accession|
 |assay|experiment|The assay type|
 |biosample|experiment|The biosample name|
-|dataset_access^[2]|experiment / dataset|The dataset accession|
+|dataset_access^[2] |experiment / dataset|The dataset accession|
 |file_accession|experiment / dataset|The file accesion|
 |file_format|experiment / dataset|The file format|
 |lab|experiment / dataset|The laboratory|
