@@ -1,0 +1,33 @@
+Package: ENCODExplorer
+Name: ENCODExplorer
+Type: Package
+Title: A compilation of ENCODE metadata
+Version: 0.99.0
+Date: 2015-02-25
+Author: Charles Joly Beauparlant
+        <charles.joly-beauparlant@crchul.ulaval.ca>, Audrey Lemacon
+        <lemacon.audrey@ulaval.ca> and Arnaud Droit
+        <arnaud.droit@crchudequebec.ulaval.ca >
+Author@R: c( person("Charles","Joly Beauparlant", email =
+        "charles.joly-beauparlant@crchul.ulaval.ca", role = "aut,cre"),
+        person("Audrey","Lemacon", email = "lemacon.audrey@ulaval.ca",
+        role = "aut"), person("Arnaud","Droit", email =
+        "arnaud.droit@crchudequebec.ulaval.ca", role = "aut"),
+        person("Astrid-Louise","Deschenes", email =
+        "Astrid-Louise.Deschenes@crchudequebec.ulaval.ca", role =
+        "ctb"))
+Maintainer: Charles Joly Beauparlant
+        <charles.joly-beauparlant@crchul.ulaval.ca>
+Description: This package allows user to quickly access ENCODE project
+        files metadata and give access to helper functions to query the
+        ENCODE rest api, download ENCODE datasets and save the database
+        in SQLite format.
+License: Artistic-2.0
+BugReports: https://github.com/CharlesJB/ENCODExplorer/issues
+VignetteBuilder: knitr
+Depends: R (>= 3.2)
+Imports: tools, jsonlite, RSQLite
+Suggests: RUnit,BiocGenerics,knitr, curl, httr
+LazyData: true
+biocViews: Infrastructure, DataImport
+NeedsCompilation: no
