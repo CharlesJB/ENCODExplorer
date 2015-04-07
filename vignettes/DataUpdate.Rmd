@@ -1,0 +1,82 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{A package to produce Metafeature plots}
+-->
+
+ENCODExplorer: A compilation of metadata from ENCODE
+====================================================================
+Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+
+This package and the underlying ENCODExplorer code are distributed under 
+the Artistic license 2.0. You are free to use and redistribute this software. 
+
+"The ENCODE (Encyclopedia of DNA Elements) Consortium is an international 
+collaboration of research groups funded by the National Human Genome Research 
+Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
+functional elements in the human genome, including elements that act at the 
+protein and RNA levels, and regulatory elements that control cells and 
+circumstances in which a gene is active"^[1] .
+
+However, data retrieval and downloading can be really time-consuming using 
+the current web portal. 
+
+This package has been designed to facilitate data access by compiling the 
+metadata associated with file, experiment and dataset. 
+
+We first extract ENCODE schema from its public github repository. 
+Then we identify the main entities and their relationship with each other to 
+rebuild the ENCODE database into an SQLite database. 
+We also developped a function which can extract the essential metadata in a R 
+object to aid data exploration.
+We implemented time-saving features to select ENCODE files by querying their 
+metadata and download them.
+
+The SQLite database can be regenerated at will to query ENCODE database locally 
+keep it up-to-date.
+
+This vignette will introduce the way to update ENCODE data.
+
+### Loading ENCODExplorer package
+
+```{r libraryLoad}
+suppressMessages(library(ENCODExplorer))
+```
+
+### Data update
+
+If you want regenerate this list, you have to process the following steps:
+
+* generate the SQL database from ENCODE: 
+
+```{r tables, eval=FALSE}
+# the path (relative or absolute) to the future database
+database_filename = "new.encode.sqlite"
+tables = prepare_ENCODEdb(database_filename)
+```
+
+* generate the metadata encode_df from the SQL database:
+```{r new_encode_df, eval = FALSE}
+new_encode_df <- export_ENCODEdb_matrix(database_filename)
+```
+
+
+The whole process will take several minutes (5 to 15 minutes depending on your
+work environment)
+
+### Updated data usage
+
+Once the `new_encode_df` is generated, you can use it to replace the default one 
+in the `queryEncode` and `downloadEncode` function by setting the *df* option of those 
+functions.
+
+```{r queryEncode, eval=FALSE}
+query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
+downloadEncode(df = new_encode_df, resultSet = query_results, resultOrigin = "queryEncode")
+```
+
+Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.
+
+You can also use the SQL database for own purpose. The imputed database 
+model is available in the [dedicated vignette](DBmodel.html)
+
+[1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
