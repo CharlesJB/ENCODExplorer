@@ -61,7 +61,7 @@ This `encode_df` is **mandatory** for the functions provided in this package.
 
 #### Query
 
-The `query` function allow the user to find the subset of files corresponding to
+The `queryEncode` function allow the user to find the subset of files corresponding to
 a precise query defined according to the following criteria :
 
 |parameter|available for| description|
@@ -88,20 +88,20 @@ of two elements *experiment* and *dataset*.
 For example, to select all the fastq files produced by RNA-seq assay on human
 cell MCF-7:
 ```{r query_results, collapse=TRUE}
-query_results <- query(assay = "RNA-seq", organism = "Homo sapiens",
+query_results <- queryEncode(assay = "RNA-seq", organism = "Homo sapiens",
                        biosample = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
 
 The same request with approximate spelling of the assay type and `fixed` option
 to `TRUE`, will give no results :
 ```{r query_results_2, collapse=TRUE}
-query_results <- query(assay = "rnaseq", organism = "Homo sapiens",
+query_results <- queryEncode(assay = "rnaseq", organism = "Homo sapiens",
                        biosample = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
 
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
 ```{r query_results_3, collapse=TRUE}
-query_results <- query(assay = "rnaseq", organism = "Homo sapiens",
+query_results <- queryEncode(assay = "rnaseq", organism = "Homo sapiens",
                        biosample = "MCF-7", file_format = "fastq",
                        fixed = FALSE)
 ```
@@ -120,7 +120,7 @@ type of data.*
 This function simulates a key word search that you could perform through the
 ENCODE web portal.
 
-The `search` function returns a data frame which corresponds to the result page
+The `searchEncode` function returns a data frame which corresponds to the result page
 provided by ENCODE portal.
 
 Here is the example of the following search : *"a549 chip-seq homo sapiens"*.
@@ -131,7 +131,7 @@ On ENCODE portal :
 
 With our function :
 ```{r search_results, collapse=TRUE}
-search_results <- search(searchTerm = "a549 chip-seq homo sapiens",
+search_results <- searchEncode(searchTerm = "a549 chip-seq homo sapiens",
                          limit = "all")
 ```
 
@@ -141,45 +141,45 @@ Following a search or a query, you may want to download the corresponding files.
 When using, the ENCODE portal you have to select the experiments one after an 
 other and for each experiment, select manually the files you're interested in.
 
-Our `download` function is a real time saving feature. To use it, you have to 
-provide the results set that you've just get from the `search` or `query` 
-function, indicate the origin of the dataset ("search" or "query") and then the 
+Our `downloadEncode` function is a real time saving feature. To use it, you have to 
+provide the results set that you've just get from the `searchEncode` or `queryEncode` 
+function, indicate the origin of the dataset ("searchEncode" or "queryEncode") and then the 
 path to the directory where you want to copy the downloaded files
 (default: `/tmp`).
 
 To ensure that the downloading have succeeded, we conduct a check md5 sum 
 comparison for each file.
 
-Moreover, if your results set stem from the `search` function, you may want to 
+Moreover, if your results set stem from the `searchEncode` function, you may want to 
 restrict the downloading to a certain type of file. To do so, you can set the 
 `format` option (which is set by defaul to `all`)
 
 Here is a small query:
 
 ```{r query_results_4, collapse=TRUE}
-query_results <- query(assay = "switchgear", target ="elavl1", fixed = FALSE)
+query_results <- queryEncode(assay = "switchgear", target ="elavl1", fixed = FALSE)
 ```
 
 And its equivalent search:
 
 ```{r search_results_2, collapse=TRUE}
-search_results <- search(searchTerm = "switchgear elavl1", limit = "all")
+search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 ```
 
 To select a particular file format you can:
 
-1) add this filter to your query and then run the `download` function
+1) add this filter to your query and then run the `downloadEncode` function
 
 ```{r query_results_5, collapse=TRUE, eval=TRUE}
-query_results <- query(assay = "switchgear", target ="elavl1",
+query_results <- queryEncode(assay = "switchgear", target ="elavl1",
                        file_format = "bed_broadPeak" , fixed = FALSE)
-download(resultSet = query_results, resultOrigin = "query")
+downloadEncode(resultSet = query_results, resultOrigin = "queryEncode")
 ```
 
-2) specify the format to the `download` function
+2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=TRUE}
-download(resultSet = search_results, resultOrigin = "search", format = "bed_broadPeak")
+downloadEncode(resultSet = search_results, resultOrigin = "searchEncode", format = "bed_broadPeak")
 ```
 
 [1]: source: [ENCODE Projet Portal ](https://www.encodeproject.org/)

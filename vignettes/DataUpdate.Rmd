@@ -66,15 +66,15 @@ work environment)
 ### Updated data usage
 
 Once the `new_encode_df` is generated, you can use it to replace the default one 
-in the `query` and `download` function by setting the *df* option of those 
+in the `queryEncode` and `downloadEncode` function by setting the *df* option of those 
 functions.
 
-```{r query, eval=FALSE}
-query_results <- query(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
-download(df = new_encode_df, resultSet = query_results, resultOrigin = "query")
+```{r queryEncode, eval=FALSE}
+query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
+downloadEncode(df = new_encode_df, resultSet = query_results, resultOrigin = "queryEncode")
 ```
 
-Be sure to use the same referencial *df* for both **query** and **download**.
+Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.
 
 You can also use the SQL database for own purpose. The imputed database 
 model is available in the [dedicated vignette](DBmodel.html)
