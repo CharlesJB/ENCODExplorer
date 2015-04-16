@@ -1,6 +1,6 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{A package to produce Metafeature plots}
+%\VignetteIndexEntry{Data update}
 -->
 
 ENCODExplorer: A compilation of metadata from ENCODE
@@ -79,4 +79,4 @@ Be sure to use the same referencial *df* for both **queryEncode** and **download
 You can also use the SQL database for own purpose. The imputed database 
 model is available in the [dedicated vignette](DBmodel.html)
 
-[1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
+[1] : source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
