@@ -1,0 +1,160 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Database model}
+-->
+
+ENCODExplorer: A compilation of metadata from ENCODE
+====================================================================
+Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+
+This package and the underlying ENCODExplorer code are distributed under 
+the Artistic license 2.0. You are free to use and redistribute this software. 
+
+"The ENCODE (Encyclopedia of DNA Elements) Consortium is an international 
+collaboration of research groups funded by the National Human Genome Research 
+Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
+functional elements in the human genome, including elements that act at the 
+protein and RNA levels, and regulatory elements that control cells and 
+circumstances in which a gene is active"^[1].
+
+However, data retrieval and downloading can be really time-consuming using 
+the current web portal. 
+
+This package has been designed to facilitate data access by compiling the 
+metadata associated with file, experiment and dataset. 
+
+We first extract ENCODE schema from its public github repository. 
+Then we identify the main entities and their relationship with each other to 
+rebuild the ENCODE database into an SQLite database. 
+We also developped a function which can extract the essential metadata in a R 
+object to aid data exploration.
+We implemented time-saving features to select ENCODE files by querying their 
+metadata and download them.
+
+The SQLite database can be regenerated at will to query ENCODE database locally 
+keep it up-to-date.
+
+This vignette will introduce the imputed ENCODE database model.
+
+### Loading ENCODExplorer package
+
+```{r libraryLoad}
+suppressMessages(library(ENCODExplorer))
+```
+
+### Data preparation
+
+To generate the SQL database from ENCODE: 
+
+```{r tables, eval=FALSE}
+# the path (relative or absolute) to the future database
+database_filename = "encode.sqlite"
+tables = prepare_ENCODEdb(database_filename)
+```
+
+The process can take a few minutes.
+
+### Schema
+![imputed model of the ENCODE database](img/model.png)
+
+The edges indicate relationship between two tables : an origin and a destination.
+The relation is made between a column of the origin table and the *id* of the 
+destination table.
+
+Those relations are described in the following table:
+
+### Relations table
+
+|origin| destination|origin column|
+|---------|------------|-------------|
+|access_key|user|user|
+|analysis_step|analysis_step|parents|
+|analysis_step|document|documents|
+|analysis_step_run|analysis_step|analysis_step|
+|analysis_step_run|workflow_run|workflow_run|
+|analysis_step|software_version|software_versions|
+|antibody_approval|antibody_characterization|characterizations|
+|antibody_approval|antibody_lot|antibody|
+|antibody_approval|target|target|
+|antibody_characterization|antibody_lot|characterizes|
+|antibody_characterization|target|target|
+|antibody_characterization|user|reviewed_by|
+|antibody_lot|organism|host_organism|
+|antibody_lot|target|targets|
+|award|user|pi|
+|biosample|biosample|derived_from|
+|biosample|biosample|part_of|
+|biosample|biosample|pooled_from|
+|biosample_characterization|biosample|characterizes|
+|biosample|construct|constructs|
+|biosample|document|protocol_documents|
+|biosample|donor|donor|
+|biosample|organism|organism|
+|biosample|rnai|rnais|
+|biosample|talen|talens|
+|biosample|treatment|treatments|
+|characterization|document|documents|
+|construct_characterization|construct|characterizes|
+|construct|document|documents|
+|construct|target|promoter_used|
+|construct|target|target|
+|dataset|document|documents|
+|dataset|file|related_files|
+|donor_characterization|donor|characterizes|
+|donor|organism|organism|
+|experiment|experiment|possible_controls|
+|experiment|target|target|
+|file|analysis_step_run|step_run|
+|file|dataset|dataset|
+|file|experiment|dataset|
+|file|file|controlled_by|
+|file|file|derived_from|
+|file|file|paired_with|
+|file|file|supercedes|
+|file|platform|platform|
+|file|replicate|replicate|
+|fly_donor|document|documents|
+|human_donor|human_donor|children|
+|human_donor|human_donor|fraternal_twin|
+|human_donor|human_donor|identical_twin|
+|human_donor|human_donor|parents|
+|human_donor|human_donor|siblings|
+|lab|award|awards|
+|lab|user|pi|
+|library|biosample|biosample|
+|library|dataset|spikeins_used|
+|library|document|documents|
+|library|treatment|treatments|
+|mouse_donor|mouse_donor|littermates|
+|page|page|parent|
+|pipeline|analysis_step|analysis_steps|
+|pipeline|analysis_step|end_points|
+|pipeline|document|documents|
+|publication|dataset|datasets|
+|quality_metric|analysis_step_run|step_run|
+|quality_metric|file|files|
+|replicate|antibody_lot|antibody|
+|replicate|experiment|experiment|
+|replicate|library|library|
+|replicate|platform|platform|
+|rnai_characterization|rnai|characterizes|
+|rnai|document|documents|
+|rnai|target|target|
+|software|publication|references|
+|software_version|software|software|
+|talen|document|documents|
+|target|organism|organism|
+|treatment|document|protocols|
+|treatment|lab|lab|
+|user|lab|lab|
+|user|lab|submits_for|
+|workflow_run|file|input_files|
+|workflow_run|pipeline|pipeline|
+|workflow_run|software_version|software_version|
+|worm_donor|document|documents|
+|worm_donor|worm_donor|outcrossed_strain|
+
+For example:
+[**file** ---> **replicate** ---> *replicate*] enables to write the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
+
+[1] : source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
