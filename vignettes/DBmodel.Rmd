@@ -1,9 +1,7 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{A package to produce Metafeature plots}
+%\VignetteIndexEntry{Database model}
 -->
-
-
 
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
@@ -17,7 +15,7 @@ collaboration of research groups funded by the National Human Genome Research
 Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
 functional elements in the human genome, including elements that act at the 
 protein and RNA levels, and regulatory elements that control cells and 
-circumstances in which a gene is active"[^1].
+circumstances in which a gene is active"^[1].
 
 However, data retrieval and downloading can be really time-consuming using 
 the current web portal. 
@@ -159,4 +157,4 @@ Those relations are described in the following table:
 For example:
 [**file** ---> **replicate** ---> *replicate*] enables to write the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
 
-[^1]: source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
+[1] : source : [ENCODE Projet Portal ](https://www.encodeproject.org/)
