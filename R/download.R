@@ -52,9 +52,9 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         
         current_dir = getwd()
         
+        setwd(dir)
         for (i in seq_along(hrefs)) {
           
-          setwd(dir)
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
 	  if (force == TRUE | !(file.exists(fileName))) {
             download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
