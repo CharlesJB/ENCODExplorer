@@ -24,7 +24,7 @@ Default = current directory}
 \item{force}{Download file is it already exists? Default: TRUE.}
 }
 \value{
-void
+The downloaded file names, if download worked correctly.
 }
 \description{
 After processing to a basic search with the \code{searchEncode} function or a
