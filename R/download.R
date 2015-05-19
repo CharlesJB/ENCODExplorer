@@ -16,6 +16,7 @@
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved.
 #' Default = current directory
+#' @param force Download file is it already exists? Default: TRUE.
 #'
 #' @return void
 #' @examples
@@ -27,7 +28,7 @@
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
-                     format = "all", dir = ".") {
+                     format = "all", dir = ".", force = TRUE) {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
@@ -55,8 +56,10 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           
           setwd(dir)
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
-          download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                               destfile = fileName, method =  "curl", extra = "-L" )
+	  if (force == TRUE | !(file.exists(fileName))) {
+            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+                                destfile = fileName, method =  "curl", extra = "-L" )
+	  }
           md5sum_file = tools::md5sum(paste0(fileName))
           if(md5sum_file != md5sums[i]) {
             warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
