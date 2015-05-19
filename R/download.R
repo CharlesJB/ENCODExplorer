@@ -48,7 +48,7 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         hrefs = c(as.character(temp$href), as.character(temp2$href))
         md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
         
-	downloaded <- ""
+	downloaded <- character()
         for (i in seq_along(hrefs)) {
           
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
