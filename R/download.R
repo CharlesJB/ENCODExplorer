@@ -59,7 +59,6 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
             download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
                                 destfile = fileName, method =  "curl", extra = "-L" )
 	  }
-	  downloaded <- c(downloaded, fileName)
           if(md5sum_file != md5sums[i]) {
             warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
             NULL
@@ -67,6 +66,7 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           else
           {
             print(paste0("Success downloading the file : ", fileName))
+	    downloaded <- c(downloaded, fileName)
           }
         }
 	downloaded
