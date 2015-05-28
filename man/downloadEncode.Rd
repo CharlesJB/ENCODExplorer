@@ -21,7 +21,8 @@ and dataset metadata.}
 \item{dir}{the name of the directory where the downloaded file will be saved.
 Default = current directory}
 
-\item{force}{Download file is it already exists? Default: TRUE.}
+\item{force}{Download file is it already exists and md5sums is valid?
+             Default: TRUE.}
 }
 \value{
 The downloaded file names, if download worked correctly.
