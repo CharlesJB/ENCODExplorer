@@ -16,7 +16,8 @@
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved.
 #' Default = current directory
-#' @param force Download file is it already exists? Default: TRUE.
+#' @param force Download file is it already exists and md5sums is valid?
+#'              Default: TRUE.
 #'
 #' @return The downloaded file names, if download worked correctly.
 #' @examples
@@ -53,12 +54,12 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
 	  fileName <- paste(dir, fileName, sep = "/")
-	  if (force == TRUE | !(file.exists(fileName))) {
+          md5sum_file = tools::md5sum(paste0(fileName))
+	  if (force == TRUE | !(file.exists(fileName)) || md5sum_file != md5sums[i]) {
             download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
                                 destfile = fileName, method =  "curl", extra = "-L" )
 	  }
 	  downloaded <- c(downloaded, fileName)
-          md5sum_file = tools::md5sum(paste0(fileName))
           if(md5sum_file != md5sums[i]) {
             warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
             NULL
