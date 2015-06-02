@@ -94,7 +94,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 export_ENCODEdb_matrix <- function(database_filename) {
   T2 = Sys.time()
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, e.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
+  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, f.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
   query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, f.status as file_status, d.related_files, f.href, f.md5sum from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
   
   rs <- RSQLite::dbSendQuery(con, query_exp)
@@ -107,73 +107,81 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   ############################ REQUETES SECONDAIRES ############################ 
   
-  organism  = c()
-  treatment = c()
-  biological_replicate_number = c()
-  technical_replicate_number = c()
+  # pre-fetch the tables
+  qry <- "select library, technical_replicate_number, biological_replicate_number, id from replicate"
+  tbl_replicate<- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
+  RSQLite::dbClearResult(con)
+  qry <- "select organism, id from biosample"
+  tbl_biosample <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
+  RSQLite::dbClearResult(con)
+  qry <- "select biosample, treatments, id from library"
+  tbl_library <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
+  RSQLite::dbClearResult(con)
+  qry <- "select scientific_name as organism, id from organism"
+  tbl_organism <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
+  RSQLite::dbClearResult(con)
+  qry <- "select treatment_term_name, id from treatment"
+  tbl_treatment <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
+  RSQLite::dbClearResult(con)
+
+  # Initialize empty vectors
+  len <- length(encode_exp$replicate_list)
+  organism <- character(len)
+  treatment <- character(len)
+  technical_replicate_number <- integer(len)
+  biological_replicate_number <- integer(len)
   
-  for(replicate in encode_exp$replicate_list) {
-    if(!is.na(replicate)) {
+  for (k in seq_along(encode_exp$replicate_list)) {
+    id_replicate <- encode_exp$replicate_list[k]
+    if (id_replicate %in% tbl_replicate$id & !is.na(id_replicate)) {
       
       ### GET library to get ORGANISM and TREATMENT
-      query_lib = paste0("select library as lib from replicate where id=\"",replicate,"\"")
-      rs <- RSQLite::dbSendQuery(con, query_lib)
-      res <- RSQLite::dbFetch(rs, n = -1)
-      RSQLite::dbClearResult(rs)
-      
+      id_library <- tbl_replicate$library[tbl_replicate$id == id_replicate]
+
       ## if there is no library, there is no way to get the organism neither the treatment infos 
-      if(length(res$lib) == 0) {
-        organism = c(organism,NA)
-        treatment = c(treatment,NA)
-      }
-      else
-      {
-        rep.library = res$lib
+      if (is.na(id_library)) {
+        organism[k] <- NA
+        treatment[k] <- NA
+      } else {
+	id_biosample <- tbl_library$biosample[tbl_library$id == id_library]
+
         ### GET ORGANISM 
-        query_org = paste0("select o.scientific_name as organism from organism as o where id= (select organism from biosample where id=(select biosample from library where id=\"",rep.library,"\"));")
-        rs <- RSQLite::dbSendQuery(con, query_org)
-        res2 <- RSQLite::dbFetch(rs, n = -1)
-        RSQLite::dbClearResult(rs)
-        
-        if(length(res2$organism) == 0) {
-          organism = c(organism,NA)
-        }
-        else
-        {
-          organism = c(organism,res2$organism)
-        }
+	if (is.na(id_biosample) | ! id_biosample %in% tbl_biosample$id) {
+	  organism[k] <- NA
+	} else {
+	  id_organism <- tbl_biosample$organism[tbl_biosample$id == id_biosample]
+	  organism[k] <- tbl_organism$organism[tbl_organism$id == id_organism]
+	}
         
         ### GET TREATMENT 
-        query_treat = paste0("select treatment_term_name from treatment where id = (select treatments from library where id=\"",rep.library,"\");")
-        rs <- RSQLite::dbSendQuery(con, query_treat)
-        res3 <- RSQLite::dbFetch(rs, n = -1)
-        RSQLite::dbClearResult(rs)
+	id_treatment <- tbl_library$treatments[tbl_library$id == id_library]
         
-        if(length(res3$treatment_term_name) == 0) {
-          treatment = c(treatment,NA)
-        }
-        else
-        {
-          treatment = c(treatment,res3$treatment_term_name)
+	if (is.na(id_treatment)) {
+	  treatment[k] <- NA
+        } else {
+          j <- tbl_treatment$id == id_treatment
+	  if (grepl(";", id_treatment)) {
+	    id_treatment <- unlist(strsplit(id_treatment, ";"))
+	    j <- do.call("|", lapply(id_treatment, function(x) {
+	      tbl_treatment$id == x}))
+	  }
+	  stopifnot(sum(j) >= 1)
+	  if (sum(j) > 1) {
+	    treatment[k] <- paste(tbl_treatment$treatment_term_name[j], collapse = ";")
+	  } else {
+	    treatment[k] <- tbl_treatment$treatment_term_name[j]
+	  }
         }
       }
       ### GET REPLICATE INFOS 
-      query_rep = paste0("select technical_replicate_number,biological_replicate_number from replicate where id=\"",replicate,"\";")
-      rs <- RSQLite::dbSendQuery(con, query_rep)
-      res4 <- RSQLite::dbFetch(rs, n = -1)
-      RSQLite::dbClearResult(rs)
-      technical_replicate_number = 
-        c(technical_replicate_number,res4$technical_replicate_number)
-      biological_replicate_number = 
-        c(biological_replicate_number,res4$biological_replicate_number)
-      
+      j <- tbl_replicate$id == id_replicate
+      technical_replicate_number[k] <- tbl_replicate$technical_replicate_number[j]
+      biological_replicate_number[k] <- tbl_replicate$biological_replicate_number[j]
     } else {
-      
-      organism = c(organism,NA)
-      treatment = c(treatment,NA) 
-      technical_replicate_number = c(technical_replicate_number,NA)
-      biological_replicate_number = c(biological_replicate_number,NA)
-      
+      organism[k] <- NA
+      treatment[k] <- NA
+      technical_replicate_number[k] <- NA
+      biological_replicate_number[k] <- NA
     }
   }
   encode_exp = cbind(encode_exp, organism, treatment, 
