@@ -57,17 +57,17 @@ test.argument_consistency_dir <- function() {
 # check download file
 
 test.download_small_file <- function() {
-  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODExplorer"))  
-  checkTrue(file.exists(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer")), 
-            msg = "the file ENCFF001VCK.broadPeak.gz is missing")
-  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))
+  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed", dir = system.file("extdata/", package = "ENCODExplorer"))
+  checkTrue(file.exists(system.file("extdata/ENCFF001VCK.bed.gz",  package = "ENCODExplorer")),
+            msg = "the file ENCFF001VCK.bed.gz is missing")
+  file.remove(system.file("extdata/ENCFF001VCK.bed.gz",  package = "ENCODExplorer"))
 }
 
 test.md5sum <- function() {
-  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak", dir = system.file("extdata/", package = "ENCODExplorer"))
-  checkEquals(as.character(tools::md5sum(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))),
+  downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed", dir = system.file("extdata/", package = "ENCODExplorer"))
+  checkEquals(as.character(tools::md5sum(system.file("extdata/ENCFF001VCK.bed.gz",  package = "ENCODExplorer"))),
               md5sum_test_file)
-  file.remove(system.file("extdata/ENCFF001VCK.broadPeak.gz",  package = "ENCODExplorer"))
+  file.remove(system.file("extdata/ENCFF001VCK.bed.gz",  package = "ENCODExplorer"))
 }
 
 
