@@ -16,8 +16,10 @@
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved.
 #' Default = current directory
+#' @param force Download file is it already exists and md5sums is valid?
+#'              Default: TRUE.
 #'
-#' @return void
+#' @return The downloaded file names, if download worked correctly.
 #' @examples
 #'   resultSet <- queryEncode(biosample = "A549", file_format = "bam")
 #'   \dontrun{
@@ -27,16 +29,14 @@
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
-                     format = "all", dir = ".") {
+                     format = "all", dir = ".", force = TRUE) {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
     warning("You have to provide both results set and its origin to use the downloadEncode function", call. = FALSE)
     NULL
-  }
-  else
-  {
+  } else {
     if(resultOrigin %in% c("searchEncode", "queryEncode"))
     {
       encode_root = "https://www.encodeproject.org"
@@ -49,15 +49,18 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         hrefs = c(as.character(temp$href), as.character(temp2$href))
         md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
         
-        current_dir = getwd()
-        
+	downloaded <- character()
         for (i in seq_along(hrefs)) {
           
-          setwd(dir)
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
-          download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                               destfile = fileName, method =  "curl", extra = "-L" )
+	  fileName <- paste(dir, fileName, sep = "/")
           md5sum_file = tools::md5sum(paste0(fileName))
+	  if (force == TRUE | !(file.exists(fileName)) |
+		  (file.exists(fileName) & md5sum_file != md5sums[i])) {
+            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+                                destfile = fileName, method =  "curl", extra = "-L" )
+            md5sum_file = tools::md5sum(paste0(fileName))
+	  }
           if(md5sum_file != md5sums[i]) {
             warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
             NULL
@@ -65,20 +68,18 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           else
           {
             print(paste0("Success downloading the file : ", fileName))
+	    downloaded <- c(downloaded, fileName)
           }
         }
-        
-        setwd(current_dir)
+	downloaded
       }
       else
       {
         warning(paste0("Can't write in ", dir), call. = FALSE)
         NULL
       }
-    }
+    } else {
     # origin farfelue 
-    else
-    {
       warning("You have to provide a valid results set origin to use the downloadEncode function : searchEncode or queryEncode", call. = FALSE)
       NULL
     }

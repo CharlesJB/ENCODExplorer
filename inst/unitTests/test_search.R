@@ -1,4 +1,3 @@
-
 if(FALSE) {
   library( "RUnit" )
   library( "ENCODExplorer" )
@@ -23,12 +22,10 @@ test.ret_content <- function() {
 }
 
 test.ret_warning <- function() {
-  searchTerm = "AABBCC"
+  searchTerm = "ASDF"
   obs = tryCatch(searchEncode(searchTerm, limit),error=function(e) e, warning=conditionMessage)
   exp = "No result found"
-  msg = "The function shouldn't return any results for the search AABBCC"
+  msg = "The function shouldn't return any results for the search ASDF"
   
   checkIdentical(obs, exp, msg)
 }
-
-
