@@ -13,7 +13,7 @@ test.ret_type <- function() {
 
 test.limit <- function() {
   checkEquals(nrow(res), limit,  
-              msg = paste0("res should be a ",limit," rows data.frame"))
+
 }
 
 test.ret_content <- function() {
