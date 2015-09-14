@@ -12,8 +12,7 @@ test.ret_type <- function() {
 }
 
 test.limit <- function() {
-  checkEquals(nrow(res), limit,  
-
+  checkEquals(nrow(res), limit)
 }
 
 test.ret_content <- function() {
