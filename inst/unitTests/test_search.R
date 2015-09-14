@@ -23,7 +23,7 @@ test.ret_content <- function() {
 }
 
 test.ret_warning <- function() {
-  searchTerm = "AABBCC"
+  searchTerm = "asdf"
   obs = tryCatch(searchEncode(searchTerm, limit),error=function(e) e, warning=conditionMessage)
   exp = "No result found"
   msg = "The function shouldn't return any results for the search AABBCC"
