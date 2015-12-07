@@ -117,6 +117,7 @@ clean_table <- function(table) {
 #' @param searchTerm a search term
 #' @param limit the maximum number of return entries, default 10. \code{limit = all}
 #' will return all the result. It can generate large results set.
+#' @param userpwd Username and password in "username:password" format.
 #'
 #' @return a \code{data.frame} corresponding Every object that matches the 
 #' search term
@@ -125,14 +126,19 @@ clean_table <- function(table) {
 #'  searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
-searchEncode <- function(searchTerm = NULL, limit = 10) {
+searchEncode <- function(searchTerm = NULL, limit = 10, userpwd = NULL) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
 
-  res <- jsonlite::fromJSON(url)
+  res <- list()
+  if (is.null(userpwd)) {
+    res <- jsonlite::fromJSON(url)
+  } else {
+    res <- jsonlite::fromJSON(getURL(url, userpwd = userpwd))
+  }
   if (res[["notification"]] != "Success") {
     warning("No result found", call. = TRUE)
     r = data.frame()
