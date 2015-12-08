@@ -55,7 +55,8 @@ clean_table <- function(table) {
       if (all(sapply(column, length) == 0)) {
         column <- NULL
       } else if (column_name == "@type") {
-        column <- NULL
+        column <- gsub("_Item", "", vapply(column, function(x) paste(x, collapse = "_"),
+										   character(1)))
         # List of character vector
       } else if (all(sapply(column, class) == "character")) {
         if (all(sapply(column, length) <= 1)) {
@@ -151,7 +152,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, username = NULL, passwor
   }
   
   search_results = clean_table(r)
-  print(paste0("results : ",length(unique(search_results$accession)), " entries"))
+  print(paste0("results : ", nrow(search_results), " entries"))
   search_results
 }
 
