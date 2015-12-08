@@ -6,6 +6,7 @@
 #'   found, returns an empty \code{data.frame}
 #'   
 #' @import jsonlite
+#' @import jsonlite
 extract_table <- function(type) {
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object&format=json")
@@ -115,18 +116,21 @@ clean_table <- function(table) {
 #' This function simulates a basic query on ENCODE website 
 #'
 #' @param searchTerm a search term
-#' @param limit the maximum number of return entries, default 10. \code{limit = all}
+#' @param limit the maximum number of return entries, default 10. \code{limit = "all"}
 #' will return all the result. It can generate large results set.
-#' @param userpwd Username and password in "username:password" format.
+#' @param username username
+#' @param password password
 #'
-#' @return a \code{data.frame} corresponding Every object that matches the 
+#' @return a \code{data.frame} corresponding every object that matches the 
 #' search term
 #'
 #' @examples
 #'  searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
+#' @import httr
 #' @export
-searchEncode <- function(searchTerm = NULL, limit = 10, userpwd = NULL) {
+searchEncode <- function(searchTerm = NULL, limit = 10, username = NULL, password = NULL) {
+  stopifnot((!is.null(username) & !is.null(password)) | (is.null(password) & is.null(username)))
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
@@ -134,10 +138,10 @@ searchEncode <- function(searchTerm = NULL, limit = 10, userpwd = NULL) {
   url <- paste0(url, filters)
 
   res <- list()
-  if (is.null(userpwd)) {
-    res <- jsonlite::fromJSON(url)
+  if (is.null(username)) {
+    res <- jsonlite::fromJSON(content(httr::GET(url), as = "text"))
   } else {
-    res <- jsonlite::fromJSON(getURL(url, userpwd = userpwd))
+    res <- jsonlite::fromJSON(content(httr::GET(url, authenticate(username, password)), as = "text"))
   }
   if (res[["notification"]] != "Success") {
     warning("No result found", call. = TRUE)
@@ -150,7 +154,6 @@ searchEncode <- function(searchTerm = NULL, limit = 10, userpwd = NULL) {
   print(paste0("results : ",length(unique(search_results$accession)), " entries"))
   search_results
 }
-
 
 #' Extract the schemas from ENCODE's github
 #'
