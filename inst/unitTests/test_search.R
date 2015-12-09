@@ -19,12 +19,3 @@ test.ret_content <- function() {
   checkTrue(expr = !is.null(res$accession), 
             msg = "res should be get an accession entry")
 }
-
-test.ret_warning <- function() {
-  searchTerm = "ASDF"
-  obs = tryCatch(searchEncode(searchTerm, limit),error=function(e) e, warning=conditionMessage)
-  exp = "No result found"
-  msg = "The function shouldn't return any results for the search ASDF"
-  
-  checkIdentical(obs, exp, msg)
-}
