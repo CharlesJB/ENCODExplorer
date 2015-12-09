@@ -1,13 +1,16 @@
 #' Extract a data.frame corresponding to a table in ENCODE database
 #'
 #' @param type The type of table to extract from ENCODE rest api.
+#' @param username username
+#' @param password password
 #'
 #' @return a \code{data.frame} corresponding to the table asked. If no match is
 #'   found, returns an empty \code{data.frame}
 #'   
 #' @import jsonlite
 #' @import RCurl
-extract_table <- function(type) {
+extract_table <- function(type, username = NULL, password = NULL) {
+  stopifnot((!is.null(username) & !is.null(password)) | (is.null(password) & is.null(username)))
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object&format=json")
   
@@ -15,7 +18,12 @@ extract_table <- function(type) {
   url <- paste0(url, type, filters)
   
   if (RCurl::url.exists(url)) {
-	  res <- jsonlite::fromJSON(url)
+	  res <- list()
+	  if (is.null(username)) {
+		res <- jsonlite::fromJSON(content(httr::GET(url), as = "text"))
+	  } else {
+		res <- jsonlite::fromJSON(content(httr::GET(url, authenticate(username, password)), as = "text"))
+	  }
 	  if (res[["notification"]] != "Success") {
 		data.frame()
 	  } else {

@@ -11,6 +11,10 @@
 #' @param overwrite Should tables already present in database be overwrited?
 #' Default: \code{FALSE}.
 #' 
+#' @param username username
+#'
+#' @param password password
+#'
 #' @examples
 #' prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
 #' file.remove("platform.sql")
@@ -21,7 +25,9 @@
 #' @import jsonlite
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
-                             types = get_encode_types(), overwrite = FALSE) {
+                             types = get_encode_types(), overwrite = FALSE,
+							 username = NULL, password = NULL) {
+  stopifnot((!is.null(username) & !is.null(password)) | (is.null(password) & is.null(username)))
   
   if(file.exists(database_filename)) {
     warning(paste0("The file ", database_filename, " already exists. Please delete it before re-run the data preparation"))
@@ -33,7 +39,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
     # Extract the tables from the ENCODE rest api
     extract_type <- function(type) {
       
-      table <- extract_table(type)
+      table <- extract_table(type, username, password)
       table <- clean_table(table)
       
       if (all(dim(table) > 0)) {
