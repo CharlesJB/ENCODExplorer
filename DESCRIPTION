@@ -26,6 +26,8 @@ Imports:
     tools,
     jsonlite,
     RSQLite,
+    Hmisc,
+    RCurl,
     httr
 Suggests:
     RUnit,BiocGenerics,knitr,
