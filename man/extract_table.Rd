@@ -4,10 +4,14 @@
 \alias{extract_table}
 \title{Extract a data.frame corresponding to a table in ENCODE database}
 \usage{
-extract_table(type)
+extract_table(type, username = NULL, password = NULL)
 }
 \arguments{
 \item{type}{The type of table to extract from ENCODE rest api.}
+
+\item{username}{username}
+
+\item{password}{password}
 }
 \value{
 a \code{data.frame} corresponding to the table asked. If no match is

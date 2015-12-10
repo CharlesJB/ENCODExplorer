@@ -5,7 +5,8 @@
 \title{Create the RSQLite databse for the tables in ENCODE}
 \usage{
 prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
-  types = get_encode_types(), overwrite = FALSE)
+  types = get_encode_types(), overwrite = FALSE, username = NULL,
+  password = NULL)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.
@@ -15,6 +16,10 @@ Default: \code{ENCODEdb.sqlite}.}
 
 \item{overwrite}{Should tables already present in database be overwrited?
 Default: \code{FALSE}.}
+
+\item{username}{username}
+
+\item{password}{password}
 }
 \value{
 is a \code{list} with selected tables from ENCODE that were used to
