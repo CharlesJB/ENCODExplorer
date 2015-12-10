@@ -5,7 +5,8 @@
 \title{Download files from the Internet.}
 \usage{
 downloadEncode(df = NULL, resultSet = NULL, resultOrigin = NULL,
-  format = "all", dir = ".", force = TRUE)
+  format = "all", dir = ".", force = TRUE, username = NULL,
+  password = NULL)
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE experiment
@@ -23,6 +24,10 @@ Default = current directory}
 
 \item{force}{Download file is it already exists and md5sums is valid?
 Default: TRUE.}
+
+\item{username}{username}
+
+\item{password}{password}
 }
 \value{
 The downloaded file names, if download worked correctly.

@@ -18,6 +18,8 @@
 #' Default = current directory
 #' @param force Download file is it already exists and md5sums is valid?
 #'              Default: TRUE.
+#' @param username username
+#' @param password password
 #'
 #' @return The downloaded file names, if download worked correctly.
 #' @examples
@@ -29,8 +31,9 @@
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
-                     format = "all", dir = ".", force = TRUE) {
-  
+                     format = "all", dir = ".", force = TRUE, username = NULL,
+					 password = NULL) {
+  stopifnot((!is.null(username) & !is.null(password)) | (is.null(password) & is.null(username)))
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
@@ -57,8 +60,19 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           md5sum_file = tools::md5sum(paste0(fileName))
 	  if (force == TRUE | !(file.exists(fileName)) |
 		  (file.exists(fileName) & md5sum_file != md5sums[i])) {
-            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                                destfile = fileName, method =  "curl", extra = "-L" )
+		     cmd <- ""
+		     if (!is.null(username)) {
+		       cmd <- paste0("curl -L -o ", fileName, " ")
+			   cmd <- paste0(cmd, "-u", username, ":", password, " ")
+			   cmd <- paste0(cmd, encode_root, hrefs[i])
+			 } else {
+		       cmd <- paste0("curl -L -o ", fileName, " ")
+			   cmd <- paste0(cmd, encode_root, hrefs[i])
+			 }
+			 message(cmd)
+			 system(cmd)
+#            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+#                                destfile = fileName, method =  "curl", extra = "-L" )
             md5sum_file = tools::md5sum(paste0(fileName))
 	  }
           if(md5sum_file != md5sums[i]) {
