@@ -6,6 +6,7 @@
 #'   found, returns an empty \code{data.frame}
 #'   
 #' @import jsonlite
+#' @import RCurl
 extract_table <- function(type) {
   filters = "&limit=all"
   filters = paste0(filters, "&frame=object&format=json")
@@ -13,12 +14,16 @@ extract_table <- function(type) {
   url <- "https://www.encodeproject.org/search/?type="
   url <- paste0(url, type, filters)
   
-  res <- jsonlite::fromJSON(url)
-  if (res[["notification"]] != "Success") {
-    data.frame()
-  } else {
-    res[["@graph"]]
-  }
+  if (RCurl::url.exists(url)) {
+	  res <- jsonlite::fromJSON(url)
+	  if (res[["notification"]] != "Success") {
+		data.frame()
+	  } else {
+		res[["@graph"]]
+	  }
+   } else {
+	 data.frame()
+   }
 }
 
 #' Clean a data.frame that was produced by extract_table
@@ -55,6 +60,14 @@ clean_table <- function(table) {
         column <- NULL
       } else if (column_name == "@type") {
         column <- NULL
+      } else if (column_name == "related_files") {
+          column <- sapply(column, function(x) {
+            if (class(x) == "character" & length(x) > 0) {
+              paste(x, collapse = ";")
+            } else {
+              NA
+            }
+          })
         # List of character vector
       } else if (all(sapply(column, class) == "character")) {
         if (all(sapply(column, length) <= 1)) {
