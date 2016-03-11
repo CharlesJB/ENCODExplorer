@@ -218,26 +218,3 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   list(experiment = encode_exp, dataset = encode_ds)
 }
-
-
-
-#' A list of known tables from ENCODE database.
-#'
-#' The type (table) names are extracted from the schema list from ENCODE-DCC
-#' github repository:
-#'   https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
-#'
-#' The data is extracted using the github api:
-#'   https://developer.github.com/guides/getting-started/
-#'
-#' @return a vector of \code{character} with the names of the known tables in
-#'   the ENCODE database.
-#'
-#' @import tools
-get_encode_types <- function() {
-  encode_api_url <- "https://api.github.com/repos"
-  encoded_repo <- "encode-dcc/encoded"
-  schemas <- "src/encoded/schemas"
-  url <- paste(encode_api_url, encoded_repo, "contents", schemas, sep = "/")
-  tools::file_path_sans_ext(jsonlite::fromJSON(url)$name)
-}
