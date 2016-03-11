@@ -2,7 +2,7 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 1.3.1
+Version: 1.3.2
 Date: 2015-02-25
 Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
     Audrey Lemacon <lemacon.audrey@ulaval.ca> and Arnaud Droit
