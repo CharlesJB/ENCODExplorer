@@ -167,28 +167,49 @@ searchEncode <- function(searchTerm = NULL, limit = 10) {
 #' The data is extracted using the github api:
 #'   https://developer.github.com/guides/getting-started/
 #'
-#' The data is then converted in \code{data.frame} using the \code{jsonlite}
-#' package.
+#' The data is then downloaded using the \code{jsonlite} package.
 #'
-#' @return a \code{list} of JSON converted in \code{data.frame}.
+#' @return a \code{list} of schemas.
 #' 
 #' @import jsonlite
 get_schemas <- function() {
   # 1. Extract the description of the schemas
-  encode_api_url <- "https://api.github.com/repos"
-  encoded_repo <- "encode-dcc/encoded"
-  schema_path <- "src/encoded/schemas"
-  url <- paste(encode_api_url, encoded_repo, "contents", schema_path, sep = "/")
-  schema_description <- jsonlite::fromJSON(url)
+  types <- get_encode_types()
+  schema_names <- paste0(types, ".json")
+  names(schema_names) <- types
   
   # 2. Fetch all the JSON files
   raw_git_url <- "https://raw.githubusercontent.com"
+  encoded_repo <- "encode-dcc/encoded"
+  schema_path <- "src/encoded/schemas"
   
   base_url <- paste(raw_git_url, encoded_repo, "master", schema_path, sep = "/")
-  urls <- paste(base_url, schema_description$name, sep = "/")
+  urls <- paste(base_url, schema_names, sep = "/")
   # We need to suppress warnings:
   #   Unexpected Content-Type: text/plain; charset=utf-8
   schema_json <- suppressWarnings(lapply(urls, jsonlite::fromJSON))
-  names(schema_json) <- get_encode_types()
   schema_json
+}
+
+#' A list of known tables from ENCODE database.
+#'
+#' The type (table) names are extracted from the schema list from ENCODE-DCC
+#' github repository:
+#'   https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'
+#' The data is extracted using the github api:
+#'   https://developer.github.com/guides/getting-started/
+#'
+#' @return a vector of \code{character} with the names of the known tables in
+#'   the ENCODE database.
+#'
+#' @import tools
+get_encode_types <- function() {
+  encode_api_url <- "https://api.github.com/repos"
+  encoded_repo <- "encode-dcc/encoded"
+  schemas <- "src/encoded/schemas"
+  url <- paste(encode_api_url, encoded_repo, "contents", schemas, sep = "/")
+  schema_names <- jsonlite::fromJSON(url)$name
+  schema_names <- schema_names[grepl(".json$", schema_names)]
+  tools::file_path_sans_ext(schema_names)
 }
