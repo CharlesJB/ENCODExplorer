@@ -13,17 +13,31 @@ extract_table <- function(type) {
   
   url <- "https://www.encodeproject.org/search/?type="
   url <- paste0(url, type, filters)
+  results <- data.frame()
   
   if (RCurl::url.exists(url)) {
-	  res <- jsonlite::fromJSON(url)
-	  if (res[["notification"]] != "Success") {
-		data.frame()
-	  } else {
-		res[["@graph"]]
-	  }
-   } else {
-	 data.frame()
-   }
+    res <- jsonlite::fromJSON(url)
+    if (res[["notification"]] == "Success") {
+      results <- res[["@graph"]]
+    }
+  } else {
+    
+    temp <- strsplit(type, split = '')[[1]]
+    utype <- paste(c(toupper(temp[1]), temp[-1]), collapse = '')
+    url <- "https://www.encodeproject.org/search/?type="
+    url <- paste0(url, utype, filters)
+    
+    if (RCurl::url.exists(url)) {
+      res <- jsonlite::fromJSON(url)
+      if (res[["notification"]] == "Success") {
+        results <- res[["@graph"]]
+      }
+    } else {
+      print(paste(type, 'not found at all'))
+    }
+  }
+  
+  return(results)
 }
 
 #' Clean a data.frame that was produced by extract_table
@@ -92,7 +106,7 @@ clean_table <- function(table) {
         # List of data.frames
       } else if (all(sapply(column, class) == "data.frame")) {
         if (all(sapply(column, nrow) <= 1) &
-              all(sapply(column, ncol) <= 1)) {
+            all(sapply(column, ncol) <= 1)) {
           column <- sapply(column, function(x) {
             if (length(x) > 0) {
               x[[1,1]]
@@ -144,8 +158,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10) {
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
-
-  res <- jsonlite::fromJSON(url)
+  
   if (res[["notification"]] != "Success") {
     warning("No result found", call. = TRUE)
     r = data.frame()
