@@ -24,6 +24,7 @@
 #' ("released", "revoked", "all"). Default "released"
 #' @param  status character string to select the dataset/experiment status
 #' @param  fixed logical. If TRUE, pattern is a string to be matched as it is.
+#' @param  quiet logical enables to switch off the result summary information when setting at TRUE.
 #'
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
@@ -33,14 +34,15 @@
 #'
 #' @export
 queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL,
-                  dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
-                  lab = NULL, organism = NULL, target = NULL, treatment = NULL,
-                  file_status = "released", status = "released", fixed = TRUE) {
+                        dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
+                        lab = NULL, organism = NULL, target = NULL, treatment = NULL,
+                        file_status = "released", status = "released", fixed = TRUE, quiet = FALSE) {
+  
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(set_accession) && is.null(assay) && is.null(biosample) && is.null(dataset_accession) &&
-       is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
-       is.null(target) && is.null(treatment))
+     is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
+     is.null(target) && is.null(treatment))
   {
     warning("Please provide at least one valid criteria", call. = FALSE)
     NULL
@@ -265,13 +267,19 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
     
     
     if((nrow(s1) + nrow(s2)) == 0) {
+      print(ac)
       warning("No result found. You can try the <searchEncode> function or set the fixed option to FALSE", call. = FALSE)
       NULL
     }
     else
     {
       query_results = list(experiment = s1, dataset = s2)
-      print(paste0("experiment results : ",nrow(query_results$experiment)," files in ",length(unique(query_results$experiment$accession))," experiments ; dataset results : ",nrow(query_results$dataset), " files"))
+      if(!quiet) 
+        cat(paste0("experiment results : ",
+                   nrow(query_results$experiment),
+                   " files / ",length(unique(query_results$experiment$accession)),
+                   " experiments ; dataset results : ",nrow(query_results$dataset),
+                   " files / ",length(unique(query_results$dataset$accession))," experiments\n"))
       query_results
     }
     
@@ -287,3 +295,46 @@ query_transform <- function(my.term) {
   
   my.term.4.grep
 }
+
+searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
+  
+  if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
+  
+  res = list(experiment = NULL, 
+             dataset = NULL)
+  
+  if(nrow(searchResults) > 0){
+    ids <- as.character(searchResults$id)
+    ids <- ids[grepl(x = ids, pattern = '/experiments/')]
+    accessions <- gsub(x = ids, pattern = '/experiments/([A-Z0-9]+)/', replacement = "\\1")
+    
+    
+    for(i in seq_along(accessions)){
+      
+      accession <- accessions[i]
+      
+      r <- queryEncode(df = encode_df, set_accession = accession, fixed = TRUE, quiet = quiet)
+      if(!is.null(r)){
+        
+        if(!is.null(res$experiment))
+          res$experiment <- rbind(res$experiment, r$experiment)
+        else
+          res$experiment <- r$experiment
+        
+        if(!is.null(res$dataset))
+          res$dataset <- rbind(res$dataset, r$dataset)
+        else
+          res$dataset <- r$dataset
+      }
+    }
+  }
+  
+  if(!quiet) 
+    cat(paste0("Total : experiment results : ",
+               nrow(res$experiment),
+               " files / ",length(unique(res$experiment$accession)),
+               " experiments ; dataset results : ",nrow(res$dataset),
+               " files / ",length(unique(res$dataset$accession))," experiments\n"))
+  return(res)
+}
+
