@@ -143,6 +143,7 @@ clean_table <- function(table) {
 #'
 #' @param searchTerm a search term
 #' @param limit the maximum number of return entries, default 10. \code{limit = all}
+#' @param quiet logical value enables to switch off the result summary information when setting at TRUE.
 #' will return all the result. It can generate large results set.
 #'
 #' @return a \code{data.frame} corresponding Every object that matches the 
@@ -152,22 +153,24 @@ clean_table <- function(table) {
 #'  searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
-searchEncode <- function(searchTerm = NULL, limit = 10) {
+searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
-  
+  r = data.frame()
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
   
-  if (res[["notification"]] != "Success") {
-    warning("No result found", call. = TRUE)
-    r = data.frame()
-  } else {
-    r = res[["@graph"]]
+  if (RCurl::url.exists(url)) {
+    res <- jsonlite::fromJSON(url)
+    if (res[["notification"]] == "Success") {
+      r <- res[["@graph"]]
+    } else {
+      warning("No result found", call. = TRUE)
+    }
   }
   
   search_results = clean_table(r)
-  print(paste0("results : ",length(unique(search_results$accession)), " entries"))
+  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)), " entries\n"))
   search_results
 }
 
