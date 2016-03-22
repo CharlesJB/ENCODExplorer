@@ -94,8 +94,8 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 export_ENCODEdb_matrix <- function(database_filename) {
   T2 = Sys.time()
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, f.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum FROM experiment as e, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id;"
-  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, f.status as file_status, d.related_files, f.href, f.md5sum from dataset as d, file as f, lab as l where f.dataset=d.id AND f.lab=l.id;"
+  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, f.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum, award.project FROM experiment as e, award, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id AND e.award = award.id;"
+  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, f.status as file_status, d.related_files, f.href, f.md5sum, award.project from dataset as d, file as f, lab as l, award where f.dataset=d.id AND f.lab=l.id AND d.award = award.id;"
   
   rs <- RSQLite::dbSendQuery(con, query_exp)
   encode_exp <- RSQLite::dbFetch(rs, n = -1)
@@ -123,7 +123,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   qry <- "select treatment_term_name, id from treatment"
   tbl_treatment <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
   RSQLite::dbClearResult(con)
-
+  
   # Initialize empty vectors
   len <- length(encode_exp$replicate_list)
   organism <- character(len)
@@ -137,40 +137,40 @@ export_ENCODEdb_matrix <- function(database_filename) {
       
       ### GET library to get ORGANISM and TREATMENT
       id_library <- tbl_replicate$library[tbl_replicate$id == id_replicate]
-
+      
       ## if there is no library, there is no way to get the organism neither the treatment infos 
       if (is.na(id_library)) {
         organism[k] <- NA
         treatment[k] <- NA
       } else {
-	id_biosample <- tbl_library$biosample[tbl_library$id == id_library]
-
+        id_biosample <- tbl_library$biosample[tbl_library$id == id_library]
+        
         ### GET ORGANISM 
-	if (is.na(id_biosample) | ! id_biosample %in% tbl_biosample$id) {
-	  organism[k] <- NA
-	} else {
-	  id_organism <- tbl_biosample$organism[tbl_biosample$id == id_biosample]
-	  organism[k] <- tbl_organism$organism[tbl_organism$id == id_organism]
-	}
+        if (is.na(id_biosample) | ! id_biosample %in% tbl_biosample$id) {
+          organism[k] <- NA
+        } else {
+          id_organism <- tbl_biosample$organism[tbl_biosample$id == id_biosample]
+          organism[k] <- tbl_organism$organism[tbl_organism$id == id_organism]
+        }
         
         ### GET TREATMENT 
-	id_treatment <- tbl_library$treatments[tbl_library$id == id_library]
+        id_treatment <- tbl_library$treatments[tbl_library$id == id_library]
         
-	if (is.na(id_treatment)) {
-	  treatment[k] <- NA
+        if (is.na(id_treatment)) {
+          treatment[k] <- NA
         } else {
           j <- tbl_treatment$id == id_treatment
-	  if (grepl(";", id_treatment)) {
-	    id_treatment <- unlist(strsplit(id_treatment, ";"))
-	    j <- do.call("|", lapply(id_treatment, function(x) {
-	      tbl_treatment$id == x}))
-	  }
-	  stopifnot(sum(j) >= 1)
-	  if (sum(j) > 1) {
-	    treatment[k] <- paste(tbl_treatment$treatment_term_name[j], collapse = ";")
-	  } else {
-	    treatment[k] <- tbl_treatment$treatment_term_name[j]
-	  }
+          if (grepl(";", id_treatment)) {
+            id_treatment <- unlist(strsplit(id_treatment, ";"))
+            j <- do.call("|", lapply(id_treatment, function(x) {
+              tbl_treatment$id == x}))
+          }
+          stopifnot(sum(j) >= 1)
+          if (sum(j) > 1) {
+            treatment[k] <- paste(tbl_treatment$treatment_term_name[j], collapse = ";")
+          } else {
+            treatment[k] <- tbl_treatment$treatment_term_name[j]
+          }
         }
       }
       ### GET REPLICATE INFOS 
@@ -184,6 +184,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
       biological_replicate_number[k] <- NA
     }
   }
+  
   encode_exp = cbind(encode_exp, organism, treatment, 
                      technical_replicate_number, biological_replicate_number)
   

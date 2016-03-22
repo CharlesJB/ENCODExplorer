@@ -35,14 +35,14 @@
 #' @export
 queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL,
                         dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
-                        lab = NULL, organism = NULL, target = NULL, treatment = NULL,
+                        lab = NULL, organism = NULL, target = NULL, treatment = NULL, project = NULL,
                         file_status = "released", status = "released", fixed = TRUE, quiet = FALSE) {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
   if(is.null(set_accession) && is.null(assay) && is.null(biosample) && is.null(dataset_accession) &&
      is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
-     is.null(target) && is.null(treatment))
+     is.null(target) && is.null(treatment) && is.null(project))
   {
     warning("Please provide at least one valid criteria", call. = FALSE)
     NULL
@@ -63,6 +63,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
     tr = treatment
     es = status
     fs = file_status
+    pr = project
     
     if(fixed) {
       
@@ -124,6 +125,11 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
       if(es != "all") {
         s1 <- subset(s1, s1$status == es)
         s2 <- subset(s2, s2$status == es)
+      }
+      
+      if(pr != "all") {
+        s1 <- subset(s1, s1$project == pr)
+        s2 <- subset(s2, s2$project == pr)
       }
       
     } else {
@@ -262,6 +268,16 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
         s2 = s2[select.entries,]
       }
       
+      if(pr != "all") {
+        query.transfo = query_transform(pr)
+        select.entries = grepl(x = s1$project, pattern = query.transfo, 
+                               ignore.case =TRUE, perl =TRUE)
+        s1 = s1[select.entries,]
+        
+        select.entries = grepl(x = s2$project, pattern = query.transfo, 
+                               ignore.case =TRUE, perl =TRUE)
+        s2 = s2[select.entries,]
+      }
     }
     
     
