@@ -13,17 +13,31 @@ extract_table <- function(type) {
   
   url <- "https://www.encodeproject.org/search/?type="
   url <- paste0(url, type, filters)
+  results <- data.frame()
   
   if (RCurl::url.exists(url)) {
-	  res <- jsonlite::fromJSON(url)
-	  if (res[["notification"]] != "Success") {
-		data.frame()
-	  } else {
-		res[["@graph"]]
-	  }
-   } else {
-	 data.frame()
-   }
+    res <- jsonlite::fromJSON(url)
+    if (res[["notification"]] == "Success") {
+      results <- res[["@graph"]]
+    }
+  } else {
+    
+    temp <- strsplit(type, split = '')[[1]]
+    utype <- paste(c(toupper(temp[1]), temp[-1]), collapse = '')
+    url <- "https://www.encodeproject.org/search/?type="
+    url <- paste0(url, utype, filters)
+    
+    if (RCurl::url.exists(url)) {
+      res <- jsonlite::fromJSON(url)
+      if (res[["notification"]] == "Success") {
+        results <- res[["@graph"]]
+      }
+    } else {
+      print(paste(type, 'not found at all'))
+    }
+  }
+  
+  return(results)
 }
 
 #' Clean a data.frame that was produced by extract_table
@@ -92,7 +106,7 @@ clean_table <- function(table) {
         # List of data.frames
       } else if (all(sapply(column, class) == "data.frame")) {
         if (all(sapply(column, nrow) <= 1) &
-              all(sapply(column, ncol) <= 1)) {
+            all(sapply(column, ncol) <= 1)) {
           column <- sapply(column, function(x) {
             if (length(x) > 0) {
               x[[1,1]]
@@ -129,6 +143,7 @@ clean_table <- function(table) {
 #'
 #' @param searchTerm a search term
 #' @param limit the maximum number of return entries, default 10. \code{limit = all}
+#' @param quiet logical value enables to switch off the result summary information when setting at TRUE.
 #' will return all the result. It can generate large results set.
 #'
 #' @return a \code{data.frame} corresponding Every object that matches the 
@@ -138,23 +153,24 @@ clean_table <- function(table) {
 #'  searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
-searchEncode <- function(searchTerm = NULL, limit = 10) {
+searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
-  
+  r = data.frame()
   filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
-
-  res <- jsonlite::fromJSON(url)
-  if (res[["notification"]] != "Success") {
-    warning("No result found", call. = TRUE)
-    r = data.frame()
-  } else {
-    r = res[["@graph"]]
+  
+  if (RCurl::url.exists(url)) {
+    res <- jsonlite::fromJSON(url)
+    if (res[["notification"]] == "Success") {
+      r <- res[["@graph"]]
+    } else {
+      warning("No result found", call. = TRUE)
+    }
   }
   
   search_results = clean_table(r)
-  print(paste0("results : ",length(unique(search_results$accession)), " entries"))
+  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)), " entries\n"))
   search_results
 }
 
