@@ -5,12 +5,14 @@
 \title{Simulate a query on ENCODE website and return the result as a 
 \code{data.frame}}
 \usage{
-searchEncode(searchTerm = NULL, limit = 10)
+searchEncode(searchTerm = NULL, limit = 10, quiet = FALSE)
 }
 \arguments{
 \item{searchTerm}{a search term}
 
-\item{limit}{the maximum number of return entries, default 10. \code{limit = all}
+\item{limit}{the maximum number of return entries, default 10. \code{limit = all}}
+
+\item{quiet}{logical value enables to switch off the result summary information when setting at TRUE.
 will return all the result. It can generate large results set.}
 }
 \value{
