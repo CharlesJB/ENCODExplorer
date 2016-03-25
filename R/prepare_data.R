@@ -240,6 +240,6 @@ get_encode_types <- function() {
   schemas <- "src/encoded/schemas"
   url <- paste(encode_api_url, encoded_repo, "contents", schemas, sep = "/")
   encode_names <- jsonlite::fromJSON(url)$name
-  encode_names <- encode_names[grepl(x = encode_names, pattern = ".json$", fixed = F)]
+  encode_names <- encode_names[grepl(x = encode_names, pattern = ".json$", fixed = FALSE)]
   tools::file_path_sans_ext(encode_names)
 }
