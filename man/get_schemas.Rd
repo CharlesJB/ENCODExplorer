@@ -7,7 +7,7 @@
 get_schemas()
 }
 \value{
-a \code{list} of JSON converted in \code{data.frame}.
+a \code{list} of schemas.
 }
 \description{
 The JSONs are fetched from:
@@ -17,7 +17,6 @@ The JSONs are fetched from:
 The data is extracted using the github api:
   https://developer.github.com/guides/getting-started/
 
-The data is then converted in \code{data.frame} using the \code{jsonlite}
-package.
+The data is then downloaded using the \code{jsonlite} package.
 }
 
