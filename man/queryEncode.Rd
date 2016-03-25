@@ -7,8 +7,8 @@
 queryEncode(df = NULL, set_accession = NULL, assay = NULL,
   biosample = NULL, dataset_accession = NULL, file_accession = NULL,
   file_format = NULL, lab = NULL, organism = NULL, target = NULL,
-  treatment = NULL, file_status = "released", status = "released",
-  fixed = TRUE)
+  treatment = NULL, project = NULL, file_status = "released",
+  status = "released", fixed = TRUE, quiet = FALSE)
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE 
@@ -34,12 +34,16 @@ experiment and dataset metadata}
 
 \item{treatment}{character string to select the treatment}
 
+\item{project}{character string to select the project}
+
 \item{file_status}{character string to select the file status 
 ("released", "revoked", "all"). Default "released"}
 
 \item{status}{character string to select the dataset/experiment status}
 
 \item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.}
+
+\item{quiet}{logical enables to switch off the result summary information when setting at TRUE.}
 }
 \value{
 a \code{list} of two \code{data.frame}s containing data about ENCODE 

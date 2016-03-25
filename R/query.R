@@ -20,6 +20,7 @@
 #' @param  organism character string to select the donor organism
 #' @param  target character string to select the experimental target
 #' @param  treatment character string to select the treatment
+#' @param  project character string to select the project
 #' @param  file_status character string to select the file status 
 #' ("released", "revoked", "all"). Default "released"
 #' @param  status character string to select the dataset/experiment status
@@ -127,7 +128,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
         s2 <- subset(s2, s2$status == es)
       }
       
-      if(pr != "all") {
+      if(!is.null(pr)) {
         s1 <- subset(s1, s1$project == pr)
         s2 <- subset(s2, s2$project == pr)
       }
@@ -268,7 +269,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
         s2 = s2[select.entries,]
       }
       
-      if(pr != "all") {
+      if(!is.null(pr)) {
         query.transfo = query_transform(pr)
         select.entries = grepl(x = s1$project, pattern = query.transfo, 
                                ignore.case =TRUE, perl =TRUE)

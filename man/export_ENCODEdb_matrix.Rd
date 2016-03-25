@@ -12,8 +12,10 @@ export_ENCODEdb_matrix(database_filename)
 Default: \code{ENCODEdb.sqlite}.}
 }
 \value{
-A \code{data.frame} containing essential informations for each file
-part of an experiment.
+a \code{list} containing two elements. The first one 'experiment' is 
+a \code{data.frame} containing essential informations for each file part of  
+an experiment ; the second one 'dataset' is a \code{data.frame} containing 
+essential informations for each file part of a dataset.
 }
 \description{
 Extract essential informations from the RSQLite databse in a \code{list} of 

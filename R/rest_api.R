@@ -83,6 +83,8 @@ clean_table <- function(table) {
             }
           })
         # List of character vector
+      } else if (column_name == "replicates") {
+	  column <- NULL
       } else if (all(sapply(column, class) == "character")) {
         if (all(sapply(column, length) <= 1)) {
           column <- sapply(column, function(x) {
