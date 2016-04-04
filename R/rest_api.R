@@ -172,6 +172,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   }
   
   search_results = clean_table(r)
+  search_results <- search_results[,order(colnames(search_results))]
   if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)), " entries\n"))
   search_results
 }
