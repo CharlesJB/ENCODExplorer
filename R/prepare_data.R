@@ -1,3 +1,5 @@
+cores <- 1
+
 #' Create the RSQLite databse for the tables in ENCODE
 #' 
 #' @return is a \code{list} with selected tables from ENCODE that were used to
@@ -80,6 +82,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #' essential informations for each file part of a dataset.
 #'
 #' @param database_filename The name of the file to save the database into.
+#' @param mc.cores The number of cores to use, i.e. at most how many child processes will be run simultaneously. Default 1
 #' Default: \code{ENCODEdb.sqlite}.
 #'
 #' @examples
@@ -89,133 +92,527 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #'     export_ENCODEdb_matrix(database_filename = database_filename)
 #'   }
 #' @import RSQLite
+#' @import parallel
 #' 
 #' @export
-export_ENCODEdb_matrix <- function(database_filename) {
-  T2 = Sys.time()
+export_ENCODEdb_matrix <- function(database_filename, mc.cores = NULL) {
+
+  T1<-Sys.time()
+  print(format(T1, "%a %b %d %X %Y"))
+  
+  if(!is.null(mc.cores))
+    cores <<- mc.cores
+  
+  Tables <- step1(database_filename = database_filename)
+  Tables$files <- step2(files = Tables$files)
+  Tables$files <- step3(files = Tables$files, awards = Tables$awards, labs = Tables$labs, platforms = Tables$platforms)
+  
+  # suppression des tables inutiles
+  Tables$awards = NULL
+  Tables$labs = NULL
+  Tables$platforms = NULL
+  
+  Tables$files <- step4(files = Tables$files, replicates = Tables$replicates, libraries = Tables$libraries, treatments = Tables$treatments)
+  
+  # suppression des tables inutiles
+  Tables$replicates = NULL
+  Tables$libraries = NULL
+  Tables$treatments = NULL
+  
+  Tables$files <- step5(files = Tables$files)
+  
+  ### les experiences seront toutes reunies par encode_df$experiment et les autres entites seront ajoutee dans dataset
+  ### split the dataframe
+  
+  not_experiments_idx <- which(!grepl(x = Tables$files$dataset, pattern = 'experiments'))
+  experiments_idx <- which(grepl(x = Tables$files$dataset, pattern = 'experiments'))
+  
+  encode_df <- list(experiment = Tables$files[experiments_idx,],
+                    dataset = Tables$files[not_experiments_idx,])
+  
+  # suppression des tables inutiles
+  Tables$files = NULL
+  
+  # creation des nouvelles colonnes
+  empty_vector <- rep(x = NA, times = nrow(encode_df$experiment))
+  encode_df$experiment <- cbind(encode_df$experiment, target = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, date_released = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, status = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, assay = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, biosample_type = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, biosample_name = empty_vector)
+  encode_df$experiment <- cbind(encode_df$experiment, controls = empty_vector)
+  
+  encode_df$experiment$target <- step6_1(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$date_released <- step6_2(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$status <- step6_3(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$assay <- step6_4(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$biosample_type <- step6_5(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$biosample_name <- step6_6(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$controls <- step6_7(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  
+  # suppression des tables inutiles
+  Tables$experiments = NULL
+  
+  encode_df$experiment <- cbind(encode_df$experiment, organism = empty_vector)
+  encode_df$experiment <- step7(encode_df$experiment, targets = Tables$targets)
+  encode_df$experiment <- step8(encode_df$experiment, targets = Tables$targets)
+  encode_df$experiment <- step9(encode_df$experiment, organisms = Tables$organisms)
+  
+  # suppression des tables
+  remove(Tables)
+  
+  Tdiff = Sys.time() - T1
+  print(paste0("Building ENCODE_DF : ",Tdiff, " min"))
+  
+  encode_df
+}
+
+step1 <- function(database_filename){
   con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  query_exp = "select e.accession as accession, target.name as target, e.possible_controls as controls, l.title as lab, e.date_released, e.status, e.assay_term_name as assay, e.biosample_type, e.biosample_term_name as biosample_name, e.assembly, f.run_type, f.accession as file_accession, f.file_format, f.status as file_status, f.paired_end, f.paired_with, f.platform, f.replicate as replicate_list, f.href, f.md5sum, award.project FROM experiment as e, award, file as f, lab as l LEFT JOIN target ON e.target = target.id where f.dataset=e.id AND f.lab=l.id AND e.award = award.id;"
-  query_ds = "select d.accession, l.title as lab, d.date_released, d.status as status, d.assembly, f.accession as file_accession, f.file_format, f.status as file_status, d.related_files, f.href, f.md5sum, award.project from dataset as d, file as f, lab as l, award where f.dataset=d.id AND f.lab=l.id AND d.award = award.id;"
   
-  rs <- RSQLite::dbSendQuery(con, query_exp)
-  encode_exp <- RSQLite::dbFetch(rs, n = -1)
+  ### Step 1 : fetch all needed data
+  cat('Step 1 : fetch all needed data\n')
+  rs <- RSQLite::dbSendQuery(con, 'select * from file;')
+  all_files <- RSQLite::dbFetch(rs, n = -1)
   RSQLite::dbClearResult(rs)
+  nrow(all_files)
   
-  rs <- RSQLite::dbSendQuery(con, query_ds)
-  encode_ds <- RSQLite::dbFetch(rs, n = -1)
+  rs <- RSQLite::dbSendQuery(con, 'select * from experiment;')
+  all_experiments <- RSQLite::dbFetch(rs, n = -1)
   RSQLite::dbClearResult(rs)
+  nrow(all_experiments)
   
-  ############################ REQUETES SECONDAIRES ############################ 
+  rs <- RSQLite::dbSendQuery(con, 'select * from dataset;')
+  all_datasets <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_datasets)
   
-  # pre-fetch the tables
-  qry <- "select library, technical_replicate_number, biological_replicate_number, id from replicate"
-  tbl_replicate<- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
-  RSQLite::dbClearResult(con)
-  qry <- "select organism, id from biosample"
-  tbl_biosample <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
-  RSQLite::dbClearResult(con)
-  qry <- "select biosample, treatments, id from library"
-  tbl_library <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
-  RSQLite::dbClearResult(con)
-  qry <- "select scientific_name as organism, id from organism"
-  tbl_organism <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
-  RSQLite::dbClearResult(con)
-  qry <- "select treatment_term_name, id from treatment"
-  tbl_treatment <- RSQLite::dbFetch(RSQLite::dbSendQuery(con, qry), n = -1)
-  RSQLite::dbClearResult(con)
+  rs <- RSQLite::dbSendQuery(con, 'select * from matched_set;')
+  all_matched_sets <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_matched_sets)
   
-  # Initialize empty vectors
-  len <- length(encode_exp$replicate_list)
-  organism <- character(len)
-  treatment <- character(len)
-  technical_replicate_number <- integer(len)
-  biological_replicate_number <- integer(len)
+  rs <- RSQLite::dbSendQuery(con, 'select * from lab;')
+  all_labs <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_labs)
   
-  for (k in seq_along(encode_exp$replicate_list)) {
-    id_replicate <- encode_exp$replicate_list[k]
-    if (id_replicate %in% tbl_replicate$id & !is.na(id_replicate)) {
-      
-      ### GET library to get ORGANISM and TREATMENT
-      id_library <- tbl_replicate$library[tbl_replicate$id == id_replicate]
-      
-      ## if there is no library, there is no way to get the organism neither the treatment infos 
-      if (is.na(id_library)) {
-        organism[k] <- NA
-        treatment[k] <- NA
-      } else {
-        id_biosample <- tbl_library$biosample[tbl_library$id == id_library]
-        
-        ### GET ORGANISM 
-        if (is.na(id_biosample) | ! id_biosample %in% tbl_biosample$id) {
-          organism[k] <- NA
-        } else {
-          id_organism <- tbl_biosample$organism[tbl_biosample$id == id_biosample]
-          organism[k] <- tbl_organism$organism[tbl_organism$id == id_organism]
-        }
-        
-        ### GET TREATMENT 
-        id_treatment <- tbl_library$treatments[tbl_library$id == id_library]
-        
-        if (is.na(id_treatment)) {
-          treatment[k] <- NA
-        } else {
-          j <- tbl_treatment$id == id_treatment
-          if (grepl(";", id_treatment)) {
-            id_treatment <- unlist(strsplit(id_treatment, ";"))
-            j <- do.call("|", lapply(id_treatment, function(x) {
-              tbl_treatment$id == x}))
-          }
-          stopifnot(sum(j) >= 1)
-          if (sum(j) > 1) {
-            treatment[k] <- paste(tbl_treatment$treatment_term_name[j], collapse = ";")
-          } else {
-            treatment[k] <- tbl_treatment$treatment_term_name[j]
-          }
-        }
-      }
-      ### GET REPLICATE INFOS 
-      j <- tbl_replicate$id == id_replicate
-      technical_replicate_number[k] <- tbl_replicate$technical_replicate_number[j]
-      biological_replicate_number[k] <- tbl_replicate$biological_replicate_number[j]
-    } else {
-      organism[k] <- NA
-      treatment[k] <- NA
-      technical_replicate_number[k] <- NA
-      biological_replicate_number[k] <- NA
-    }
-  }
+  rs <- RSQLite::dbSendQuery(con, 'select * from award;')
+  all_awards <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_awards)
   
-  encode_exp = cbind(encode_exp, organism, treatment, 
-                     technical_replicate_number, biological_replicate_number)
+  rs <- RSQLite::dbSendQuery(con, 'select * from target;')
+  all_targets <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_targets)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from biosample;')
+  all_biosamples <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_biosamples)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from library;')
+  all_librarys <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_librarys)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from organism;')
+  all_organisms <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_organisms)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from treatment;')
+  all_treatments <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_treatments)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from replicate;')
+  all_replicates <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_replicates)
+  
+  rs <- RSQLite::dbSendQuery(con, 'select * from platform;')
+  all_platforms <- RSQLite::dbFetch(rs, n = -1)
+  RSQLite::dbClearResult(rs)
+  nrow(all_platforms)
+  
   
   RSQLite::dbDisconnect(con)
   
+  return(list(
+    files = all_files,
+    experiments = all_experiments,
+    datasets = all_datasets,
+    matched_sets = all_matched_sets,
+    labs = all_labs,
+    awards = all_awards,
+    targets = all_targets,
+    biosamples = all_biosamples,
+    libraries = all_librarys,
+    organisms = all_organisms,
+    treatments = all_treatments,
+    replicates = all_replicates,
+    platforms = all_platforms
+  ))
+}
+
+step2 <- function(files){
+  cat('Step 2 : renommage\n')
+  ### Step 2 : renommage
+  #### files
+  names(files)[names(files) == 'status'] <- 'file_status'
+  names(files)[names(files) == 'accession'] <- 'file_accession'
+  names(files)[names(files) == 'award'] <- 'project'
+  names(files)[names(files) == 'replicate'] <- 'replicate_list'
   
-  ############################ AJOUT LIENS AVEC DATASET ############################ 
+  return(files)
+}
+
+step3 <- function(files, awards, labs, platforms){
+  cat('Step 3 : remplacement des references simple par leur valeur : project (anc. award), platform, lab, paired_with\n')
+  ### Step 3 : remplacement des references simple par leur valeur : project (anc. award), platform, lab, paired_with
+  #### il y a des awards inconnus....
+  files$project <- unlist(
+    mclapply(
+      X = files$project, 
+      FUN = function(x) {
+        p <- subset(x = awards, awards$id == x)$project ;
+        if(length(p)) return(p) else return(gsub(x = x, 
+                                                 pattern = "/awards/(.*)/", 
+                                                 replacement = '\\1'))
+      },
+      mc.cores =  cores
+    )
+  )
   
-  dataset_accession = rep(NA, nrow(encode_exp))
-  names(dataset_accession) = as.character(encode_exp$file_accession)
-  dataset_with_file = subset(encode_ds, ! is.na(encode_ds$related_files), 
-                             select = c("accession", "related_files" ))
-  dataset_with_file = unique(dataset_with_file)
+  files$paired_with <- gsub(x = files$paired_with, pattern = "/files/(.*)/", replacement = '\\1')
   
-  for (i in (1:nrow(dataset_with_file))) {
-    
-    ds = dataset_with_file[i,]
-    dsId = as.character(ds$accession)
-    related_files = strsplit(ds$related_files, split = ";")[[1]]
-    for (f in related_files) {
-      f = strsplit(f, split = "/")[[1]][3]
-      if(f %in% names(dataset_accession)) {
-        dataset_accession[[f]] = dsId
+  files$platform <- unlist(
+    mclapply(
+      X = files$platform, 
+      FUN = function(x) {
+        p <- subset(x = platforms, platforms$id == x)$title ;
+        if(length(p)) return(p) else return(gsub(x = x, 
+                                                 pattern = "/platforms/(.*)/", 
+                                                 replacement = '\\1'))
+      },
+      mc.cores =  cores
+    )
+  )
+  
+  files$lab <- unlist(
+    mclapply(
+      X = files$lab, 
+      FUN = function(x) {
+        p <- subset(x = labs, labs$id == x)$title ;
+        if(length(p)) return(p) else return(gsub(x = x, 
+                                                 pattern = "/labs/(.*)/", 
+                                                 replacement = '\\1'))
+      },
+      mc.cores =  cores
+    )
+  )
+  
+  return(files)
+}
+
+step4 <- function(files, replicates, libraries, treatments){
+  cat('Step 4.1 : remplacement des references complexes par les valeurs : replicate_list (anc.replicate)\n')
+  ### Step 4 : remplacement des references complexes par les valeurs : replicate_list (anc.replicate) 
+  ### => replicate$id + ajout de 2 colonnes technical_replicate_number, biological_replicate_number
+  
+  biological_replicate_number <- unlist(
+    mclapply(
+      X = files$replicate_list, 
+      FUN = function(x) {
+        p <- subset(x = replicates, replicates$id == x) ;
+        if(length(p) && nrow(p) > 0) 
+          p$biological_replicate_number 
+        else 
+          NA
+      },
+      mc.cores =  cores
+    ))
+  
+  technical_replicate_number <- unlist(
+    mclapply(
+      X = files$replicate_list, 
+      FUN = function(x) {
+        p <- subset(x = replicates, replicates$id == x) ;
+        if(length(p) && nrow(p) > 0) 
+          p$technical_replicate_number 
+        else 
+          NA
+      },
+      mc.cores =  cores
+    ))
+  
+  #all_files <- cbind(all_files, biological_replicate_number, technical_replicate_number)
+  
+  cat('Step 4.2 : treatment first get 1 replicate from replicate_list, from replicate get library, from library get treatment\n')
+  # ### => treatment first get 1 replicate from replicate_list, from replicate get library, from library get treatment
+  treatment <- unlist(mclapply(
+    #X = as.character(all_files_experiments$replicate_list), # dataset accession
+    X = as.character(files$replicate_list), # dataset accession
+    FUN = function(x) {
+      if(!is.na(x)) {
+        p <- subset(x = replicates, replicates$id == x)$library
+        if(length(p)) {
+          p <- subset(x = libraries, libraries$id == p)$treatment
+          if(length(p)) {
+            p <- subset(x = treatments, treatments$id == p)$treatment_term_name
+            if(length(p)) {
+              return(p)
+            } else {
+              return(NA)
+            }
+          } else {
+            return(NA)
+          }
+        } else {
+          return(NA)
+        }
+      } else {
+        return(NA)
       }
-    }    
-  }
+    },
+    mc.cores =  cores
+  ))
   
-  encode_exp = cbind(encode_exp, dataset_accession)
+  #all_files_experiments <- cbind(all_files_experiments, treatment)
   
-  Tdiff = Sys.time() - T2
-  print(paste0("Extract data from the DB : ",Tdiff, " min"))
+  files <- cbind(files, biological_replicate_number, technical_replicate_number, treatment)
   
-  list(experiment = encode_exp, dataset = encode_ds)
+  remove(treatment)
+  remove(biological_replicate_number)
+  remove(technical_replicate_number)
+  
+  return(files)
+}
+
+step5 <- function(files){
+  cat('Step 5 : remplacement des references dataset\n')
+  
+  dataset_types <- gsub(x = files$dataset, pattern = "/(.*)s/.*/", replacement = "\\1")
+  
+  cat('Step 5.1 : accessions\n')
+  ### => accession
+  dataset_accessions <- gsub(x = files$dataset, pattern = "/.*/(.*)/", replacement = "\\1")
+  
+  files <- cbind(accession = dataset_accessions, dataset_type = dataset_types, files)
+  
+  remove(dataset_accessions)
+  
+  return(files)
+}
+
+step6_1 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : target\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$target
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_2 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : date_released\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$date_released
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_3 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : status\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$status
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_4 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : assay\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$assay
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_5 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : biosample_type\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$biosample_type
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_6 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : biosample_name\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$biosample_term_name
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step6_7 <- function(experiments_files_acc, experiments) {
+  cat('Step 6 : controls\n')
+  
+  out <- unlist(mclapply(
+    X = as.character(experiments_files_acc), # dataset accession
+    FUN = function(x) {
+      p <- subset(x = experiments, experiments$accession == x)$possible_controls
+      if(length(p)) {
+        p
+      } else {
+        NA
+      }
+    },
+    mc.cores =  cores
+  ))
+  
+  return(out)
+}
+
+step7 <- function(experiments_files, targets){
+  cat('Step 7 : prepare organism\n')
+  
+  experiments_files$organism <- unlist(
+    mclapply(
+      X = experiments_files$target,
+      FUN = function(x) {
+        if(!is.na(x)) {
+          p <- subset(x = targets, targets$id == x)$organism
+          if(length(p)) {
+            return(p)
+          } else {
+            return(NA)
+          }
+        } else {
+          return(NA)
+        }
+      },
+      mc.cores =  cores
+    )
+  )
+  
+  return(experiments_files)
+}
+
+step8 <- function(experiments_files, targets){
+  cat('Step 8 : target id -> target name\n')
+  
+  experiments_files$target <- unlist(
+    mclapply(
+      X = experiments_files$target,
+      FUN = function(x) {
+        if(!is.na(x)) {
+          p <- subset(x = targets, targets$id == x)$label
+          if(length(p)) {
+            return(p)
+          } else {
+            return(gsub(x = x, pattern = "/targets/(.*)/", replacement = '\\1'))
+          }
+        } else {
+          return(NA)
+        }
+      },
+      mc.cores =  cores
+    )
+  )
+  
+  return(experiments_files)
+}
+
+step9 <- function(experiments_files, organisms){
+  cat('Step 9 : organism id -> organism name\n')
+  ### organism id -> organism name
+  
+  experiments_files$organism <- unlist(
+    mclapply(
+      X = experiments_files$organism,
+      FUN = function(x) {
+        if(!is.na(x)) {
+          p <- subset(x = organisms, organisms$id == x)$scientific_name
+          if(length(p)) {
+            return(p)
+          } else {
+            return(gsub(x = x, pattern = "/organisms/(.*)/", replacement = '\\1'))
+          }
+        } else {
+          return(NA)
+        }
+      },
+      mc.cores =  cores
+    )
+  )
+  
+  return(experiments_files)
 }
