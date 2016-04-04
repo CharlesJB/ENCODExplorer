@@ -133,7 +133,7 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = NULL) {
   # suppression des tables inutiles
   Tables$files = NULL
   
-  # creation des nouvelles colonnes
+  # creation des nouvelles colonnes dans experiments
   empty_vector <- rep(x = NA, times = nrow(encode_df$experiment))
   encode_df$experiment <- cbind(encode_df$experiment, target = empty_vector)
   encode_df$experiment <- cbind(encode_df$experiment, date_released = empty_vector)
@@ -143,13 +143,13 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = NULL) {
   encode_df$experiment <- cbind(encode_df$experiment, biosample_name = empty_vector)
   encode_df$experiment <- cbind(encode_df$experiment, controls = empty_vector)
   
-  encode_df$experiment$target <- step6_1(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$date_released <- step6_2(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$status <- step6_3(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$assay <- step6_4(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$biosample_type <- step6_5(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$biosample_name <- step6_6(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
-  encode_df$experiment$controls <- step6_7(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$target <- step6_target(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$date_released <- step6_date_released(files_acc = encode_df$experiment$accession, set = Tables$experiments)
+  encode_df$experiment$status <- step6_status(files_acc = encode_df$experiment$accession, set = Tables$experiments)
+  encode_df$experiment$assay <- step6_assay(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$biosample_type <- step6_biosample_type(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$biosample_name <- step6_biosample_name(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
+  encode_df$experiment$controls <- step6_control(experiments_files_acc = encode_df$experiment$accession, experiments = Tables$experiments)
   
   # suppression des tables inutiles
   Tables$experiments = NULL
@@ -158,6 +158,17 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = NULL) {
   encode_df$experiment <- step7(encode_df$experiment, targets = Tables$targets)
   encode_df$experiment <- step8(encode_df$experiment, targets = Tables$targets)
   encode_df$experiment <- step9(encode_df$experiment, organisms = Tables$organisms)
+  
+  # creation des nouvelles colonnes dans dataset
+  empty_vector <- rep(x = NA, times = nrow(encode_df$dataset))
+  encode_df$dataset <- cbind(encode_df$dataset, date_released = empty_vector)
+  encode_df$dataset <- cbind(encode_df$dataset, status = empty_vector)
+  
+  encode_df$dataset$date_released <- step6_date_released(files_acc = encode_df$dataset$accession, set = Tables$datasets)
+  encode_df$dataset$status <- step6_status(files_acc = encode_df$dataset$accession, set = Tables$datasets)
+  
+  # suppression des tables inutiles
+  Tables$datasets = NULL
   
   # suppression des tables
   remove(Tables)
@@ -408,7 +419,7 @@ step5 <- function(files){
   return(files)
 }
 
-step6_1 <- function(experiments_files_acc, experiments) {
+step6_target <- function(experiments_files_acc, experiments) {
   cat('Step 6 : target\n')
   
   out <- unlist(mclapply(
@@ -427,13 +438,13 @@ step6_1 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_2 <- function(experiments_files_acc, experiments) {
+step6_date_released <- function(files_acc, set) {
   cat('Step 6 : date_released\n')
   
   out <- unlist(mclapply(
-    X = as.character(experiments_files_acc), # dataset accession
+    X = as.character(files_acc), # dataset accession
     FUN = function(x) {
-      p <- subset(x = experiments, experiments$accession == x)$date_released
+      p <- subset(x = set, set$accession == x)$date_released
       if(length(p)) {
         p
       } else {
@@ -446,13 +457,13 @@ step6_2 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_3 <- function(experiments_files_acc, experiments) {
+step6_status <- function(files_acc, set) {
   cat('Step 6 : status\n')
   
   out <- unlist(mclapply(
-    X = as.character(experiments_files_acc), # dataset accession
+    X = as.character(files_acc), # dataset accession
     FUN = function(x) {
-      p <- subset(x = experiments, experiments$accession == x)$status
+      p <- subset(x = set, set$accession == x)$status
       if(length(p)) {
         p
       } else {
@@ -465,7 +476,7 @@ step6_3 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_4 <- function(experiments_files_acc, experiments) {
+step6_assay <- function(experiments_files_acc, experiments) {
   cat('Step 6 : assay\n')
   
   out <- unlist(mclapply(
@@ -484,7 +495,7 @@ step6_4 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_5 <- function(experiments_files_acc, experiments) {
+step6_biosample_type <- function(experiments_files_acc, experiments) {
   cat('Step 6 : biosample_type\n')
   
   out <- unlist(mclapply(
@@ -503,7 +514,7 @@ step6_5 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_6 <- function(experiments_files_acc, experiments) {
+step6_biosample_name <- function(experiments_files_acc, experiments) {
   cat('Step 6 : biosample_name\n')
   
   out <- unlist(mclapply(
@@ -522,7 +533,7 @@ step6_6 <- function(experiments_files_acc, experiments) {
   return(out)
 }
 
-step6_7 <- function(experiments_files_acc, experiments) {
+step6_control <- function(experiments_files_acc, experiments) {
   cat('Step 6 : controls\n')
   
   out <- unlist(mclapply(
