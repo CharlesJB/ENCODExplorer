@@ -284,7 +284,6 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
     
     
     if((nrow(s1) + nrow(s2)) == 0) {
-      print(ac)
       warning("No result found. You can try the <searchEncode> function or set the fixed option to FALSE", call. = FALSE)
       NULL
     }
