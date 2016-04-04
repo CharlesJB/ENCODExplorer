@@ -29,22 +29,23 @@ test.combined_query <- function() {
 }
 
 test.query_4_dataset <- function() {
-  res_dataset_only = queryEncode(set_accession = "ENCSR685AIQ")
+  res_dataset_only = queryEncode(set_accession = "ENCSR180GCH")
   checkEquals(nrow(res_dataset_only$experiment), 0,
               msg = "this query shouldn't return any experiment results" )
   
-  checkEquals(nrow(res_dataset_only$dataset), 1, 
+  checkEquals(nrow(res_dataset_only$dataset), 2, 
               msg = "this query should return this precise result")
 }
 
-test.query_4_dataset_and_exp <- function() {
-  res_exp_dataset = queryEncode(dataset_access = "ENCSR403MYH")
-  checkTrue(nrow(res_exp_dataset$dataset) > 0,
-            msg = "this query should return at least one dataset result")
-  
-  checkTrue(nrow(res_exp_dataset$experiment) > 0,
-            msg = "this query should return at least one experiment result")
-}
+# No more overlap between experiment and dataset accession numbers
+# test.query_4_dataset_and_exp <- function() {
+#   res_exp_dataset = queryEncode(dataset_access = "ENCSR403MYH")
+#   checkTrue(nrow(res_exp_dataset$dataset) > 0,
+#             msg = "this query should return at least one dataset result")
+#   
+#   checkTrue(nrow(res_exp_dataset$experiment) > 0,
+#             msg = "this query should return at least one experiment result")
+# }
 
 test.combined_query_on_custom_df <- function() {
   load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODExplorer"))
@@ -60,7 +61,7 @@ test.query_revoked_file <- function() {
   res_revok = queryEncode(assay = "chipseq", biosample = "mcf7", fixed = F, 
                     file_status = "revoked")
   
-  checkTrue("ENCFF000RYT" %in% as.character(res_revok$experiment$file_accession), 
-              msg = "this combined query should return a result set containg ENCFF000RYT")
+  checkTrue("ENCFF000ZKM" %in% as.character(res_revok$experiment$file_accession), 
+              msg = "this combined query should return a result set containg ENCFF000ZKM")
 }
 
