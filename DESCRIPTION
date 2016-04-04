@@ -27,6 +27,7 @@ Imports:
     jsonlite,
     RSQLite,
     Hmisc,
+    parallel,
     RCurl
 Suggests:
     RUnit,BiocGenerics,knitr,
