@@ -10,8 +10,7 @@ export_ENCODEdb_matrix(database_filename, mc.cores = 1)
 \arguments{
 \item{database_filename}{The name of the file to save the database into.}
 
-\item{mc.cores}{The number of cores to use. Default 1
-Default: \code{ENCODEdb.sqlite}.}
+\item{mc.cores}{The number of cores to use. Default 1}
 }
 \value{
 a \code{list} containing two elements. The first one 'experiment' is 

@@ -8,12 +8,11 @@ prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
   types = get_encode_types(), overwrite = FALSE)
 }
 \arguments{
-\item{database_filename}{The name of the file to save the database into.
-Default: \code{ENCODEdb.sqlite}.}
+\item{database_filename}{The name of the file to save the database into.}
 
 \item{types}{The names of the tables to extract from ENCODE rest api.}
 
-\item{overwrite}{Should tables already present in database be overwrited?
+\item{overwrite}{Should tables already present in database be overwrited
 Default: \code{FALSE}.}
 }
 \value{
