@@ -312,6 +312,26 @@ query_transform <- function(my.term) {
   my.term.4.grep
 }
 
+
+#' Convert searchEncode output in queryEncode output.
+#'
+#' After processing to a basic search with the \code{searchEncode} function 
+#' you can convert your result in a queryEncode output. Thus you can benefit 
+#' from the collected metadata. 
+#' 
+#' The output is compatible with the dowload function.
+#' 
+#' @param  df \code{list} of two \code{data.frame} containing ENCODE experiment
+#' and dataset metadata.
+#' @param searchResults the results set generated from \code{searchEncode}
+#' @param  quiet logical enables to switch off the result summary information when setting at TRUE.
+#'
+#' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
+#' experiments and datasets
+#' 
+#' @import tools
+#' 
+#' @export
 searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
