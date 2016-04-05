@@ -16,7 +16,7 @@ collaboration of research groups funded by the National Human Genome Research
 Institute (NHGRI). The goal of ENCODE is to build a comprehensive parts list of 
 functional elements in the human genome, including elements that act at the 
 protein and RNA levels, and regulatory elements that control cells and 
-circumstances in which a gene is active" ^[1] .
+circumstances in which a gene is active"^[source: [ENCODE Projet Portal ](https://www.encodeproject.org/)] .
 
 However, data retrieval and downloading can be really time consuming using 
 current web portal, especially with multiple files from different experiments.
@@ -40,19 +40,24 @@ This vignette will introduce all the main features of the ENCODExplorer package.
 
 ### Loading ENCODExplorer package
 
-```{r libraryLoad}
+```{r libraryLoad, warning=FALSE}
 suppressMessages(library(ENCODExplorer))
 ```
 
 ### Introduction
 
+Up to date, there are 7 types of dataset in ENCODE : annotation, experiment, 
+matched-set, project, reference, reference-epigenome and ucsc-browser-composite.
 This package comes with a up-to-date list of `data.frame` containing the essential
 of ENCODE files metadata: `encode_df`. This list contains two elements.
 The first one `encode_df$experiment` is a `data.frame` containing information for
-each file part of an experiment ; the second one `encode_df$dataset` is a
-`data.frame` containing information for each file part of a dataset.
+each file part of an experiment dataset ; the second one `encode_df$dataset` is a
+`data.frame` containing information for each file part of a non-experiment dataset. 
 
-This `encode_df` is **mandatory** for the functions provided in this package.
+The `encode_df` object is **mandatory** for the functions provided in this package.
+
+In the current release, `encode_df` contains 86083 entries for experiments and 
+4747 entries for non-experiment datasets.
 
 ### Main functions
 
@@ -66,13 +71,23 @@ a precise query defined according to the following criteria :
 |set_accession|experiment / dataset|The experiment or dataset accession|
 |assay|experiment|The assay type|
 |biosample|experiment|The biosample name|
-|dataset_access^[2] |experiment / dataset|The dataset accession|
+|dataset_access^[There is a subtle difference between the parameters **set_accession** and
+**dataset_accession**. In fact, some files can be part of experiment, dataset or
+both. When using **set_accession**, you will get all the files directly linked with
+this accession (experiment and/or dataset). While the usage of
+**dataset_accesstion** will get the files directly link to the requested
+dataset **AND** those which are part of an experiment and indirectly link to a
+dataset (reported as related_files in the dataset and related_dataset in
+experiment).] |experiment / dataset|The dataset accession|
 |file_accession|experiment / dataset|The file accesion|
-|file_format|experiment / dataset|The file format|
+|file_format^[The current version of encode_df contains the following file format : 
+*fastq*,*bed*,*bigBed*,*bam*,*tsv*,*bigWig*,*rcc*,*csfasta*,*idat*,*gtf*,*tar*,
+*CEL*,*csqual*,*sam*,*wig*,*gff*,*fasta*,*tagAlign*]|experiment / dataset|The file format|
 |lab|experiment / dataset|The laboratory|
 |organism|experiment|The donor organism|
 |target|experiment|The experimental target|
 |treatment|experiment|The treatment|
+|project|experiment / dataset|The Project|
 
 
 By default, the query use the exact string matching to perform the selection of 
@@ -135,8 +150,6 @@ search_results <- searchEncode(searchTerm = "a549 chip-seq homo sapiens",
 #### Download
 
 Following a search or a query, you may want to download the corresponding files.
-When using, the ENCODE portal you have to select the experiments one after an 
-other and for each experiment, select manually the files you're interested in.
 
 Our `downloadEncode` function is a real time saving feature. To use it, you have to 
 provide the results set that you've just get from the `searchEncode` or `queryEncode` 
@@ -169,23 +182,33 @@ To select a particular file format you can:
 
 ```{r query_results_5, collapse=TRUE, eval=TRUE}
 query_results <- queryEncode(assay = "switchgear", target ="elavl1",
-                       file_format = "bed_broadPeak" , fixed = FALSE)
+                       file_format = "bed" , fixed = FALSE)
 downloadEncode(resultSet = query_results, resultOrigin = "queryEncode")
 ```
 
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=TRUE}
-downloadEncode(resultSet = search_results, resultOrigin = "searchEncode", format = "bed_broadPeak")
+downloadEncode(resultSet = search_results, resultOrigin = "searchEncode", format = "bed")
 ```
 
-[1]: source: [ENCODE Projet Portal ](https://www.encodeproject.org/)
 
-[2]: There is a subtle difference between the parameters **set_accession** and
-**dataset_accession**. In fact, some files can be part of experiment, dataset or
-both. When using **set_accession**, you will get all the files directly linked with
-this accession (experiment and/or dataset). While the usage of
-**dataset_accesstion** will get the files directly link to the requested
-dataset **AND** those which are part of an experiment and indirectly link to a
-dataset (reported as related_files in the dataset and related_dataset in
-experiment).
+#### Conversion
+The function `searchToquery` enables to convert a `searchEncode` output in a `queryEncode` output based on the found accession numbers. Thus the user can benefit from all the collected metadata.
+
+The structure of the result set is similar to the `encode_df` structure : a list 
+of two dataframe *experiment* and *dataset*.
+
+Let's try it with the previous example :
+
+1) search 
+
+```{r search_results_3, collapse=TRUE}
+search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
+```
+
+2) convert
+```{r conert_results_1, collapse=TRUE}
+convert_results <- searchToquery(searchResults = search_results)
+```
+
