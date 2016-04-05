@@ -29,7 +29,7 @@
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
-                     format = "all", dir = ".", force = TRUE) {
+                           format = "all", dir = ".", force = TRUE) {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
@@ -49,18 +49,18 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         hrefs = c(as.character(temp$href), as.character(temp2$href))
         md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
         
-	downloaded <- character()
+        downloaded <- character()
         for (i in seq_along(hrefs)) {
           
           fileName = strsplit(x = hrefs[i], split = "@@download/",fixed = TRUE)[[1]][2]
-	  fileName <- paste(dir, fileName, sep = "/")
+          fileName <- paste(dir, fileName, sep = "/")
           md5sum_file = tools::md5sum(paste0(fileName))
-	  if (force == TRUE | !(file.exists(fileName)) |
-		  (file.exists(fileName) & md5sum_file != md5sums[i])) {
+          if (force == TRUE | !(file.exists(fileName)) |
+              (file.exists(fileName) & md5sum_file != md5sums[i])) {
             download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                                destfile = fileName, method =  "curl", extra = "-L" )
+                          destfile = fileName, method =  "curl", extra = "-L" )
             md5sum_file = tools::md5sum(paste0(fileName))
-	  }
+          }
           if(md5sum_file != md5sums[i]) {
             warning(paste0("Error while downloading the file : ", fileName), call. = FALSE)
             NULL
@@ -68,10 +68,10 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           else
           {
             print(paste0("Success downloading the file : ", fileName))
-	    downloaded <- c(downloaded, fileName)
+            downloaded <- c(downloaded, fileName)
           }
         }
-	downloaded
+        downloaded
       }
       else
       {
@@ -79,7 +79,7 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
         NULL
       }
     } else {
-    # origin farfelue 
+      # origin farfelue 
       warning("You have to provide a valid results set origin to use the downloadEncode function : searchEncode or queryEncode", call. = FALSE)
       NULL
     }
