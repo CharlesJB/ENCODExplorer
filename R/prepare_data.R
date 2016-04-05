@@ -1,14 +1,68 @@
+#' Create or update all the needed data for ENCODExplorer
+#' 
+#' This function creates or updates ENCODExplorer data according the following 
+#' steps :
+#' 1) Create the RSQLite databse for the tables in ENCODE
+#' 2) Extract essential informations from the RSQLite databse in encode_df
+#' 3) Extract accession numbers from all the datasets of RSQLite databse in 
+#' accession_df
+#' 4) if overwrite = TRUE, the new encode_df will overwrite the former one else 
+#' return the newly generated objets.
+#' 
+#' @return none if \code{overwrite} is set to TRUE or return a \code{list} 
+#' containg two objects encode_df and accession_df.
+#'
+#' @param database_filename The name of the file to save the database into.
+#' @param types The names of the tables to extract from ENCODE rest api.
+#' @param overwrite Should tables already present in database be overwrited
+#' Default: \code{FALSE}.
+#' 
+#' @examples
+#' update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
+#' file.remove("platform.sql")
+#'   \dontrun{
+#'     update_ENCODExplorer("ENCODEdb.sqlite")
+#'   }
+#'   
+#' @import jsonlite
+#' @export
+update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
+                                 types = get_encode_types(), overwrite = FALSE){
+  
+  # 1) Create the RSQLite databse for the tables in ENCODE
+  prepare_ENCODEdb(database_filename, overwrite = overwrite)
+  
+  # 2) Extract essential informations from the RSQLite databse in encode_df
+  new_encode_df <- export_ENCODEdb_matrix(database_filename = database_filename)
+  
+  # 3) Extract accession numbers from all the datasets of RSQLite databse in accession_df
+  new_accession_df <- export_ENCODEdb_accession(df = new_encode_df, 
+                                               database_filename = database_filename)
+  
+  # 4) if overwrite = TRUE, the new encode_df will overwrite the former one
+  if(overwrite){
+    encode_df <- new_encode_df
+    accession_df <- new_accession_df
+    save(encode_df, file = 'data/encode_df.rda' )
+    save(accession_df, file = 'data/accession_df.rda' )
+  } else { # else return the update object
+    invisible(list(
+      encode_df = new_encode_df,
+      accession_df = new_accession_df
+    ))
+  }
+  
+}
+
+
 #' Create the RSQLite databse for the tables in ENCODE
 #' 
 #' @return is a \code{list} with selected tables from ENCODE that were used to
 #' create the \code{RSQLite} database.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' Default: \code{ENCODEdb.sqlite}.
-#' 
 #' @param types The names of the tables to extract from ENCODE rest api.
-#' 
-#' @param overwrite Should tables already present in database be overwrited?
+#' @param overwrite Should tables already present in database be overwrited
 #' Default: \code{FALSE}.
 #' 
 #' @examples
@@ -81,7 +135,6 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #'
 #' @param database_filename The name of the file to save the database into.
 #' @param mc.cores The number of cores to use. Default 1
-#' Default: \code{ENCODEdb.sqlite}.
 #'
 #' @examples
 #'   database_filename <- system.file("extdata/ENCODEdb.sqlite",
@@ -193,6 +246,55 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = 1) {
   print(paste0("Building ENCODE_DF : ",Tdiff, " min"))
   
   encode_df
+}
+
+
+#' Extract accession numbers from all the datasets of RSQLite databse in a 
+#' \code{data.frame}
+#' 
+#'
+#' @return a \code{data.frame} composed of 3 fields : accession, 
+#' files (\code{list} of files accessions) and dataset_type.
+#' 
+#' @param  df \code{list} of two \code{data.frame} containing ENCODE 
+#' experiment and dataset metadata. Default
+#' @param database_filename The name of the file to save the database into.
+#'
+#' @examples
+#'   database_filename <- system.file("extdata/ENCODEdb.sqlite",
+#'                                    package = "ENCODEdb")
+#'   \dontrun{
+#'     export_ENCODEdb_accession(database_filename = database_filename)
+#'   }
+#' @import RSQLite
+#' 
+#' @export
+export_ENCODEdb_accession <- function(df = NULL, database_filename){
+  
+  if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
+  
+  con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
+  
+  dataset_types <- unique(c(as.character(encode_df$experiment$dataset_type), 
+                            as.character(encode_df$dataset$dataset_type)))
+  dataset_types <- gsub(x = dataset_types, pattern = '-', replacement = '_')
+  accession_df <- data.frame(accession = c(), files = list(), 
+                             dataset_type = c(), stringsAsFactors = FALSE)
+  
+  for(dataset_type in dataset_types){
+    rs <- RSQLite::dbSendQuery(con, paste0('select accession, files from ',
+                                           dataset_type, ' ;'))
+    results <- RSQLite::dbFetch(rs, n = -1)
+    RSQLite::dbClearResult(rs)
+    file_list <- strsplit(x = results$files, split = ';')
+    results <- cbind(accession = results$accession, files = file_list, 
+                     dataset_type = rep(x = dataset_type, times = nrow(results)))
+    accession_df <- rbind(accession_df, results)
+  }
+  
+  RSQLite::dbDisconnect(con)
+  
+  invisible(accession_df)
 }
 
 step1 <- function(database_filename){
@@ -593,5 +695,5 @@ step9 <- function(experiments_files, organisms, cores){
     )
   )
   
-  return(experiments_files)
+  invisible(experiments_files)
 }
