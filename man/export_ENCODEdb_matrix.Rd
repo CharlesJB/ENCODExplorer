@@ -5,12 +5,12 @@
 \title{Extract essential informations from the RSQLite databse in a \code{list} of 
 \code{data.frame}s}
 \usage{
-export_ENCODEdb_matrix(database_filename, mc.cores = NULL)
+export_ENCODEdb_matrix(database_filename, mc.cores = 1)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.}
 
-\item{mc.cores}{The number of cores to use, i.e. at most how many child processes will be run simultaneously. Default 1
+\item{mc.cores}{The number of cores to use. Default 1
 Default: \code{ENCODEdb.sqlite}.}
 }
 \value{
