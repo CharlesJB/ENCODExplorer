@@ -26,7 +26,6 @@ Imports:
     tools,
     jsonlite,
     RSQLite,
-    Hmisc,
     parallel,
     RCurl
 Suggests:
