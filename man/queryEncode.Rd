@@ -14,7 +14,8 @@ queryEncode(df = NULL, set_accession = NULL, assay = NULL,
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE 
 experiment and dataset metadata}
 
-\item{set_accession}{character string to select the experiment or dataset accession}
+\item{set_accession}{character string to select the experiment or dataset 
+accession}
 
 \item{assay}{character string to select the assay type}
 
@@ -43,7 +44,8 @@ experiment and dataset metadata}
 
 \item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.}
 
-\item{quiet}{logical enables to switch off the result summary information when setting at TRUE.}
+\item{quiet}{logical enables to switch off the result summary information 
+when setting at TRUE.}
 }
 \value{
 a \code{list} of two \code{data.frame}s containing data about ENCODE 
@@ -60,7 +62,7 @@ By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
 \examples{
-  queryEncode(biosample = "A549", file_format = "bam")
+    queryEncode(biosample = "A549", file_format = "bam")
 
 }
 

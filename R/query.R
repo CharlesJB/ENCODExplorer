@@ -8,41 +8,47 @@
 #' By default, the query can be made on an exact match term. This behaviour can 
 #' be modified by setting the \code{fixed} argument at \code{TRUE}
 #' 
-#' @param  df \code{list} of two \code{data.frame} containing ENCODE 
+#' @param    df \code{list} of two \code{data.frame} containing ENCODE 
 #' experiment and dataset metadata 
-#' @param  set_accession character string to select the experiment or dataset accession
-#' @param  assay character string to select the assay type
-#' @param  biosample character string to select the biosample name
-#' @param  dataset_accession character string to select the dataset accession
-#' @param  file_accession character string to select the file accesion
-#' @param  file_format character string to select the file format
-#' @param  lab character string to select the laboratory 
-#' @param  organism character string to select the donor organism
-#' @param  target character string to select the experimental target
-#' @param  treatment character string to select the treatment
-#' @param  project character string to select the project
-#' @param  file_status character string to select the file status 
+#' @param    set_accession character string to select the experiment or dataset 
+#' accession
+#' @param    assay character string to select the assay type
+#' @param    biosample character string to select the biosample name
+#' @param    dataset_accession character string to select the dataset accession
+#' @param    file_accession character string to select the file accesion
+#' @param    file_format character string to select the file format
+#' @param    lab character string to select the laboratory 
+#' @param    organism character string to select the donor organism
+#' @param    target character string to select the experimental target
+#' @param    treatment character string to select the treatment
+#' @param    project character string to select the project
+#' @param    file_status character string to select the file status 
 #' ("released", "revoked", "all"). Default "released"
-#' @param  status character string to select the dataset/experiment status
-#' @param  fixed logical. If TRUE, pattern is a string to be matched as it is.
-#' @param  quiet logical enables to switch off the result summary information when setting at TRUE.
+#' @param    status character string to select the dataset/experiment status
+#' @param    fixed logical. If TRUE, pattern is a string to be matched as it is.
+#' @param    quiet logical enables to switch off the result summary information 
+#' when setting at TRUE.
 #'
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
 #'
 #' @examples
-#'   queryEncode(biosample = "A549", file_format = "bam")
+#'     queryEncode(biosample = "A549", file_format = "bam")
 #'
 #' @export
-queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample = NULL,
-                        dataset_accession = NULL, file_accession = NULL, file_format = NULL, 
-                        lab = NULL, organism = NULL, target = NULL, treatment = NULL, project = NULL,
-                        file_status = "released", status = "released", fixed = TRUE, quiet = FALSE) {
+queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, 
+                        biosample = NULL, dataset_accession = NULL, 
+                        file_accession = NULL, file_format = NULL, 
+                        lab = NULL, organism = NULL, target = NULL, 
+                        treatment = NULL, project = NULL,
+                        file_status = "released", status = "released", 
+                        fixed = TRUE, quiet = FALSE) {
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
-  if(is.null(set_accession) && is.null(assay) && is.null(biosample) && is.null(dataset_accession) &&
-     is.null(file_accession) && is.null(file_format) && is.null(lab) && is.null(organism) &&
+  if(is.null(set_accession) && is.null(assay) && is.null(biosample) && 
+     is.null(dataset_accession) && is.null(file_accession) && 
+     is.null(file_format) && is.null(lab) && is.null(organism) &&
      is.null(target) && is.null(treatment) && is.null(project))
   {
     warning("Please provide at least one valid criteria", call. = FALSE)
@@ -172,7 +178,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
       
       if(!is.null(da)) {
         query.transfo = query_transform(da)
-        select.entries = grepl(x = s1$dataset_accession, pattern = query.transfo, 
+        select.entries = grepl(x = s1$dataset_accession, pattern =query.transfo, 
                                ignore.case =TRUE, perl =TRUE)
         s1 = s1[select.entries,]
         
@@ -284,8 +290,29 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
     
     
     if((nrow(s1) + nrow(s2)) == 0) {
-      print(ac)
-      warning("No result found. You can try the <searchEncode> function or set the fixed option to FALSE", call. = FALSE)
+      warning_message <- "No result found in encode_df. 
+      You can try the <searchEncode> function or set the fixed option to FALSE."
+      
+      dataset_type <- character()
+      if(!is.null(ac)){
+        dataset_type <- as.character(resolveEncodeAccession(ac)$dataset_type)
+      } else {
+        if(!is.null(da)){
+          dataset_type <- as.character(resolveEncodeAccession(da)$dataset_type)
+        }
+      }
+      
+      if(length(dataset_type)) {
+        warning_message <- (paste0(warning_message, 
+                                   "The requested accession belongs to ", 
+                                   dataset_type, 
+                                   ", which is not supported by the current ",
+                                   "version of ENCODExplorer. You can still ",
+                                   "recover the list of the associated files ",
+                                   "using the <resolveEncodeAccession> function"))
+      }
+      
+      warning(warning_message, call. = FALSE)
       NULL
     }
     else
@@ -296,7 +323,8 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, biosample
                    nrow(query_results$experiment),
                    " files / ",length(unique(query_results$experiment$accession)),
                    " experiments ; dataset results : ",nrow(query_results$dataset),
-                   " files / ",length(unique(query_results$dataset$accession))," experiments\n"))
+                   " files / ",length(unique(query_results$dataset$accession)),
+                   " experiments\n"))
       query_results
     }
     
@@ -313,6 +341,29 @@ query_transform <- function(my.term) {
   my.term.4.grep
 }
 
+
+#' Convert searchEncode output in queryEncode output.
+#'
+#' After processing to a basic search with the \code{searchEncode} function 
+#' you can convert your result in a queryEncode output. Thus you can benefit 
+#' from the collected metadata. 
+#' 
+#' The output is compatible with the dowload function.
+#' 
+#' @param    df \code{list} of two \code{data.frame} containing ENCODE 
+#' experiment and dataset metadata.
+#' @param searchResults the results set generated from \code{searchEncode}
+#' @param    quiet logical enables to switch off the result summary information 
+#' when setting at TRUE.
+#'
+#' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
+#' experiments and datasets
+#' 
+#' @examples
+#' search_res <- searchEncode(searchTerm = "switchgear elavl1", limit = "1")
+#' res <- searchToquery(searchResults = search_res, quiet = TRUE)
+#' 
+#' @export
 searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
@@ -323,14 +374,15 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
   if(nrow(searchResults) > 0){
     ids <- as.character(searchResults$id)
     ids <- ids[grepl(x = ids, pattern = '/experiments/')]
-    accessions <- gsub(x = ids, pattern = '/experiments/([A-Z0-9]+)/', replacement = "\\1")
-    
+    accessions <- gsub(x = ids, pattern = '/experiments/([A-Z0-9]+)/',
+                       replacement = "\\1")
     
     for(i in seq_along(accessions)){
       
       accession <- accessions[i]
       
-      r <- queryEncode(df = encode_df, set_accession = accession, fixed = TRUE, quiet = quiet)
+      r <- queryEncode(df = encode_df, set_accession = accession, fixed = TRUE, 
+                       quiet = quiet)
       if(!is.null(r)){
         
         if(!is.null(res$experiment))
@@ -351,7 +403,26 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
                nrow(res$experiment),
                " files / ",length(unique(res$experiment$accession)),
                " experiments ; dataset results : ",nrow(res$dataset),
-               " files / ",length(unique(res$dataset$accession))," experiments\n"))
+               " files / ",length(unique(res$dataset$accession)),
+               " experiments\n"))
   return(res)
 }
 
+
+#' Return a \code{data.frame} containing basic datasets information from an 
+#' accession number
+#'
+#' @param accession character, dataset accession number
+#'
+#' @return a \code{data.frame} containing basic datasets information for the 
+#' requested accession number
+#' 
+#' @examples
+#' res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
+#' 
+#' 
+#' @export
+resolveEncodeAccession <- function(accession){
+  data(accession_df, envir = environment())
+  accession_df[accession_df$accession == accession,]
+}
