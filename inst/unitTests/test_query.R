@@ -66,7 +66,7 @@ test.query_revoked_file <- function() {
 }
 
 test.resolve_unknown_accession <- function(){
-  dataset_type <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$dataset_type
+  dataset_type <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$dataset_type[[1]]
   checkEquals(dataset_type, "ucsc_browser_composite", 
               msg = "ENCSR361ONJ dataset type is ucsc_browser_composite.")
 }
