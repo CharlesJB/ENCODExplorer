@@ -11,7 +11,7 @@ extract_table(type)
 }
 \value{
 a \code{data.frame} corresponding to the table asked. If no match is
-  found, returns an empty \code{data.frame}
+        found, returns an empty \code{data.frame}
 }
 \description{
 Extract a data.frame corresponding to a table in ENCODE database

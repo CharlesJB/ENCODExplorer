@@ -3,8 +3,8 @@
 #' @param type The type of table to extract from ENCODE rest api.
 #'
 #' @return a \code{data.frame} corresponding to the table asked. If no match is
-#'   found, returns an empty \code{data.frame}
-#'   
+#'         found, returns an empty \code{data.frame}
+#'         
 #' @import jsonlite
 #' @import RCurl
 extract_table <- function(type) {
@@ -32,8 +32,6 @@ extract_table <- function(type) {
       if (res[["notification"]] == "Success") {
         results <- res[["@graph"]]
       }
-    } else {
-      print(paste(type, 'not found at all'))
     }
   }
   
@@ -75,17 +73,18 @@ clean_table <- function(table) {
       } else if (column_name == "@type") {
         column <- NULL
       } else if (column_name == "related_files") {
-          column <- sapply(column, function(x) {
-            if (class(x) == "character" & length(x) > 0) {
-              paste(x, collapse = ";")
-            } else {
-              NA
-            }
-          })
+        column <- sapply(column, function(x) {
+          if (class(x) == "character" & length(x) > 0) {
+            paste(x, collapse = ";")
+          } else {
+            NA
+          }
+        })
         # List of character vector
       } else if (column_name == "replicates") {
-	  column <- NULL
-      } else if (all(sapply(column, class) == "character" | sapply(column, is.null))) {
+        column <- NULL
+      } else if (all(sapply(column, class) == "character" | 
+                     sapply(column, is.null))) {
         if (all(sapply(column, length) <= 1)) {
           column <- sapply(column, function(x) {
             if (length(x) > 0) {
@@ -144,15 +143,16 @@ clean_table <- function(table) {
 #' This function simulates a basic query on ENCODE website 
 #'
 #' @param searchTerm a search term
-#' @param limit the maximum number of return entries, default 10. \code{limit = all}
-#' @param quiet logical value enables to switch off the result summary information when setting at TRUE.
+#' @param limit the maximum number of return entries, default 10. 
+#' @param quiet logical value enables to switch off the result summary 
+#' information when setting at TRUE.
 #' will return all the result. It can generate large results set.
 #'
 #' @return a \code{data.frame} corresponding Every object that matches the 
 #' search term
 #'
 #' @examples
-#'  searchEncode("ChIP-Seq+H3K4me1")
+#'        searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
@@ -173,7 +173,8 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   
   search_results = clean_table(r)
   search_results <- search_results[,order(colnames(search_results))]
-  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)), " entries\n"))
+  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
+                        " entries\n"))
   search_results
 }
 
@@ -181,10 +182,10 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
 #' Extract the schemas from ENCODE's github
 #'
 #' The JSONs are fetched from:
-#'   https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'         https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 #'
 #' The data is extracted using the github api:
-#'   https://developer.github.com/guides/getting-started/
+#'         https://developer.github.com/guides/getting-started/
 #'
 #' The data is then downloaded using the \code{jsonlite} package.
 #'
@@ -202,10 +203,11 @@ get_schemas <- function() {
   encoded_repo <- "encode-dcc/encoded"
   schema_path <- "src/encoded/schemas"
   
-  base_url <- paste(raw_git_url, encoded_repo, "master", schema_path, sep = "/")
+  base_url <- paste(raw_git_url, encoded_repo, "master", schema_path, 
+                    sep = "/")
   urls <- paste(base_url, schema_names, sep = "/")
   # We need to suppress warnings:
-  #   Unexpected Content-Type: text/plain; charset=utf-8
+  #         Unexpected Content-Type: text/plain; charset=utf-8
   schema_json <- suppressWarnings(lapply(urls, jsonlite::fromJSON))
   schema_json
 }
@@ -214,13 +216,13 @@ get_schemas <- function() {
 #'
 #' The type (table) names are extracted from the schema list from ENCODE-DCC
 #' github repository:
-#'   https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'         https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 #'
 #' The data is extracted using the github api:
-#'   https://developer.github.com/guides/getting-started/
+#'         https://developer.github.com/guides/getting-started/
 #'
 #' @return a vector of \code{character} with the names of the known tables in
-#'   the ENCODE database.
+#'         the ENCODE database.
 #'
 #' @import tools
 get_encode_types <- function() {
