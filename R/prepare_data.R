@@ -15,29 +15,42 @@
 #' @param database_filename The name of the file to save the database into.
 #' @param types The names of the tables to extract from ENCODE rest api.
 #' @param overwrite Should tables already present in database be overwrited
+#' @param mc.cores The number of cores to use. Default 1
 #' Default: \code{FALSE}.
 #' 
 #' @examples
 #' update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
 #' file.remove("platform.sql")
-#'   \dontrun{
-#'     update_ENCODExplorer("ENCODEdb.sqlite")
-#'   }
-#'   
+#'     \dontrun{
+#'         update_ENCODExplorer("ENCODEdb.sqlite")
+#'     }
+#'     
 #' @import jsonlite
 #' @export
 update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
-                                 types = get_encode_types(), overwrite = FALSE){
+                                 types = get_encode_types(), overwrite = FALSE, mc.cores = 1){
   
   # 1) Create the RSQLite databse for the tables in ENCODE
-  prepare_ENCODEdb(database_filename, overwrite = overwrite)
+  ret <- prepare_ENCODEdb(database_filename, overwrite = overwrite)
+  
+  if(is.null(ret)){
+    return(NULL)
+  }
   
   # 2) Extract essential informations from the RSQLite databse in encode_df
-  new_encode_df <- export_ENCODEdb_matrix(database_filename = database_filename)
+  new_encode_df <- export_ENCODEdb_matrix(database_filename = database_filename,
+                                          mc.cores = mc.cores)
+  
+  if(length(new_encode_df) != 2){
+    return(NULL)
+  }
   
   # 3) Extract accession numbers from all the datasets of RSQLite databse in accession_df
-  new_accession_df <- export_ENCODEdb_accession(df = new_encode_df, 
-                                               database_filename = database_filename)
+  new_accession_df <- export_ENCODEdb_accession(new_encode_df,database_filename)
+  
+  if(length(new_accession_df) != 1){
+    return(NULL)
+  }
   
   # 4) if overwrite = TRUE, the new encode_df will overwrite the former one
   if(overwrite){
@@ -68,21 +81,19 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
 #' @examples
 #' prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
 #' file.remove("platform.sql")
-#'   \dontrun{
-#'     prepare_ENCODEdb("ENCODEdb.sqlite")
-#'   }
-#'   
+#'     \dontrun{
+#'         prepare_ENCODEdb("ENCODEdb.sqlite")
+#'     }
+#'     
 #' @import jsonlite
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
                              types = get_encode_types(), overwrite = FALSE) {
   
-  if(file.exists(database_filename)) {
+  if(file.exists(database_filename) && !overwrite) {
     warning(paste0("The file ", database_filename, " already exists. Please delete it before re-run the data preparation"))
-  }
-  else
-  {
-    print(format(Sys.time(), "%a %b %d %X %Y"))
+    NULL
+  } else {
     T1<-Sys.time()
     # Extract the tables from the ENCODE rest api
     extract_type <- function(type) {
@@ -116,9 +127,9 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
     else
     {
       warning(paste0("Some goes wrong during the data preparation. 
-            Please erase the database ",database_filename," and re-run the whole process.
-            If the problem persists, please contact us"))
-      list()
+                        Please erase the database ",database_filename," and re-run the whole process.
+                        If the problem persists, please contact us"))
+      NULL
     }
     
   }
@@ -129,7 +140,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #' 
 #'
 #' @return a \code{list} containing two elements. The first one 'experiment' is 
-#' a \code{data.frame} containing essential informations for each file part of  
+#' a \code{data.frame} containing essential informations for each file part of    
 #' an experiment ; the second one 'dataset' is a \code{data.frame} containing 
 #' essential informations for each file part of a dataset.
 #'
@@ -137,11 +148,11 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 #' @param mc.cores The number of cores to use. Default 1
 #'
 #' @examples
-#'   database_filename <- system.file("extdata/ENCODEdb.sqlite",
-#'                                    package = "ENCODEdb")
-#'   \dontrun{
-#'     export_ENCODEdb_matrix(database_filename = database_filename)
-#'   }
+#'     database_filename <- system.file("extdata/ENCODEdb.sqlite",
+#'                                                                        package = "ENCODEdb")
+#'     \dontrun{
+#'         export_ENCODEdb_matrix(database_filename = database_filename)
+#'     }
 #' @import RSQLite
 #' @import parallel
 #' 
@@ -149,7 +160,6 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
 export_ENCODEdb_matrix <- function(database_filename, mc.cores = 1) {
   
   T1<-Sys.time()
-  print(format(T1, "%a %b %d %X %Y"))
   
   Tables <- step1(database_filename = database_filename)
   Tables$files <- step2(files = Tables$files)
@@ -256,16 +266,16 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = 1) {
 #' @return a \code{data.frame} composed of 3 fields : accession, 
 #' files (\code{list} of files accessions) and dataset_type.
 #' 
-#' @param  df \code{list} of two \code{data.frame} containing ENCODE 
+#' @param    df \code{list} of two \code{data.frame} containing ENCODE 
 #' experiment and dataset metadata. Default
 #' @param database_filename The name of the file to save the database into.
 #'
 #' @examples
-#'   database_filename <- system.file("extdata/ENCODEdb.sqlite",
-#'                                    package = "ENCODEdb")
-#'   \dontrun{
-#'     export_ENCODEdb_accession(database_filename = database_filename)
-#'   }
+#'     database_filename <- system.file("extdata/ENCODEdb.sqlite",
+#'                                                                        package = "ENCODEdb")
+#'     \dontrun{
+#'         export_ENCODEdb_accession(database_filename = database_filename)
+#'     }
 #' @import RSQLite
 #' 
 #' @export
@@ -361,7 +371,7 @@ step3 <- function(files, awards, labs, platforms, cores){
                                                  pattern = "/awards/(.*)/", 
                                                  replacement = '\\1'))
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
@@ -377,7 +387,7 @@ step3 <- function(files, awards, labs, platforms, cores){
                                                  pattern = "/platforms/(.*)/", 
                                                  replacement = '\\1'))
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
@@ -390,7 +400,7 @@ step3 <- function(files, awards, labs, platforms, cores){
                                                  pattern = "/labs/(.*)/", 
                                                  replacement = '\\1'))
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
@@ -411,7 +421,7 @@ step4 <- function(files, replicates, libraries, treatments, cores){
         else 
           NA
       },
-      mc.cores =  cores
+      mc.cores =    cores
     ))
   
   technical_replicate_number <- unlist(
@@ -424,7 +434,7 @@ step4 <- function(files, replicates, libraries, treatments, cores){
         else 
           NA
       },
-      mc.cores =  cores
+      mc.cores =    cores
     ))
   
   cat('Step 4.2 : treatment first get 1 replicate from replicate_list, ',
@@ -455,7 +465,7 @@ step4 <- function(files, replicates, libraries, treatments, cores){
         return(NA)
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   files <- cbind(files, biological_replicate_number, technical_replicate_number,
@@ -500,7 +510,7 @@ step6_target <- function(experiments_files_acc, experiments, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -519,7 +529,7 @@ step6_date_released <- function(files_acc, set, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -538,7 +548,7 @@ step6_status <- function(files_acc, set, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -557,7 +567,7 @@ step6_assay <- function(experiments_files_acc, experiments, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -576,7 +586,7 @@ step6_biosample_type <- function(experiments_files_acc, experiments, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -596,7 +606,7 @@ step6_biosample_name <- function(experiments_files_acc, experiments, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -615,7 +625,7 @@ step6_control <- function(experiments_files_acc, experiments, cores) {
         NA
       }
     },
-    mc.cores =  cores
+    mc.cores =    cores
   ))
   
   return(out)
@@ -639,7 +649,7 @@ step7 <- function(experiments_files, targets, cores){
           return(NA)
         }
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
@@ -664,7 +674,7 @@ step8 <- function(experiments_files, targets, cores){
           return(NA)
         }
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
@@ -691,7 +701,7 @@ step9 <- function(experiments_files, organisms, cores){
           return(NA)
         }
       },
-      mc.cores =  cores
+      mc.cores =    cores
     )
   )
   
