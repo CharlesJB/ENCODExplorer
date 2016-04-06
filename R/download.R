@@ -38,8 +38,9 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
   }
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
-    warning("You have to provide both results set and its origin to use the 
-                              downloadEncode function", call. = FALSE)
+    warning_msg <- "You have to provide both results set and its origin to use"
+    warning_msg <- paste0(warning_msg, " the downloadEncode function")
+    warning(warning_msg, call. = FALSE)
     NULL
   } else {
     if(resultOrigin %in% c("searchEncode", "queryEncode")) {
@@ -88,9 +89,10 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
       }
     } else {
       # origin farfelue 
-      warning("You have to provide a valid results set origin to use the 
-                                   downloadEncode function : searchEncode or queryEncode", 
-              call. = FALSE)
+      warning_msg <- "You have to provide a valid results set origin to use the"
+      warning_msg <- paste0(warning_msg, " downloadEncode function : ")
+      warning_msg <- paste0(warning_msg, "searchEncode or queryEncode")
+      warning(warning_msg, call. = FALSE)
       NULL
     }
   }
