@@ -38,9 +38,9 @@ set, its origin (searchEncode or queryEncode), the file format and finally
 the destination directory.
 }
 \examples{
-  resultSet <- queryEncode(biosample = "A549", file_format = "bam")
-  \dontrun{
-  downloadEncode(resultSet = resultSet, dir = ".")
-  }
+     resultSet <- queryEncode(biosample = "A549", file_format = "bam")
+     \dontrun{
+     downloadEncode(resultSet = resultSet, dir = ".")
+     }
 }
 

@@ -10,9 +10,10 @@ searchEncode(searchTerm = NULL, limit = 10, quiet = FALSE)
 \arguments{
 \item{searchTerm}{a search term}
 
-\item{limit}{the maximum number of return entries, default 10. \code{limit = all}}
+\item{limit}{the maximum number of return entries, default 10.}
 
-\item{quiet}{logical value enables to switch off the result summary information when setting at TRUE.
+\item{quiet}{logical value enables to switch off the result summary 
+information when setting at TRUE.
 will return all the result. It can generate large results set.}
 }
 \value{
@@ -28,6 +29,6 @@ and/or columns that are \code{data.frames}.
 This function simulates a basic query on ENCODE website
 }
 \examples{
- searchEncode("ChIP-Seq+H3K4me1")
+       searchEncode("ChIP-Seq+H3K4me1")
 }
 

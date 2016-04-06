@@ -11,11 +11,11 @@ a \code{list} of schemas.
 }
 \description{
 The JSONs are fetched from:
-  https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 }
 \details{
 The data is extracted using the github api:
-  https://developer.github.com/guides/getting-started/
+        https://developer.github.com/guides/getting-started/
 
 The data is then downloaded using the \code{jsonlite} package.
 }

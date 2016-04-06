@@ -5,11 +5,11 @@ if(FALSE) {
 
 
 test.fixed_option <- function() {
-  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=T),error=function(e) e, warning=conditionMessage)
-  exp = "No result found. You can try the <searchEncode> function or set the fixed option to FALSE"
+  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=T),
+                 error=function(e) e, warning=conditionMessage)
   msg = "queryEncode with approximative target name and fixed = T shouldn't return any dataset results"
   
-  checkIdentical(obs, exp, msg)
+  checkTrue(!is.null(obs), msg)
 }
 
 test.query_with_target <- function() {
@@ -23,33 +23,34 @@ test.query_with_target <- function() {
 
 test.combined_query <- function() {
   res_combo = queryEncode(biosample = "A549", assay = "chipseq", 
-                              file_format = "bigwig", fixed = F)
+                          file_format = "bigwig", fixed = F)
   checkTrue("ENCFF000VPN" %in% as.character(res_combo$experiment$file_accession), 
             msg = "this combined query should return a results set containing the id ENCFF000VPN")
 }
 
 test.query_4_dataset <- function() {
-  res_dataset_only = queryEncode(set_accession = "ENCSR685AIQ")
+  res_dataset_only = queryEncode(set_accession = "ENCSR180GCH")
   checkEquals(nrow(res_dataset_only$experiment), 0,
               msg = "this query shouldn't return any experiment results" )
   
-  checkEquals(nrow(res_dataset_only$dataset), 1, 
+  checkEquals(nrow(res_dataset_only$dataset), 2, 
               msg = "this query should return this precise result")
 }
 
-test.query_4_dataset_and_exp <- function() {
-  res_exp_dataset = queryEncode(dataset_access = "ENCSR403MYH")
-  checkTrue(nrow(res_exp_dataset$dataset) > 0,
-            msg = "this query should return at least one dataset result")
-  
-  checkTrue(nrow(res_exp_dataset$experiment) > 0,
-            msg = "this query should return at least one experiment result")
-}
+# No more overlap between experiment and dataset accession numbers
+# test.query_4_dataset_and_exp <- function() {
+#   res_exp_dataset = queryEncode(dataset_access = "ENCSR403MYH")
+#   checkTrue(nrow(res_exp_dataset$dataset) > 0,
+#             msg = "this query should return at least one dataset result")
+#   
+#   checkTrue(nrow(res_exp_dataset$experiment) > 0,
+#             msg = "this query should return at least one experiment result")
+# }
 
 test.combined_query_on_custom_df <- function() {
   load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODExplorer"))
   res_combo_custom = queryEncode(df = small_encode_df, target = "ELAVL1-human", 
-                           fixed = F, file_status = "all")
+                                 fixed = F, file_status = "all")
   
   checkEquals(as.character(res_combo_custom$experiment$file_accession), "ENCFF001VCK", 
               msg = "this combined query should return this precise result")
@@ -58,9 +59,14 @@ test.combined_query_on_custom_df <- function() {
 
 test.query_revoked_file <- function() {
   res_revok = queryEncode(assay = "chipseq", biosample = "mcf7", fixed = F, 
-                    file_status = "revoked")
+                          file_status = "revoked")
   
-  checkTrue("ENCFF000RYT" %in% as.character(res_revok$experiment$file_accession), 
-              msg = "this combined query should return a result set containg ENCFF000RYT")
+  checkTrue("ENCFF000ZKM" %in% as.character(res_revok$experiment$file_accession), 
+            msg = "this combined query should return a result set containg ENCFF000ZKM")
 }
 
+test.resolve_unknown_accession <- function(){
+  dataset_type <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$dataset_type[[1]]
+  checkEquals(dataset_type, "ucsc_browser_composite", 
+              msg = "ENCSR361ONJ dataset type is ucsc_browser_composite.")
+}
