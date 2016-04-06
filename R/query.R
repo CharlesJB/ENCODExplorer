@@ -359,6 +359,10 @@ query_transform <- function(my.term) {
 #' @return a \code{list} of two \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
 #' 
+#' @examples
+#' search_res <- searchEncode(searchTerm = "switchgear elavl1", limit = "1")
+#' res <- searchToquery(searchResults = search_res, quiet = TRUE)
+#' 
 #' @export
 searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
   

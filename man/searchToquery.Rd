@@ -27,4 +27,9 @@ from the collected metadata.
 \details{
 The output is compatible with the dowload function.
 }
+\examples{
+search_res <- searchEncode(searchTerm = "switchgear elavl1", limit = "1")
+res <- searchToquery(searchResults = search_res, quiet = TRUE)
+
+}
 
