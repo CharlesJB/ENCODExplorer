@@ -44,7 +44,18 @@ suppressMessages(library(ENCODExplorer))
 
 ### Data update
 
-If you want regenerate this list, you have to process the following steps:
+If you want regenerate ENCODExplorer data, you can use the update function.
+When you use `overwrite = TRUE`, it will overwrite the default package data, 
+otherwise it will return the list `encode_df` and the dataframe `accession_df`.
+
+```{r, eval=FALSE}
+# the path (relative or absolute) to the future database
+database_filename <- "new.encode.sqlite"
+new_data <- update_ENCODExplorer(database_filename, overwrite = FALSE)
+```
+
+If you want to update the data manually or partially, you have to process the 
+following steps:
 
 * generate the SQL database from ENCODE: 
 
@@ -59,12 +70,18 @@ tables = prepare_ENCODEdb(database_filename)
 new_encode_df <- export_ENCODEdb_matrix(database_filename)
 ```
 
+* generate the metadata accession_df from the SQL database:
+```{r new_accession_df, eval = FALSE}
+new_accession_df <- export_ENCODEdb_accession(new_encode_df, database_filename)
+```
 
-The whole process will take several minutes (5 to 15 minutes depending on your
+The whole process will take several minutes (30 to 60 minutes depending on your
 work environment)
 
 ### Updated data usage
 
+If you have chosen not to overwrite the default data, you can use your newly 
+created data.
 Once the `new_encode_df` is generated, you can use it to replace the default one 
 in the `queryEncode` and `downloadEncode` function by setting the *df* option of those 
 functions.

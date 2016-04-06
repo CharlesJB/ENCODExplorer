@@ -118,7 +118,6 @@ query_results <- queryEncode(assay = "rnaseq", organism = "Homo sapiens",
                        fixed = FALSE)
 ```
 
-
 These criteria correspond to the filters that you can find on ENCODE portal : 
 
 ![results of a filtered search on ENCODE portal](img/query_mcf7.png)
@@ -126,6 +125,18 @@ These criteria correspond to the filters that you can find on ENCODE portal :
 *Note: the usage of some criteria, like organism or target, will automatically
 dismiss the dataset results because this information isn't available for that
 type of data.*
+
+For some reason, some accession number can be missing for non-experiment 
+datasets. The metadata retrieval is not completely available in the current 
+release of ENCODExplorer. So that the user can at least have the list of 
+associated files, we implemented a new function `resolveEncodeAccession` which 
+return a `data.frame` containing the list of files associated to a particular 
+accession number.
+
+```{r files, collapse=TRUE}
+related_files <- resolveEncodeAccession(accession = 'ENCSR361ONJ')
+related_files$files
+```
 
 
 #### Search
