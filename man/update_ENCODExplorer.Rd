@@ -32,11 +32,10 @@ accession_df
 return the newly generated objets.
 }
 \examples{
-update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
-file.remove("platform.sql")
-    \dontrun{
-        update_ENCODExplorer("ENCODEdb.sqlite")
-    }
+\dontrun{
+    update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
+    update_ENCODExplorer("ENCODEdb.sqlite")
+}
     
 }
 

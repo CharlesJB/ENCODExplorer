@@ -19,11 +19,10 @@
 #' Default: \code{FALSE}.
 #' 
 #' @examples
-#' update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
-#' file.remove("platform.sql")
-#'     \dontrun{
-#'         update_ENCODExplorer("ENCODEdb.sqlite")
-#'     }
+#' \dontrun{
+#'     update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
+#'     update_ENCODExplorer("ENCODEdb.sqlite")
+#' }
 #'     
 #' @import jsonlite
 #' @export
