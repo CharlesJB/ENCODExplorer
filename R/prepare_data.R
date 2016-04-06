@@ -19,10 +19,11 @@
 #' Default: \code{FALSE}.
 #' 
 #' @examples
-#' \dontrun{
-#'     update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
-#'     update_ENCODExplorer("ENCODEdb.sqlite")
-#' }
+#' update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
+#' file.remove("platform.sql")
+#'     \dontrun{
+#'         update_ENCODExplorer("ENCODEdb.sqlite")
+#'     }
 #'     
 #' @import jsonlite
 #' @export
@@ -297,12 +298,16 @@ export_ENCODEdb_accession <- function(df = NULL, database_filename){
     RSQLite::dbClearResult(rs)
     file_list <- strsplit(x = results$files, split = ';')
     results <- cbind(accession = results$accession, files = file_list, 
-                     dataset_type = rep(x = dataset_type, times = nrow(results)))
+                     dataset_type = rep(x = dataset_type, 
+                                        times = nrow(results)))
     accession_df <- rbind(accession_df, results)
   }
   
   RSQLite::dbDisconnect(con)
   
+  accession_df$accession <- unlist(accession_df$accession)
+  accession_df$dataset_type <- unlist(accession_df$dataset_type)
+
   invisible(accession_df)
 }
 
