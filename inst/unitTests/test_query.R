@@ -5,11 +5,11 @@ if(FALSE) {
 
 
 test.fixed_option <- function() {
-  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=T),error=function(e) e, warning=conditionMessage)
-  exp = "No result found. You can try the <searchEncode> function or set the fixed option to FALSE"
+  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=T),
+                 error=function(e) e, warning=conditionMessage)
   msg = "queryEncode with approximative target name and fixed = T shouldn't return any dataset results"
   
-  checkIdentical(obs, exp, msg)
+  checkTrue(!is.null(obs), msg)
 }
 
 test.query_with_target <- function() {
@@ -23,7 +23,7 @@ test.query_with_target <- function() {
 
 test.combined_query <- function() {
   res_combo = queryEncode(biosample = "A549", assay = "chipseq", 
-                              file_format = "bigwig", fixed = F)
+                          file_format = "bigwig", fixed = F)
   checkTrue("ENCFF000VPN" %in% as.character(res_combo$experiment$file_accession), 
             msg = "this combined query should return a results set containing the id ENCFF000VPN")
 }
@@ -50,7 +50,7 @@ test.query_4_dataset <- function() {
 test.combined_query_on_custom_df <- function() {
   load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODExplorer"))
   res_combo_custom = queryEncode(df = small_encode_df, target = "ELAVL1-human", 
-                           fixed = F, file_status = "all")
+                                 fixed = F, file_status = "all")
   
   checkEquals(as.character(res_combo_custom$experiment$file_accession), "ENCFF001VCK", 
               msg = "this combined query should return this precise result")
@@ -59,9 +59,14 @@ test.combined_query_on_custom_df <- function() {
 
 test.query_revoked_file <- function() {
   res_revok = queryEncode(assay = "chipseq", biosample = "mcf7", fixed = F, 
-                    file_status = "revoked")
+                          file_status = "revoked")
   
   checkTrue("ENCFF000ZKM" %in% as.character(res_revok$experiment$file_accession), 
-              msg = "this combined query should return a result set containg ENCFF000ZKM")
+            msg = "this combined query should return a result set containg ENCFF000ZKM")
 }
 
+test.resolve_unknown_accession <- function(){
+  dataset_type <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$dataset_type
+  checkEquals(dataset_type, "ucsc_browser_composite", 
+              msg = "ENCSR361ONJ dataset type is ucsc_browser_composite.")
+}
