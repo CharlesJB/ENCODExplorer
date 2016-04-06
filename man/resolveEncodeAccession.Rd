@@ -18,4 +18,9 @@ requested accession number
 Return a \code{data.frame} containing basic datasets information from an 
 accession number
 }
+\examples{
+res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
+
+
+}
 

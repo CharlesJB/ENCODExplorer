@@ -22,10 +22,10 @@ Extract accession numbers from all the datasets of RSQLite databse in a
 \code{data.frame}
 }
 \examples{
-  database_filename <- system.file("extdata/ENCODEdb.sqlite",
-                                   package = "ENCODEdb")
-  \dontrun{
-    export_ENCODEdb_accession(database_filename = database_filename)
-  }
+    database_filename <- system.file("extdata/ENCODEdb.sqlite",
+                                                                       package = "ENCODEdb")
+    \dontrun{
+        export_ENCODEdb_accession(database_filename = database_filename)
+    }
 }
 

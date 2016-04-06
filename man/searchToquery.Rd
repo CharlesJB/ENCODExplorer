@@ -7,12 +7,13 @@
 searchToquery(df = NULL, searchResults, quiet = FALSE)
 }
 \arguments{
-\item{df}{\code{list} of two \code{data.frame} containing ENCODE experiment
-and dataset metadata.}
+\item{df}{\code{list} of two \code{data.frame} containing ENCODE 
+experiment and dataset metadata.}
 
 \item{searchResults}{the results set generated from \code{searchEncode}}
 
-\item{quiet}{logical enables to switch off the result summary information when setting at TRUE.}
+\item{quiet}{logical enables to switch off the result summary information 
+when setting at TRUE.}
 }
 \value{
 a \code{list} of two \code{data.frame}s containing data about ENCODE 
