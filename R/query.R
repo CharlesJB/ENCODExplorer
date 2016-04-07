@@ -424,5 +424,8 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
 #' @export
 resolveEncodeAccession <- function(accession){
   data(accession_df, envir = environment())
-  accession_df[accession_df$accession == accession,]
+  ret <- accession_df[accession_df$accession == accession,]
+  return(list(accession = as.character(ret$accession),
+              files =  as.character((ret$files)),
+              dataset_type = as.character(ret$dataset_type)))
 }
