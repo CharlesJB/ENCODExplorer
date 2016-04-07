@@ -134,7 +134,7 @@ return a `data.frame` containing the list of files associated to a particular
 accession number.
 
 ```{r files, collapse=TRUE}
-related_files <- resolveEncodeAccession(accession = 'ENCSR361ONJ')
+related_files <- resolveEncodeAccession(accession = 'ENCSR918FQM')
 related_files$files
 ```
 
