@@ -64,9 +64,3 @@ test.query_revoked_file <- function() {
   checkTrue("ENCFF000ZKM" %in% as.character(res_revok$experiment$file_accession), 
             msg = "this combined query should return a result set containg ENCFF000ZKM")
 }
-
-test.resolve_unknown_accession <- function(){
-  dataset_type <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$dataset_type
-  checkEquals(dataset_type, "ucsc_browser_composite", 
-              msg = "ENCSR361ONJ dataset type is ucsc_browser_composite.")
-}
