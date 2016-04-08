@@ -13,25 +13,22 @@
 #' containg two objects encode_df and accession_df.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' @param types The names of the tables to extract from ENCODE rest api.
 #' @param overwrite Should tables already present in database be overwrited
 #' @param mc.cores The number of cores to use. Default 1
 #' Default: \code{FALSE}.
 #' 
 #' @examples
-#' update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
-#' file.remove("platform.sql")
+#'
 #'     \dontrun{
 #'         update_ENCODExplorer("ENCODEdb.sqlite")
 #'     }
 #'     
 #' @import jsonlite
 #' @export
-update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
-                                 types = get_encode_types(), overwrite = FALSE, mc.cores = 1){
+update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqlite", overwrite = FALSE, mc.cores = 1){
   
   # 1) Create the RSQLite databse for the tables in ENCODE
-  ret <- prepare_ENCODEdb(database_filename, overwrite = overwrite)
+  ret <- prepare_ENCODEdb(database_filename = database_filename, overwrite = overwrite)
   
   if(is.null(ret)){
     return(NULL)
