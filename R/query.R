@@ -293,27 +293,21 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       warning_message <- "No result found in encode_df. 
       You can try the <searchEncode> function or set the fixed option to FALSE."
       
-      dataset_type <- character()
+      s3 <- NULL
       if(!is.null(ac)){
-        dataset_type <- as.character(resolveEncodeAccession(ac)$dataset_type)
+        s3 <- resolveEncodeAccession(ac)
       } else {
         if(!is.null(da)){
-          dataset_type <- as.character(resolveEncodeAccession(da)$dataset_type)
+          s3 <- resolveEncodeAccession(da)
         }
       }
       
-      if(length(dataset_type)) {
-        warning_message <- (paste0(warning_message, 
-                                   "The requested accession belongs to ", 
-                                   dataset_type, 
-                                   ", which is not supported by the current ",
-                                   "version of ENCODExplorer. You can still ",
-                                   "recover the list of the associated files ",
-                                   "using the <resolveEncodeAccession> function"))
+      if(!is.null(s3)) {
+        return(s3)
+      } else {
+        warning(warning_message, call. = FALSE)
+        NULL
       }
-      
-      warning(warning_message, call. = FALSE)
-      NULL
     }
     else
     {
@@ -421,11 +415,13 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
 #' res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
 #' 
 #' 
-#' @export
 resolveEncodeAccession <- function(accession){
   data(accession_df, envir = environment())
   ret <- accession_df[accession_df$accession == accession,]
-  return(list(accession = as.character(ret$accession),
-              files =  as.character((ret$files)),
-              dataset_type = as.character(ret$dataset_type)))
+  files <-  gsub(x = as.character(ret$files[[1]]), pattern = "/files/(.*)/", replacement = "\\1")
+  i <- encode_df$dataset$file_accession %in% files
+  j <- encode_df$experiment$file_accession %in% files
+  
+  list(experiment = encode_df$experiment[j,],
+       dataset = encode_df$dataset[i,])
 }

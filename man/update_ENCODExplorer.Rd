@@ -5,12 +5,10 @@
 \title{Create or update all the needed data for ENCODExplorer}
 \usage{
 update_ENCODExplorer(database_filename = "inst/extdata/ENCODEdb.sqlite",
-  types = get_encode_types(), overwrite = FALSE, mc.cores = 1)
+  overwrite = FALSE, mc.cores = 1)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.}
-
-\item{types}{The names of the tables to extract from ENCODE rest api.}
 
 \item{overwrite}{Should tables already present in database be overwrited}
 
@@ -32,10 +30,10 @@ accession_df
 return the newly generated objets.
 }
 \examples{
-\dontrun{
-    update_ENCODExplorer(database_filename = "platform.sql", types = "platform")
-    update_ENCODExplorer("ENCODEdb.sqlite")
-}
+
+    \dontrun{
+        update_ENCODExplorer("ENCODEdb.sqlite")
+    }
     
 }
 
