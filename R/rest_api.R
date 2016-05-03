@@ -53,81 +53,82 @@ extract_table <- function(type) {
 #' input \code{data.frame}.
 #'
 #'
-clean_table <- function(table) {
-  
-  clean_column <- function(column_name) {
-    column <- table[[column_name]]
-    # Case: data.frame
-    if (is.data.frame(column)) {
-      if (ncol(column) == 1 & nrow(column) == nrow(table)) {
-        column <- column[,1]
-      } else {
-        column <- NULL
-      }
+clean_column <- function(column_name,table) {
+  column <- table[[column_name]]
+  # Case: data.frame
+  if (is.data.frame(column)) {
+    if (ncol(column) == 1 & nrow(column) == nrow(table)) {
+      column <- column[,1]
+    } else {
+      column <- NULL
+    }
+    
+    # Case: list
+  } else if (is.list(column)) {
+    # List of empty list
+    if (all(sapply(column, length) == 0)) {
+      column <- NULL
       
-      # Case: list
-    } else if (is.list(column)) {
-      # List of empty list
-      if (all(sapply(column, length) == 0)) {
-        column <- NULL
-      } else if (column_name == "@type") {
-        column <- NULL
-      } else if (column_name == "related_files") {
+    } else if (column_name == "related_files") {
+      column <- sapply(column, function(x) {
+        if (class(x) == "character" & length(x) > 0) {
+          paste(x, collapse = ";")
+        } else {
+          NA
+        }
+      })
+      # List of character vector
+    } else if (column_name == "replicates") {
+      column <- NULL
+    } else if (all(sapply(column, class) == "character" | 
+                   sapply(column, is.null))) {
+      if (all(sapply(column, length) <= 1)) {
         column <- sapply(column, function(x) {
-          if (class(x) == "character" & length(x) > 0) {
-            paste(x, collapse = ";")
+          if (length(x) > 0) {
+            x[[1]]
           } else {
             NA
           }
         })
-        # List of character vector
-      } else if (column_name == "replicates") {
-        column <- NULL
-      } else if (all(sapply(column, class) == "character" | 
-                     sapply(column, is.null))) {
-        if (all(sapply(column, length) <= 1)) {
-          column <- sapply(column, function(x) {
-            if (length(x) > 0) {
-              x[[1]]
-            } else {
-              NA
-            }
-          })
-        } else {
-          column <- sapply(column, function(x) {
-            if (length(x) > 0) {
-              paste(x, collapse = ";")
-            }
-            else {
-              NA
-            }
-          })
+      } else {
+        column <- sapply(column, function(x) {
           
-        }
-        # List of data.frames
-      } else if (all(sapply(column, class) == "data.frame")) {
-        if (all(sapply(column, nrow) <= 1) &
-            all(sapply(column, ncol) <= 1)) {
-          column <- sapply(column, function(x) {
-            if (length(x) > 0) {
-              x[[1,1]]
-            } else {
-              NA
-            }
-          })
-        } else {
-          column <- NULL
-        }
+          if (length(x) > 0) {
+            paste(x, collapse = ";")
+          }
+          else {
+            NA
+          }
+        })
+        
       }
-      # List of something else
-      else {
+      # List of data.frames
+    } else if (all(sapply(column, class) == "data.frame")) {
+      if (all(sapply(column, nrow) <= 1) &
+          all(sapply(column, ncol) <= 1)) {
+        column <- sapply(column, function(x) {
+          if (length(x) > 0) {
+            x[[1,1]]
+          } else {
+            NA
+          }
+        })
+      } else {
         column <- NULL
       }
     }
-    column
+    # List of something else
+    else {
+      column <- NULL
+    }
   }
+  column
+}
+
+clean_table <- function(table) {
+  
   table_names <- gsub("@", "", colnames(table))
-  table <- lapply(colnames(table), clean_column)
+  table <- lapply(colnames(table), clean_column, table)
   names(table) <- table_names
   table[sapply(table, is.null)] <- NULL
   as.data.frame(table)
