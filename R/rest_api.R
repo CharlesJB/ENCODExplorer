@@ -78,8 +78,7 @@ clean_column <- function(column_name,table) {
         }
       })
       # List of character vector
-    } else if (column_name == "replicates") {
-      column <- NULL
+    
     } else if (all(sapply(column, class) == "character" | 
                    sapply(column, is.null))) {
       if (all(sapply(column, length) <= 1)) {
@@ -103,25 +102,32 @@ clean_column <- function(column_name,table) {
         
       }
       # List of data.frames
-    } else if (all(sapply(column, class) == "data.frame")) {
-      if (all(sapply(column, nrow) <= 1) &
-          all(sapply(column, ncol) <= 1)) {
-        column <- sapply(column, function(x) {
-          if (length(x) > 0) {
-            x[[1,1]]
-          } else {
+    } else if (all(sapply(column, class) == "data.frame" |
+                   sapply(column,is.null))){
+
+        column <- sapply(column, function(x){
+          unlisted<-unlist(x)
+          if(is.null(x)){
             NA
+          }else if(nrow(x)>1){
+            number_vector <- grep("1$",names(unlisted))
+            clean_list <- unlisted
+            if(length(number_vector)>0){
+              clean_list <- unlisted[number_vector]
+            }
+            unlisted <- clean_list[!duplicated(clean_list)]
           }
+          unlisted <- gsub("1$","",unlisted)
+          #paste(unlisted,collapse = ";")
         })
-      } else {
-        column <- NULL
+      
       }
     }
     # List of something else
     else {
       column <- NULL
     }
-  }
+  
   column
 }
 
