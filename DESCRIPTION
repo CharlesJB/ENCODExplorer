@@ -27,7 +27,8 @@ Imports:
     jsonlite,
     RSQLite,
     parallel,
-    RCurl
+    RCurl,
+    tidyr
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

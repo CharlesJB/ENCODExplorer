@@ -54,6 +54,7 @@ extract_table <- function(type) {
 #'
 #'
 clean_column <- function(column_name,table) {
+  print(column_name)
   column <- table[[column_name]]
   # Case: data.frame
   if (is.data.frame(column)) {
@@ -63,7 +64,10 @@ clean_column <- function(column_name,table) {
       column <- NULL
     }
     
-    # Case: list
+    # Case: character
+  }else if(is.character(column)){
+    column
+    
   } else if (is.list(column)) {
     # List of empty list
     if (all(sapply(column, length) == 0)) {
@@ -105,30 +109,53 @@ clean_column <- function(column_name,table) {
     } else if (all(sapply(column, class) == "data.frame" |
                    sapply(column,is.null))){
 
-        column <- sapply(column, function(x){
-          unlisted<-unlist(x)
-          if(is.null(x)){
-            NA
-          }else if(nrow(x)>1){
-            number_vector <- grep("1$",names(unlisted))
-            clean_list <- unlisted
-            if(length(number_vector)>0){
-              clean_list <- unlisted[number_vector]
-            }
-            unlisted <- clean_list[!duplicated(clean_list)]
+        column_clean <- clean_data_row(column)
+
+        list_data <-vector("list",length(column))
+        list_data <- lapply(seq_along(column_clean),function(x){
+          
+          a=column_clean[[x]]
+          
+          if(is.na(a)){
+            df<-data.frame(sample=NULL,col_name=NULL,value=NULL)
+            
+          }else{
+            df<-data.frame(sample=x,col_name=names(a),value=a)
+            row.names(df)<- NULL
           }
-          unlisted <- gsub("1$","",unlisted)
-          #paste(unlisted,collapse = ";")
+          df
         })
       
-      }
+        df_clean<-do.call("rbind",list_data)
+        df_clean$sample<-factor(df_clean$sample,levels=seq_along(column_clean))
+        df_clean<-spread(df_clean,col_name,value,drop=FALSE)
+        df_clean$sample<-NULL
+        column<-df_clean
     }
+    
     # List of something else
-    else {
+    }else {
       column <- NULL
     }
   
   column
+}
+#Clean a list of data.frame to kept only 1 row per data.frame
+clean_data_row <- function(column){
+  res<-vector("list",length(column))
+  for(i in 1:length(column)){
+    if(is.null(column[[i]])){
+      res[[i]]<-NA
+    }else if(nrow(column[[i]])>=1){
+      res[[i]]<-unlist(column[[i]][1,])
+      list_name <- names(unlist(column[[i]]))
+      list_name <- unique(gsub("\\d","",list_name))
+      names(res[[i]])<-list_name
+    }else{
+      res[[i]]<- NA
+    }
+  }
+  res
 }
 
 clean_table <- function(table) {
@@ -136,6 +163,7 @@ clean_table <- function(table) {
   table_names <- gsub("@", "", colnames(table))
   table <- lapply(colnames(table), clean_column, table)
   names(table) <- table_names
+  #return(table)
   table[sapply(table, is.null)] <- NULL
   as.data.frame(table)
 }
@@ -162,6 +190,11 @@ clean_table <- function(table) {
 #'        searchEncode("ChIP-Seq+H3K4me1")
 #' @import jsonlite
 #' @export
+#' 
+#' 
+#all_names <- unique(unlist(lapply(a, names)))
+
+
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   r = data.frame()
