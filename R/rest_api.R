@@ -38,22 +38,26 @@ extract_table <- function(type) {
   return(results)
 }
 
-#' Clean a data.frame that was produced by extract_table
+#' Clean a single column of the data.frame
 #'
-#' \code{data.frame}s produced when converting JSON to \code{data.frame} with
-#' the \code{fromJSON} function will sometime have columns that are lists
-#' and/or columns that are \code{data.frames}.
+#' The input column can either be a data.frame, a vector of character, a vector
+#' of numeric or a list of one the previous type.
 #'
 #' This function will either remove columns that are not relevant and convert
-#' columns to a vector.
+#' columns to a vector or data.frame.
 #'
-#' @param table The table produced by the \code{extract_table} function.
+#' @param column_name:the name of the column for the table that is been process.
+#'        table: The table produced by the \code{extract_table} function.
 #'
 #' @return a \code{data.frame} corresponding to the cleaned version of the
 #' input \code{data.frame}.
-#'
-#'
+#' 
+#' @examples clean_column("files",my_table)
+#' 
+#' @import tidyr
+#' 
 clean_column <- function(column_name,table) {
+  library(tidyr)
   print(column_name)
   column <- table[[column_name]]
   # Case: data.frame
@@ -67,23 +71,30 @@ clean_column <- function(column_name,table) {
     # Case: character
   }else if(is.character(column)){
     column
-    
+    # Case: numeric
+  }else if (is.numeric(column)){
+    if(length(column)== nrow(table)){
+      column
+    }else{
+      column <- NULL
+    }
   } else if (is.list(column)) {
     # List of empty list
     if (all(sapply(column, length) == 0)) {
       column <- NULL
       
-    } else if (column_name == "related_files") {
-      column <- sapply(column, function(x) {
-        if (class(x) == "character" & length(x) > 0) {
-          paste(x, collapse = ";")
-        } else {
-          NA
-        }
-      })
-      # List of character vector
+    # List of numeric
     
-    } else if (all(sapply(column, class) == "character" | 
+    }else if (all(sapply(column, class) == "numeric" | 
+                  sapply(column, is.null))){
+      if(length(column)==nrow(table)){
+        column
+      }else{
+        column <- NULL
+      }
+    
+    # List of character vector
+    }else if (all(sapply(column, class) == "character" | 
                    sapply(column, is.null))) {
       if (all(sapply(column, length) <= 1)) {
         column <- sapply(column, function(x) {
@@ -108,9 +119,23 @@ clean_column <- function(column_name,table) {
       # List of data.frames
     } else if (all(sapply(column, class) == "data.frame" |
                    sapply(column,is.null))){
-
-        column_clean <- clean_data_row(column)
-
+        
+        res<-vector("list",length(column))
+        for(i in 1:length(column)){
+          if(is.null(column[[i]])){
+            res[[i]]<-NA
+          }else if(nrow(column[[i]])>=1){
+            res[[i]]<-unlist(column[[i]][1,])
+            list_name <- names(unlist(column[[i]]))
+            list_name <- unique(gsub("\\d","",list_name))
+            names(res[[i]])<-list_name
+          }else{
+            res[[i]]<- NA
+          }
+        }
+        
+        column_clean<-res
+        
         list_data <-vector("list",length(column))
         list_data <- lapply(seq_along(column_clean),function(x){
           
@@ -120,7 +145,7 @@ clean_column <- function(column_name,table) {
             df<-data.frame(sample=NULL,col_name=NULL,value=NULL)
             
           }else{
-            df<-data.frame(sample=x,col_name=names(a),value=a)
+            df<-data.frame(sample=x,col_name=names(a),value=a,stringsAsFactors = FALSE)
             row.names(df)<- NULL
           }
           df
@@ -140,30 +165,28 @@ clean_column <- function(column_name,table) {
   
   column
 }
-#Clean a list of data.frame to kept only 1 row per data.frame
-clean_data_row <- function(column){
-  res<-vector("list",length(column))
-  for(i in 1:length(column)){
-    if(is.null(column[[i]])){
-      res[[i]]<-NA
-    }else if(nrow(column[[i]])>=1){
-      res[[i]]<-unlist(column[[i]][1,])
-      list_name <- names(unlist(column[[i]]))
-      list_name <- unique(gsub("\\d","",list_name))
-      names(res[[i]])<-list_name
-    }else{
-      res[[i]]<- NA
-    }
-  }
-  res
-}
+
+#' Clean a data.frame that was produced by extract_table
+#'
+#' \code{data.frame}s produced when converting JSON to \code{data.frame} with
+#' the \code{fromJSON} function will sometime have columns that are lists
+#' and/or columns that are \code{data.frames}.
+#'
+#' This function will either remove columns that are not relevant and convert
+#' columns to a vector or data.frame.
+#'
+#' @param table The table produced by the \code{extract_table} function.
+#'
+#' @return a \code{data.frame} corresponding to the cleaned version of the
+#' input \code{data.frame}.
+#'
+#' 
 
 clean_table <- function(table) {
   
   table_names <- gsub("@", "", colnames(table))
   table <- lapply(colnames(table), clean_column, table)
   names(table) <- table_names
-  #return(table)
   table[sapply(table, is.null)] <- NULL
   as.data.frame(table)
 }
@@ -192,7 +215,6 @@ clean_table <- function(table) {
 #' @export
 #' 
 #' 
-#all_names <- unique(unlist(lapply(a, names)))
 
 
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
