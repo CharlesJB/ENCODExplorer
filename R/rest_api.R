@@ -46,8 +46,8 @@ extract_table <- function(type) {
 #' This function will either remove columns that are not relevant and convert
 #' columns to a vector or data.frame.
 #'
-#' @param column_name:the name of the column for the table that is been process.
-#'        table: The table produced by the \code{extract_table} function.
+#' @param column_name The name of the column for the table that is been process.
+#' @param table The table produced by the \code{extract_table} function.
 #'
 #' @return a \code{data.frame} corresponding to the cleaned version of the
 #' input \code{data.frame}.
@@ -56,110 +56,111 @@ extract_table <- function(type) {
 #' 
 #' @import tidyr
 #' 
-clean_column <- function(column_name,table) {
-  library(tidyr)
-  print(column_name)
-  column <- table[[column_name]]
-  # Case: data.frame
-  if (is.data.frame(column)) {
-    if (ncol(column) == 1 & nrow(column) == nrow(table)) {
-      column <- column[,1]
-    } else {
-      column <- NULL
-    }
+clean_column <- function(column_name, table) {
+  
+    stopifnot(is.character(column_name))
+    stopifnot(column_name %in% colnames(table))
+    stopifnot(length(column_name) == 1)
+    stopifnot(is.data.frame(table))
+    stopifnot(nrow(table) >= 1)
+  
+    column <- table[[column_name]]
+    # Case: data.frame
+    if (is.data.frame(column)) {
+        if (ncol(column) == 1 & nrow(column) == nrow(table)) {
+            column <- column[,1]
+        } else {
+            column <- NULL
+        }
     
     # Case: character
-  }else if(is.character(column)){
-    column
-    # Case: numeric
-  }else if (is.numeric(column)){
-    if(length(column)== nrow(table)){
-      column
-    }else{
-      column <- NULL
-    }
-  } else if (is.list(column)) {
-    # List of empty list
-    if (all(sapply(column, length) == 0)) {
-      column <- NULL
-      
-    # List of numeric
-    
-    }else if (all(sapply(column, class) == "numeric" | 
-                  sapply(column, is.null))){
-      if(length(column)==nrow(table)){
+    } else if (is.character(column)) {
         column
-      }else{
-        column <- NULL
-      }
-    
-    # List of character vector
-    }else if (all(sapply(column, class) == "character" | 
-                   sapply(column, is.null))) {
-      if (all(sapply(column, length) <= 1)) {
-        column <- sapply(column, function(x) {
-          if (length(x) > 0) {
-            x[[1]]
-          } else {
-            NA
-          }
-        })
-      } else {
-        column <- sapply(column, function(x) {
-          
-          if (length(x) > 0) {
-            paste(x, collapse = ";")
-          }
-          else {
-            NA
-          }
-        })
-        
-      }
-      # List of data.frames
-    } else if (all(sapply(column, class) == "data.frame" |
-                   sapply(column,is.null))){
-        
-        res<-vector("list",length(column))
-        for(i in 1:length(column)){
-          if(is.null(column[[i]])){
-            res[[i]]<-NA
-          }else if(nrow(column[[i]])>=1){
-            res[[i]]<-unlist(column[[i]][1,])
-            list_name <- names(unlist(column[[i]]))
-            list_name <- unique(gsub("\\d","",list_name))
-            names(res[[i]])<-list_name
-          }else{
-            res[[i]]<- NA
-          }
+        # Case: numeric
+    } else if (is.numeric(column)) {
+        if (length(column) == nrow(table)) {
+            column
+        } else {
+            column <- NULL
         }
-        
-        column_clean<-res
-        
-        list_data <-vector("list",length(column))
-        list_data <- lapply(seq_along(column_clean),function(x){
-          
-          a=column_clean[[x]]
-          
-          if(is.na(a)){
-            df<-data.frame(sample=NULL,col_name=NULL,value=NULL)
-            
-          }else{
-            df<-data.frame(sample=x,col_name=names(a),value=a,stringsAsFactors = FALSE)
-            row.names(df)<- NULL
-          }
-          df
-        })
+    } else if (is.list(column)) {
+        # List of empty list
+        if (all(sapply(column, length) == 0)) {
+            column <- NULL
       
-        df_clean<-do.call("rbind",list_data)
-        df_clean$sample<-factor(df_clean$sample,levels=seq_along(column_clean))
-        df_clean<-spread(df_clean,col_name,value,drop=FALSE)
-        df_clean$sample<-NULL
-        column<-df_clean
-    }
+        # List of numeric
+        } else if (all(sapply(column, class) == "numeric" | 
+                  sapply(column, is.null))) {
+            if (length(column) == nrow(table)) {
+                column
+            } else {
+                column <- NULL
+            }
+    
+        # List of character vector
+        } else if (all(sapply(column, class) == "character" | 
+                   sapply(column, is.null))) {
+            
+            if (all(sapply(column, length) <= 1)) {
+                column <- sapply(column, function(x) {
+                    if (length(x) > 0) {
+                        x[[1]]
+                    } else {
+                        NA
+                    }
+                })
+            } else {
+                column <- sapply(column, function(x) {
+                    if (length(x) > 0) {
+                        paste(x, collapse=";")
+                    } else {
+                        NA
+                    }
+                })
+        
+            }
+        # List of data.frames
+        } else if (all(sapply(column, class) == "data.frame" |
+                   sapply(column, is.null))) {
+        
+            res <- vector("list", length(column))
+            for (i in 1:length(column)) {
+                if (is.null(column[[i]])) {
+                    res[[i]] <- NA
+                } else if (nrow(column[[i]]) >= 1) {
+                    res[[i]] <- unlist(column[[i]][1,])
+                    list_name <- names(unlist(column[[i]]))
+                    list_name <- unique(gsub("\\d", "", list_name))
+                    names(res[[i]]) <- list_name
+                } else {
+                    res[[i]] <- NA
+                }
+            }
+        
+            column_clean <- res
+            list_data <- vector("list",length(column))
+            list_data <- lapply(seq_along(column_clean),function(x) {
+                a=column_clean[[x]]
+                if (is.na(a)) {
+                    df <- data.frame(sample=NULL, col_name=NULL, value=NULL)
+                } else {
+                    df <- data.frame(sample=x, col_name=names(a), value=a,
+                           stringsAsFactors=FALSE)
+                    row.names(df) <- NULL
+                }
+                df
+            })
+      
+            df_clean <- do.call("rbind", list_data)
+            df_clean$sample <- factor(df_clean$sample,
+                                      levels=seq_along(column_clean))
+            df_clean <- spread(df_clean, col_name, value, drop=FALSE)
+            df_clean$sample <- NULL
+            column <- df_clean
+        }
     
     # List of something else
-    }else {
+    } else {
       column <- NULL
     }
   
@@ -244,7 +245,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
 #' Extract the schemas from ENCODE's github
 #'
 #' The JSONs are fetched from:
-#'         https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 #'
 #' The data is extracted using the github api:
 #'         https://developer.github.com/guides/getting-started/
@@ -278,7 +279,7 @@ get_schemas <- function() {
 #'
 #' The type (table) names are extracted from the schema list from ENCODE-DCC
 #' github repository:
-#'         https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+#'        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 #'
 #' The data is extracted using the github api:
 #'         https://developer.github.com/guides/getting-started/
