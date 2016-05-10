@@ -63,7 +63,9 @@ clean_column <- function(column_name, table) {
     stopifnot(length(column_name) == 1)
     stopifnot(is.data.frame(table))
     stopifnot(nrow(table) >= 1)
-  
+    
+    #print(paste0("Current column is :",column_name))
+    
     column <- table[[column_name]]
     # Case: data.frame
     if (is.data.frame(column)) {
@@ -128,10 +130,23 @@ clean_column <- function(column_name, table) {
                 if (is.null(column[[i]])) {
                     res[[i]] <- NA
                 } else if (nrow(column[[i]]) >= 1) {
-                    res[[i]] <- unlist(column[[i]][1,])
-                    list_name <- names(unlist(column[[i]]))
-                    list_name <- unique(gsub("\\d", "", list_name))
-                    names(res[[i]]) <- list_name
+                    res[[i]] <- unlist(column[[i]][1,]) #Only first row is selected
+                    if (nrow(column[[i]]) == 1) {
+                        list_name <- names(unlist(column[[i]]))
+                    } else {
+                        list_name <- names(unlist(column[[i]][1,]))
+                    }
+                    list_name <- (gsub("\\d", "", list_name))
+                    list_name <- (gsub("@", "", list_name))
+                    list_name_unique <- unique(gsub("\\d", "", list_name))
+                    
+                    if (!(length(list_name) == length(list_name_unique))) {
+                        splited <- split(res[[i]], list_name)
+                        res[[i]] <- sapply(splited, paste0, collapse=";")
+                        names(res[[i]]) <- list_name_unique
+                    } else{
+                        names(res[[i]]) <- list_name 
+                    }
                 } else {
                     res[[i]] <- NA
                 }
