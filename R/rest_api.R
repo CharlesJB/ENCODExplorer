@@ -52,8 +52,6 @@ extract_table <- function(type) {
 #' @return a \code{data.frame} corresponding to the cleaned version of the
 #' input \code{data.frame}.
 #' 
-#' @examples clean_column("files",my_table)
-#' 
 #' @import tidyr
 #' 
 clean_column <- function(column_name, table) {
