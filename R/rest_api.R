@@ -130,12 +130,22 @@ clean_column <- function(column_name, table) {
                 if (is.null(column[[i]])) {
                     res[[i]] <- NA
                 } else if (nrow(column[[i]]) >= 1) {
-                    res[[i]] <- unlist(column[[i]][1,]) #Only first row is selected
                     if (nrow(column[[i]]) == 1) {
+                        res[[i]] <- unlist(column[[i]])
                         list_name <- names(unlist(column[[i]]))
                     } else {
+                        res[[i]] <- unlist(column[[i]][1,])
                         list_name <- names(unlist(column[[i]][1,]))
+                        if (ncol(column[[i]]) == 1) {
+                            list_name <- names(unlist(column[[i]][1]))
+                            list_name <- unique(gsub("\\d", "", list_name))
+                        }
+                        
                     }
+                    #if(ncol(column[[i]])==1){
+                        #list_name <- paste0(colnames(column[[i]]),".",list_name)
+                    #}
+                    
                     list_name <- (gsub("\\d", "", list_name))
                     list_name <- (gsub("@", "", list_name))
                     list_name_unique <- unique(gsub("\\d", "", list_name))
@@ -202,12 +212,10 @@ clean_table <- function(table) {
   
     class_vector <- as.vector(sapply(table, class))
     table <- table[,class_vector %in% c("character","list","data.frame")]
-    
     table_names <- gsub("@", "", colnames(table))
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
     table[sapply(table, is.null)] <- NULL
-    print("hello World")
     as.data.frame(table)
 }
 
