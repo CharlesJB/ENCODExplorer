@@ -164,7 +164,7 @@ clean_column <- function(column_name, table) {
             list_data <- vector("list",length(column))
             list_data <- lapply(seq_along(column_clean),function(x) {
                 a=column_clean[[x]]
-                if (is.na(a)) {
+                if (all(is.na(a))) {
                     df <- data.frame(sample=NULL, col_name=NULL, value=NULL)
                 } else {
                     df <- data.frame(sample=x, col_name=names(a), value=a,
