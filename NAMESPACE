@@ -3,6 +3,7 @@
 export(downloadEncode)
 export(export_ENCODEdb_accession)
 export(export_ENCODEdb_matrix)
+export(resolveEncodeAccession)
 export(prepare_ENCODEdb)
 export(queryEncode)
 export(searchEncode)
