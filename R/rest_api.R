@@ -200,11 +200,15 @@ clean_column <- function(column_name, table) {
 
 clean_table <- function(table) {
   
-  table_names <- gsub("@", "", colnames(table))
-  table <- lapply(colnames(table), clean_column, table)
-  names(table) <- table_names
-  table[sapply(table, is.null)] <- NULL
-  as.data.frame(table)
+    class_vector <- as.vector(sapply(table, class))
+    table <- table[,class_vector %in% c("character","list","data.frame")]
+    
+    table_names <- gsub("@", "", colnames(table))
+    table <- lapply(colnames(table), clean_column, table)
+    names(table) <- table_names
+    table[sapply(table, is.null)] <- NULL
+    print("hello World")
+    as.data.frame(table)
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
