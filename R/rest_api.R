@@ -62,7 +62,7 @@ clean_column <- function(column_name, table) {
     stopifnot(is.data.frame(table))
     stopifnot(nrow(table) >= 1)
     
-    #print(paste0("Current column is :",column_name))
+    print(paste0("Current column is :",column_name))
     
     column <- table[[column_name]]
     # Case: data.frame
@@ -212,7 +212,7 @@ clean_table <- function(table) {
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
     table[sapply(table, is.null)] <- NULL
-    as.data.frame(table)
+    as.data.table(table)
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
