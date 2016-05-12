@@ -112,7 +112,7 @@ clean_column <- function(column_name, table) {
             } else {
                 column <- sapply(column, function(x) {
                     if (length(x) > 0) {
-                        paste(x, collapse=";")
+                        paste(x, collapse="; ")
                     } else {
                         NA
                     }
@@ -140,9 +140,6 @@ clean_column <- function(column_name, table) {
                         }
                         
                     }
-                    #if(ncol(column[[i]])==1){
-                        #list_name <- paste0(colnames(column[[i]]),".",list_name)
-                    #}
                     
                     list_name <- (gsub("\\d", "", list_name))
                     list_name <- (gsub("@", "", list_name))
@@ -209,7 +206,8 @@ clean_column <- function(column_name, table) {
 clean_table <- function(table) {
   
     class_vector <- as.vector(sapply(table, class))
-    table <- table[,class_vector %in% c("character","list","data.frame")]
+    table <- table[,class_vector %in% c("character", "list", "data.frame",
+                                        "numeric")]
     table_names <- gsub("@", "", colnames(table))
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
