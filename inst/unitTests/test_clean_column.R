@@ -12,12 +12,13 @@ test.column_character <- function() {
 }
 
 test.column_dataFrame <- function () {
-    df1 <- data.frame(a=c("a", "b", "c"), stringsAsFactors=FALSE)
-    input <- data.frame(df1)
-    obs <- ENCODExplorer:::clean_column("a", input)
-    exp <- c("a", "b", "c")
-    res <- checkIdentical(obs, exp)
-    print(res)
+
+    load(file=system.file("extdata/ABC_df_lab.rda", package="ENCODExplorer"))
+    stopifnot(is.data.frame(ABC_df_lab))
+    stopifnot(is.data.frame(ABC_df_lab[,1]))
+    obs <- ENCODExplorer:::clean_column("lab", ABC_df_lab)
+    exp <- c("Bradley Bernstein, Broad", NA, NA, NA, "Richard Myers, HAIB")
+    checkIdentical(exp, obs[1:5])
 }
 
 test.column_numeric <- function() {
@@ -29,14 +30,17 @@ test.column_numeric <- function() {
 }
 
 test.column_list_character <- function() {
-    a <- c("String#1")
-    b <- c("String#2")
-    the_list <- c(a, b)
-    df <- data.frame(the_list, stringsAsFactors=FALSE)
-    input <- data.frame(df, stringsAsFactors=FALSE)
-    obs <- ENCODExplorer:::clean_column("the_list", input)
-    exp <- the_list
-    checkIdentical(obs, exp)
+    
+    load(file=system.file("extdata/ABC_list_char.rda", package="ENCODExplorer"))
+    input <- ABC_list_char
+    stopifnot(is.data.frame(ABC_list_char))
+    stopifnot(is.list(ABC_list_char[,1]))
+    stopifnot(all(sapply(ABC_list_char[,1],class) == "character" | (sapply
+            (ABC_list_char[,1],is.null))))
+    obs <- ENCODExplorer:::clean_column("@type", input)
+    exp <- c("Experiment; Dataset; Item","AntibodyLot; Item")
+    stopifnot(is.character(obs))
+    checkIdentical(obs[1:2], exp)
 }
 
 #' The data.frame ABC_subset.rda can be generate with :
@@ -47,6 +51,10 @@ test.column_list_character <- function() {
 
 test.column_list_dataFrame <- function () {
     load(file=system.file("extdata/ABC_subset.rda", package="ENCODExplorer"))
+    stopifnot(is.data.frame(ABC_subset))
+    stopifnot(is.list(ABC_subset$replicates))
+    stopifnot(all(sapply(ABC_subset$replicates,class) == "data.frame" | sapply
+                  (ABC_subset$replicates, is.null)))
     obs <- ENCODExplorer:::clean_column("replicates", ABC_subset)
     exp <- data.frame(antibody.accession=c(NA, "ENCAB000ARB"), 
         library.biosample.age=c("14", "14"), library.biosample.age_units=
