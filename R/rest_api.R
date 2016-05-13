@@ -62,13 +62,24 @@ clean_column <- function(column_name, table) {
     stopifnot(is.data.frame(table))
     stopifnot(nrow(table) >= 1)
     
-    print(paste0("Current column is :",column_name))
+    #print(paste0("Current column is :",column_name))
     
     column <- table[[column_name]]
+
+    clean_empty_list <- function(x){
+      if(is.list(x) & length(x) == 0){
+        NULL
+      }else{
+        x
+      }
+    }
+
     # Case: data.frame
     if (is.data.frame(column)) {
         if (ncol(column) == 1 & nrow(column) == nrow(table)) {
             column <- column[,1]
+        }else if (nrow(column) == nrow(table)) {
+            column
         } else {
             column <- NULL
         }
@@ -76,14 +87,25 @@ clean_column <- function(column_name, table) {
     # Case: character
     } else if (is.character(column)) {
         column
-        # Case: numeric
+    # Case: numeric
     } else if (is.numeric(column)) {
         if (length(column) == nrow(table)) {
             column
         } else {
             column <- NULL
         }
+    #Case: integer
+    }else if (is.integer(column)){
+      if (length(column) == nrow(table)){
+        column
+      }else{
+        column <- NULL
+      }
+      
     } else if (is.list(column)) {
+        #Removing empty list in the column
+        column <- lapply(column,clean_empty_list)
+        
         # List of empty list
         if (all(sapply(column, length) == 0)) {
             column <- NULL
@@ -98,7 +120,7 @@ clean_column <- function(column_name, table) {
             }
     
         # List of character vector
-        } else if (all(sapply(column, class) == "character" | 
+        } else if (all(sapply(column, class) == "character" |
                    sapply(column, is.null))) {
             
             if (all(sapply(column, length) <= 1)) {
@@ -122,7 +144,6 @@ clean_column <- function(column_name, table) {
         # List of data.frames
         } else if (all(sapply(column, class) == "data.frame" |
                    sapply(column, is.null))) {
-        
             res <- vector("list", length(column))
             for (i in 1:length(column)) {
                 if (is.null(column[[i]])) {
@@ -207,12 +228,12 @@ clean_table <- function(table) {
   
     class_vector <- as.vector(sapply(table, class))
     table <- table[,class_vector %in% c("character", "list", "data.frame",
-                                        "numeric")]
+                                        "numeric", "integer")]
     table_names <- gsub("@", "", colnames(table))
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
     table[sapply(table, is.null)] <- NULL
-    as.data.table(table)
+    as.data.frame(table)
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
