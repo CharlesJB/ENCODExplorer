@@ -14,9 +14,9 @@ test.column_character <- function() {
 test.column_dataFrame <- function () {
 
     load(file=system.file("extdata/ABC_df_lab.rda", package="ENCODExplorer"))
-    stopifnot(is.data.frame(ABC_df_lab))
-    stopifnot(is.data.frame(ABC_df_lab[,1]))
-    obs <- ENCODExplorer:::clean_column("lab", ABC_df_lab)
+    stopifnot(is.data.frame(ABC_lab))
+    stopifnot(is.data.frame(ABC_lab[,1]))
+    obs <- ENCODExplorer:::clean_column("lab", ABC_lab)
     exp <- c("Bradley Bernstein, Broad", NA, NA, NA, "Richard Myers, HAIB")
     checkIdentical(exp, obs[1:5])
 }
@@ -27,6 +27,16 @@ test.column_numeric <- function() {
     df <- data.frame(title=input, stringsAsFactors=FALSE)
     obs <- ENCODExplorer:::clean_column("title", df)
     checkIdentical(obs, exp)
+}
+
+test.column_integer <- function() {
+    load(file=system.file("extdata/dataFrame_integer.rda", package="ENCODExplorer"))
+    input <- dataFrame_integer
+    stopifnot(is.data.frame(input))
+    stopifnot(is.integer(input[[1]]))
+    obs <- clean_column("x", input)
+    exp <- as.integer(c(4, 1, 1, 1))
+    checkIdentical(obs[1:4], exp)
 }
 
 test.column_list_character <- function() {
