@@ -121,7 +121,13 @@ clean_column <- function(column_name, table) {
         } else if (all(sapply(column, class) == "numeric" | 
                   sapply(column, is.null))) {
             if (length(column) == nrow(table)) {
-                column
+              column <- sapply(column, function(x) {
+                if (length(x) > 0) {
+                  paste(x, collapse="; ")
+                } else {
+                  NA
+                }
+              })
             } else {
                 column <- NULL
             }
@@ -211,7 +217,16 @@ clean_column <- function(column_name, table) {
     } else {
       column <- NULL
     }
-  
+
+  type <- c("character", "data.frame",
+            "numeric", "integer", "NULL")
+  stopifnot(class(column) %in% type)
+  if(class(column) == "data.frame"){
+      stopifnot(nrow(column) == nrow(table))
+  }else if((class(column) %in% type) & !(class(column) == "NULL")){
+      stopifnot(length(column) == nrow(table))
+  }
+
   column
 }
 
