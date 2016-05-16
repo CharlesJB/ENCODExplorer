@@ -76,10 +76,17 @@ clean_column <- function(column_name, table) {
 
     # Case: data.frame
     if (is.data.frame(column)) {
-        if (ncol(column) == 1 & nrow(column) == nrow(table)) {
-            column <- column[,1]
-        }else if (nrow(column) == nrow(table)) {
-            column
+        if (nrow(column) == nrow(table)) {
+            for (i in 1:ncol(column)){
+              column[[i]]<-lapply(column[[i]], unlist)
+              column[[i]] <- sapply(column[[i]], function(x) {
+                if (length(x) > 0) {
+                  paste(x, collapse="; ")
+                } else {
+                  NA
+                }
+              })
+            }
         } else {
             column <- NULL
         }
