@@ -22,8 +22,12 @@ extract_table <- function(type) {
     }
   } else {
     
-    temp <- strsplit(type, split = '')[[1]]
-    utype <- paste(c(toupper(temp[1]), temp[-1]), collapse = '')
+    #temp <- strsplit(type, split = '')[[1]]
+    #utype <- paste(c(toupper(temp[1]), temp[-1]), collapse = '')
+    temp <- strsplit(type, split="_")[[1]]
+    utype <- sapply(temp,function(x){paste0(toupper(substr(x,1,1)),
+                                           substr(x,2,nchar(x)))})
+    utype <- paste(utype, collapse='')
     url <- "https://www.encodeproject.org/search/?type="
     url <- paste0(url, utype, filters)
     
@@ -62,7 +66,6 @@ clean_column <- function(column_name, table) {
     stopifnot(is.data.frame(table))
     stopifnot(nrow(table) >= 1)
     
-    #print(paste0("Current column is :",column_name))
     
     column <- table[[column_name]]
 
@@ -101,6 +104,13 @@ clean_column <- function(column_name, table) {
         } else {
             column <- NULL
         }
+    #Case: logical
+    }else if (is.logical(column)) {
+      if (length(column) == nrow(table)) {
+        column
+      } else {
+        column <- NULL
+      }
     #Case: integer
     }else if (is.integer(column)){
       if (length(column) == nrow(table)){
@@ -131,7 +141,21 @@ clean_column <- function(column_name, table) {
             } else {
                 column <- NULL
             }
-    
+        # List of logical
+        }else if (all(sapply(column, class) == "logical" | 
+                      sapply(column, is.null))) {
+            if (length(column) == nrow(table)){
+                column <- sapply(column, function(x) {
+                    if (length(x) > 0) {
+                        paste(x, collapse="; ")
+                    } else {
+                         NA
+                    }
+                })
+            }else{
+                column <- NULL
+            }
+        
         # List of character vector
         } else if (all(sapply(column, class) == "character" |
                    sapply(column, is.null))) {
@@ -218,7 +242,7 @@ clean_column <- function(column_name, table) {
       column <- NULL
     }
 
-  type <- c("character", "data.frame",
+  type <- c("character", "data.frame", "logical",
             "numeric", "integer", "NULL")
   stopifnot(class(column) %in% type)
   if(class(column) == "data.frame"){
@@ -250,7 +274,7 @@ clean_table <- function(table) {
   
     class_vector <- as.vector(sapply(table, class))
     table <- table[,class_vector %in% c("character", "list", "data.frame",
-                                        "numeric", "integer")]
+                                        "logical", "numeric", "integer")]
     table_names <- gsub("@", "", colnames(table))
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names

@@ -4,7 +4,7 @@
 \alias{prepare_ENCODEdb}
 \title{Create the RSQLite databse for the tables in ENCODE}
 \usage{
-prepare_ENCODEdb(database_filename = "inst/extdata/ENCODEdb.sqlite",
+prepare_ENCODEdb(database_filename = "inst/extdata/tables.RDA",
   types = get_encode_types(), overwrite = FALSE)
 }
 \arguments{

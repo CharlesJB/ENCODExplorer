@@ -83,8 +83,9 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
 #'     }
 #'     
 #' @import jsonlite
+#' @import data.table
 #' @export
-prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
+prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
                              types = get_encode_types(), overwrite = FALSE) {
   
   if(file.exists(database_filename) && !overwrite) {
@@ -94,28 +95,20 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/ENCODEdb.sqlite",
     T1<-Sys.time()
     # Extract the tables from the ENCODE rest api
     extract_type <- function(type) {
-      # upper case for the first letter
       table <- extract_table(type)
-      table <- clean_table(table)
-      
-      if (all(dim(table) > 0)) {
-        RSQLite::dbWriteTable(con, type, table, overwrite = overwrite)
-      } else {
-        table <- NULL
-      }
-      table
+      table_clean <- clean_table(table)
+      table <- as.data.table(table_clean)
     }
-    con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
+
     tables <- lapply(types, extract_type)
-    RSQLite::dbDisconnect(con)
+    
     
     # Return the named tables
     names(tables) <- types
     tables[sapply(tables, is.null)] <- NULL
     
     Tdiff = Sys.time() - T1
-    print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " min"))
-    
+    print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " sec"))
     
     # Extract data from the DB
     if(length(tables) > 0) {

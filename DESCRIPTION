@@ -31,7 +31,8 @@ Imports:
     RSQLite,
     parallel,
     RCurl,
-    tidyr
+    tidyr,
+    data.table
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,
