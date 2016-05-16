@@ -52,7 +52,7 @@ extract_table <- function(type) {
 #' @return a \code{data.frame} corresponding to the cleaned version of the
 #' input \code{data.frame}.
 #' 
-#' @import tidyr
+#' @importFrom tidyr spread
 #' 
 clean_column <- function(column_name, table) {
   
