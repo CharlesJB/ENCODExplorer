@@ -17,8 +17,12 @@ test.column_dataFrame <- function () {
     stopifnot(is.data.frame(ABC_lab))
     stopifnot(is.data.frame(ABC_lab[,1]))
     obs <- ENCODExplorer:::clean_column("lab", ABC_lab)
-    exp <- c("Bradley Bernstein, Broad", NA, NA, NA, "Richard Myers, HAIB")
-    checkIdentical(exp, obs[[1]][1:5])
+    exp <- data.frame(title=c("Bradley Bernstein, Broad", "NA", "NA", "NA",
+           "Richard Myers, HAIB", "Richard Myers, HAIB", 
+           "John Stamatoyannopoulos, UW", "Richard Myers, HAIB",
+           "Richard Myers, HAIB", "John Stamatoyannopoulos, UW"), 
+           stringsAsFactors = FALSE)
+    checkIdentical(exp, obs)
 }
 
 test.column_numeric <- function() {
