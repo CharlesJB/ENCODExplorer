@@ -18,7 +18,7 @@ test.column_dataFrame <- function () {
     stopifnot(is.data.frame(ABC_lab[,1]))
     obs <- ENCODExplorer:::clean_column("lab", ABC_lab)
     exp <- c("Bradley Bernstein, Broad", NA, NA, NA, "Richard Myers, HAIB")
-    checkIdentical(exp, obs[1:5])
+    checkIdentical(exp, obs[[1]][1:5])
 }
 
 test.column_numeric <- function() {
@@ -34,7 +34,7 @@ test.column_integer <- function() {
     input <- dataFrame_integer
     stopifnot(is.data.frame(input))
     stopifnot(is.integer(input[[1]]))
-    obs <- clean_column("x", input)
+    obs <- ENCODExplorer:::clean_column("x", input)
     exp <- as.integer(c(4, 1, 1, 1))
     checkIdentical(obs[1:4], exp)
 }
