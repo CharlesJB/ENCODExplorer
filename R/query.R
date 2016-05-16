@@ -414,7 +414,7 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
 #' @examples
 #' res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
 #' 
-#' 
+#' @export
 resolveEncodeAccession <- function(accession){
   data(accession_df, envir = environment())
   ret <- accession_df[accession_df$accession == accession,]
