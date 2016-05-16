@@ -11,7 +11,7 @@ a \code{list} of schemas.
 }
 \description{
 The JSONs are fetched from:
-        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
+       https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
 }
 \details{
 The data is extracted using the github api:
