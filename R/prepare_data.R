@@ -84,6 +84,7 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
 #'     
 #' @import jsonlite
 #' @import data.table
+#' @import plyr
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
                              types = get_encode_types(), overwrite = FALSE) {
@@ -97,15 +98,18 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
     extract_type <- function(type) {
       table <- extract_table(type)
       table_clean <- clean_table(table)
-      table <- as.data.table(table_clean)
     }
-
+    
+    # List of data.frame
     tables <- lapply(types, extract_type)
     
     
     # Return the named tables
     names(tables) <- types
     tables[sapply(tables, is.null)] <- NULL
+    lapply(tables, as.data.table)
+    save(tables, file=database_filename)
+
     
     Tdiff = Sys.time() - T1
     print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " sec"))
@@ -151,7 +155,7 @@ export_ENCODEdb_matrix <- function(database_filename, mc.cores = 1) {
   
   T1<-Sys.time()
   
-  Tables <- step1(database_filename = database_filename)
+  Tables <- step1x(database_filename = database_filename)
   Tables$files <- step2(files = Tables$files)
   Tables$files <- step3(files = Tables$files, awards = Tables$awards, 
                         labs = Tables$labs, platforms = Tables$platforms, 
@@ -339,6 +343,41 @@ step1 <- function(database_filename){
   ))
 }
 
+step1x <- function(database_filename){
+
+  ### Step 1 : fetch all needed data
+  cat('Step 1 : fetch all needed data\n')
+  all_files <- tables$file
+  all_experiments <- tables$experiment
+  all_datasets <- tables$dataset
+  all_matched_sets <- tables$matched_set
+  all_labs <- tables$lab
+  all_awards <- tables$award
+  all_targets <- tables$target
+  all_biosamples <- tables$biosample
+  all_libraries <- tables$biosample
+  all_organisms <- tables$organism
+  all_treatments <- tables$treatment
+  all_replicates <- tables$replicate
+  all_platforms <- tables$platform
+  
+  return(list(
+    files = all_files,
+    experiments = all_experiments,
+    datasets = all_datasets,
+    matched_sets = all_matched_sets,
+    labs = all_labs,
+    awards = all_awards,
+    targets = all_targets,
+    biosamples = all_biosamples,
+    libraries = all_libraries,
+    organisms = all_organisms,
+    treatments = all_treatments,
+    replicates = all_replicates,
+    platforms = all_platforms
+  ))
+}
+
 step2 <- function(files){
   cat('Step 2 : renommage\n')
   ### Step 2 : renommage
@@ -368,10 +407,10 @@ step3 <- function(files, awards, labs, platforms, cores){
       mc.cores =    cores
     )
   )
-  
+
   files$paired_with <- gsub(x = files$paired_with, pattern = "/files/(.*)/", 
                             replacement = '\\1')
-  
+
   files$platform <- unlist(
     mclapply(
       X = files$platform, 
@@ -384,7 +423,7 @@ step3 <- function(files, awards, labs, platforms, cores){
       mc.cores =    cores
     )
   )
-  
+
   files$lab <- unlist(
     mclapply(
       X = files$lab, 
@@ -397,7 +436,7 @@ step3 <- function(files, awards, labs, platforms, cores){
       mc.cores =    cores
     )
   )
-  
+
   return(files)
 }
 
