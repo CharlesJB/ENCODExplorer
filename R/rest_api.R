@@ -141,8 +141,23 @@ clean_column <- function(column_name, table) {
             } else {
                 column <- NULL
             }
+        # List of integer
+        } else if (all(sapply(column, class) == "integer" | 
+                       sapply(column, is.null))) {
+          if (length(column) == nrow(table)) {
+            column <- sapply(column, function(x) {
+              if (length(x) > 0) {
+                paste(x, collapse="; ")
+              } else {
+                NA
+              }
+            })
+          } else {
+            column <- NULL
+          }
+        
         # List of logical
-        }else if (all(sapply(column, class) == "logical" | 
+        } else if (all(sapply(column, class) == "logical" | 
                       sapply(column, is.null))) {
             if (length(column) == nrow(table)){
                 column <- sapply(column, function(x) {
@@ -279,7 +294,10 @@ clean_table <- function(table) {
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
     table[sapply(table, is.null)] <- NULL
-    as.data.frame(table)
+    result <- as.data.frame(table)
+    
+    final_result <- lapply(X = result, FUN = function(x) if(class(x) == "factor") {as.character(x)} else {x})
+    final_result
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
