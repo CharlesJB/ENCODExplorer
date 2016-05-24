@@ -24,7 +24,7 @@ License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODExplorer/issues
 VignetteBuilder: knitr
 Depends:
-    R (>= 3.3)
+    R (>= 3.2)
 Imports:
     tools,
     jsonlite,
