@@ -79,7 +79,7 @@ clean_column <- function(column_name, table) {
 
     # Case: data.frame
     if (is.data.frame(column)) {
-        if (nrow(column) == nrow(table)) {
+        if (nrow(column) == nrow(table) & ncol(column) >= 1) {
             for (i in 1:ncol(column)){
               column[[i]]<-lapply(column[[i]], unlist)
               column[[i]] <- sapply(column[[i]], function(x) {
@@ -286,7 +286,7 @@ clean_column <- function(column_name, table) {
 #' 
 
 clean_table <- function(table) {
-  
+
     class_vector <- as.vector(sapply(table, class))
     table <- table[,class_vector %in% c("character", "list", "data.frame",
                                         "logical", "numeric", "integer")]

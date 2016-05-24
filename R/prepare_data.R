@@ -99,20 +99,20 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
       table <- extract_table(type)
       table_clean <- clean_table(table)
     }
-    
+    cat('The tables have been extracted ...\n')
     # List of data.frame
     tables <- lapply(types, extract_type)
-    
     
     # Return the named tables
     names(tables) <- types
     tables[sapply(tables, is.null)] <- NULL
-    lapply(tables, as.data.table)
+    cat('Converting format ...\n')
+    tables <- lapply(tables, as.data.table)
     save(tables, file=database_filename)
     
     
     Tdiff = Sys.time() - T1
-    print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " sec"))
+    print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " min"))
     
     # Extract data from the DB
     if(length(tables) > 0) {
@@ -170,9 +170,9 @@ export_ENCODEdb_matrix <- function(database_filename) {
                         biosamples = Tables$biosamples)
   
   # suppression des tables inutiles
-  Tables$replicates = NULL
-  Tables$libraries = NULL
-  Tables$treatments = NULL
+  Tables$replicates <- NULL
+  Tables$libraries <- NULL
+  Tables$treatments <- NULL
   
   Tables$files <- step5(files = Tables$files)
   
@@ -297,7 +297,6 @@ export_ENCODEdb_accession <- function(df = NULL, database_filename){
 step1 <- function(database_filename){
   
   ### Step 1 : fetch all needed data
-  cat('Step 1 : fetch all needed data\n')
   all_files <- tables$file
   all_experiments <- tables$experiment
   all_datasets <- tables$dataset
@@ -306,7 +305,7 @@ step1 <- function(database_filename){
   all_awards <- tables$award
   all_targets <- tables$target
   all_biosamples <- tables$biosample
-  all_libraries <- tables$biosample
+  all_libraries <- tables$library
   all_organisms <- tables$organism
   all_treatments <- tables$treatment
   all_replicates <- tables$replicate
@@ -330,7 +329,6 @@ step1 <- function(database_filename){
 }
 
 step2 <- function(files){
-  cat('Step 2 : renommage\n')
   ### Step 2 : renommage
   #### files
   names(files)[names(files) == 'status'] <- 'file_status'
@@ -342,10 +340,6 @@ step2 <- function(files){
 }
 
 step3 <- function(files, awards, labs, platforms){
-  cat('Step 3 : remplacement des references simple par leur valeur : ',
-      'project (anc. award), platform, lab, paired_with\n')
-  T2<-Sys.time()
-  
   # Updating files$project with awards$project
   match_vector <- match(files$project, awards$id)
   no_match <- is.na(match_vector)
@@ -376,15 +370,10 @@ step3 <- function(files, awards, labs, platforms){
   files[files$lab %in% labs$id, lab := labs$title[match_vector]]
   files[no_match, lab := gsub(lab, pattern = "/.*/(.*)/", 
                                    replacement = '\\1')]
-  
-  Tdiff = Sys.time() - T2
-  print(paste0("Step3 : ",Tdiff, " sec"))
   return(files)
 }
 
 step4 <- function(files, replicates, libraries, treatments, biosamples){
-  cat('Step 4.1 : remplacement des references complexes par les valeurs : ',
-      'replicate_list (anc.replicate)\n')
  
   # Updating biological_replicate_list with replicates$biological_replicate_number
   
@@ -400,78 +389,37 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
   suppressWarnings(files$technical_replicate_number <- rep(NULL, nrow(files)))
   files[files$replicate_list %in% replicates$id, technical_replicate_number := 
           replicates$technical_replicate_number[match_vector]]
-  
-  
-  
-  cat('Step 4.2 : treatment first get 1 replicate from replicate_list, ',
-     'from replicate get library, from library get treatment\n')
-  #replicate_list->library->treatment
-  match_replicate <- match(files$replicate_list, replicates$id)
-  match_replicate <- match_replicate[!is.na(match_replicate)]
-  suppressWarnings(files$treatment_col <- rep(NULL, row(files)))
-  files[files$replicate_list %in% replicates$id, treatment_col := 
-          replicates$library[match_replicate]]
-  # files[, treatment_col := gsub(treatment_col, pattern = "/.*/(.*)/", 
-  #                                      replacement = '\\1')]
-  # files[, treatment_col := substr(treatment_col, start=6, stop=20)]
-  # 
-  # temp <- gsub(libraries$id, pattern = "/.*/(.*)/", 
-  #              replacement = '\\1')
-  # temp <- substr(temp, start=6, stop=20)
-  # libraries$id <- temp
-  # 
-  # match_library <- match(files$treatment_col, libraries$id)
-  # match_library <- match_library[!is.na(match_library)]
-  # print(length(match_library))
-  # files[files$treatment_col %in% libraries$id, treatment_col :=
-  #          libraries$treatments[match_library]]
-   
-  
-  #match_library <- match(files$treatment_col, )
-  # treatment <- unlist(mclapply(
-  #   X = as.character(files$replicate_list), # dataset accession
-  #   FUN = function(x) {
-  #     if(!is.na(x)) {
-  #       p <- subset(x = replicates, replicates$id == x)$library
-  #       if(length(p)) {
-  #         p <- subset(x = libraries, libraries$id == p)$treatment
-  #         if(length(p)) {
-  #           p <- subset(x = treatments, treatments$id == p)$treatment_term_name
-  #           if(length(p)) {
-  #             return(p)
-  #           } else {
-  #             return(NA)
-  #           }
-  #         } else {
-  #           return(NA)
-  #         }
-  #       } else {
-  #         return(NA)
-  #       }
-  #     } else {
-  #       return(NA)
-  #     }
-  #   },
-  #   mc.cores =    cores
-  # ))
-  # 
-  # # #files <- cbind(files, biological_replicate_number, technical_replicate_number,
-  # #                treatment)
-  # 
-  # remove(treatment)
-  # remove(biological_replicate_number)
-  # remove(technical_replicate_number)
+ 
+  # replicate_list->library->biosample->treatment
+  # updating treatment_col with replicate$library using the link :
+  # Tables$files$replicate_list <---> replicate$id
+  match_vector <- match(files$replicate_list, replicates$id)
+  match_vector <- match_vector[!is.na(match_vector)]
+  suppressWarnings(files$treatment <- rep(NULL, row(files)))
+  files[files$replicate_list %in% replicates$id, treatment := 
+           replicates$library[match_vector]]
+  # Link library$biosample <---> biosample$id
+  match_vector <- match(files$treatment,libraries$id)
+  match_vector <- match_vector[!is.na(match_vector)]
+  files[files$treatment %in% libraries$id, treatment :=
+           libraries$biosample[match_vector]]
+  # Link biosample$treatment <---> treatment$id
+  match_vector <- match(files$treatment, biosamples$id)
+  match_vector <- match_vector[!is.na(match_vector)]
+  files[files$treatment %in% biosamples$id, treatment :=
+          biosamples$treatments[match_vector]]
+  # Accessing treatment$treatment_term_name
+  match_vector <- match(files$treatment, treatments$id)
+  match_vector <- match_vector[!is.na(match_vector)]
+  files[files$treatment %in% treatments$id, treatment :=
+           treatments$treatment_term_name[match_vector]]
   
   return(files)
 }
 
 step5 <- function(files){
-  cat('Step 5 : remplacement des references dataset\n')
-  
   dataset_types <- gsub(x = files$dataset, pattern = "/(.*)s/.*/", 
                         replacement = "\\1")
-  
-  cat('Step 5.1 : accessions\n')
   ### => accession
   dataset_accessions <- gsub(x = files$dataset, pattern = "/.*/(.*)/", 
                              replacement = "\\1")
@@ -485,7 +433,6 @@ step5 <- function(files){
 }
 
 step6_target <- function(encode_exp, experiments) {
-  cat('Step 6 : target\n')
   #Updating target column of encode_df with target column of Tables$experiments
   match_target <- match(encode_exp$accession, experiments$accession)
   match_target <- match_target[!is.na(match_target)]
@@ -498,7 +445,6 @@ step6_target <- function(encode_exp, experiments) {
 }
 
 step6_date_released <- function(encode_exp, experiments) {
-  cat('Step 6 : date_released\n')
   #Updating date_released with the date_released of Tables$experiments
   
   match_date <- match(encode_exp$accession, experiments$accession)
@@ -511,7 +457,6 @@ step6_date_released <- function(encode_exp, experiments) {
 }
 
 step6_status <- function(encode_exp, experiments) {
-  cat('Step 6 : status\n')
   match_status <- match(encode_exp$accession, experiments$accession)
   match_status <- match_status[!is.na(match_status)]
   encode_exp$status <- as.character(encode_exp$status) 
@@ -521,7 +466,6 @@ step6_status <- function(encode_exp, experiments) {
 }
 
 step6_assay <- function(encode_exp, experiments) {
-  cat('Step 6 : assay\n')
   match_assay <- match(encode_exp$accession, experiments$accession)
   match_assay <- match_assay[!is.na(match_assay)]
   encode_exp$assay <- as.character(encode_exp$assay) 
@@ -531,7 +475,6 @@ step6_assay <- function(encode_exp, experiments) {
 }
 
 step6_biosample_type <- function(encode_exp, experiments) {
-  cat('Step 6 : biosample_type\n')
   match_bio_type <- match(encode_exp$accession, experiments$accession)
   match_bio_type <- match_bio_type[!is.na(match_bio_type)]
   encode_exp$biosample_type <- as.character(encode_exp$biosample_type) 
@@ -541,7 +484,6 @@ step6_biosample_type <- function(encode_exp, experiments) {
 }
 
 step6_biosample_name <- function(encode_exp, experiments) {
-  cat('Step 6 : biosample_name\n')
   # Updating biosample_name with Tables$experiments$biosample_name 
   match_bio_name <- match(encode_exp$accession, experiments$accession)
   match_bio_name <- match_bio_name[!is.na(match_bio_name)]
@@ -552,7 +494,6 @@ step6_biosample_name <- function(encode_exp, experiments) {
 }
 
 step6_control <- function(encode_exp, experiments) {
-  cat('Step 6 : controls\n')
   #Updating control with the possible_controls column from Tables$experiment
   match_control <- match(encode_exp$accession, experiments$accession)
   match_control <- match_control[!is.na(match_control)]
@@ -563,7 +504,7 @@ step6_control <- function(encode_exp, experiments) {
 }
 
 step7 <- function(encode_exp, tables_target){
-  cat('Step 7 : prepare organism\n')
+
   # Updating organism with the column organism from Tables$targets
   tables_target$id <- gsub(tables_target$id, pattern = "/.*/(.*)/", 
                            replacement = '\\1')
@@ -577,7 +518,6 @@ step7 <- function(encode_exp, tables_target){
 }
 
 step8 <- function(encode_exp, tables_target){
-  cat('Step 8 : target id -> target name\n')
   # Updating target with the label columns of Tables$targets
   match_target <- match(encode_exp$target, tables_target$id)
   match_target <- match_target[!is.na(match_target)]
@@ -587,7 +527,6 @@ step8 <- function(encode_exp, tables_target){
 }
 
 step9 <- function(encode_exp, tables_org){
-  cat('Step 9 : organism id -> organism name\n')
   # Updating organism with scientific_name column from Tables$organism
   
   match_org <- match(encode_exp$organism, tables_org$id)
