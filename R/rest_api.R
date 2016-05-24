@@ -250,6 +250,12 @@ clean_column <- function(column_name, table) {
             df_clean <- spread(df_clean, col_name, value, drop=FALSE)
             df_clean$sample <- NULL
             column <- df_clean
+        } else {
+            result <- as.list(rep(NA, nrow(table)))
+            for(i in 1:length(result)){
+              result[[i]] <- paste(unlist(column[[i]]), collapse = "; ")
+            }
+            column <- unlist(result)
         }
     
     # List of something else
@@ -265,7 +271,7 @@ clean_column <- function(column_name, table) {
   }else if((class(column) %in% type) & !(class(column) == "NULL")){
       stopifnot(length(column) == nrow(table))
   }
-
+  print(paste(column_name,"has been extracted", sep = " "))
   column
 }
 
@@ -329,7 +335,7 @@ clean_table <- function(table) {
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   r = data.frame()
-  filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
+  filters = paste0("searchTerm=",searchTerm, "format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
   
@@ -341,7 +347,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
       warning("No result found", call. = TRUE)
     }
   }
-  
+  return(r)
   search_results = clean_table(r)
   search_results <- search_results[,order(colnames(search_results))]
   if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
