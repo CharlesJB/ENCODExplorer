@@ -5,6 +5,7 @@ NEW FEATURES
 
     o Added quiet param to the queryEncode and searchEncode functions.
     o Added the Roadmap datasets.
+    o Updated clean_column to extract more information from ENCODE tables
     o Updated the encode_df object with the latest changes in the ENCODE
       database.
 
