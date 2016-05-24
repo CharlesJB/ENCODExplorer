@@ -335,7 +335,7 @@ clean_table <- function(table) {
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   r = data.frame()
-  filters = paste0("searchTerm=",searchTerm, "format=json&limit=", limit)
+  filters = paste0("searchTerm=",searchTerm, "&format=json&limit=", limit)
   url <- "https://www.encodeproject.org/search/?"
   url <- paste0(url, filters)
   
