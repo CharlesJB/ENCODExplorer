@@ -130,7 +130,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df$experiment$target <- step8(encode_df$experiment, Tables$targets)
   encode_df$experiment$organism <- step9(encode_df$experiment, Tables$organisms)
   
-  # creation des nouvelles colonnes dans dataset
+  # Creating and updating new columns for dataset
   empty_vector <- rep(x = NA, times = nrow(encode_df$dataset))
   encode_df$dataset <- cbind(encode_df$dataset, date_released = empty_vector,
                              status = empty_vector)
