@@ -2,9 +2,9 @@
 #' 
 #' This function creates or updates ENCODExplorer data according the following 
 #' steps :
-#' 1) Create the RSQLite databse for the tables in ENCODE
-#' 2) Extract essential informations from the RSQLite databse in encode_df
-#' 3) Extract accession numbers from all the datasets of RSQLite databse in 
+#' 1) Create the list of data.table for the tables in ENCODE
+#' 2) Extract essential informations from the list of data.table in encode_df
+#' 3) Extract accession numbers from all the datasets of list of data.table in 
 #' accession_df
 #' 4) if overwrite = TRUE, the new encode_df will overwrite the former one else 
 #' return the newly generated objets.
@@ -20,7 +20,7 @@
 #' @examples
 #'
 #'     \dontrun{
-#'         update_ENCODExplorer("ENCODEdb.sqlite")
+#'         update_ENCODExplorer("tables.RDA")
 #'     }
 #'     
 #' @import jsonlite
@@ -34,7 +34,7 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
     return(NULL)
   }
   
-  # 2) Extract essential informations from the RSQLite databse in encode_df
+  # 2) Extract essential informations from the list of data.table in encode_df
   new_encode_df <- export_ENCODEdb_matrix(database_filename = database_filename,
                                           mc.cores = mc.cores)
   
@@ -42,7 +42,7 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
     return(NULL)
   }
   
-  # 3) Extract accession numbers from all the datasets of RSQLite databse in accession_df
+  # 3) Extract accession numbers from all the datasets  of the data.table in accession_df
   new_accession_df <- export_ENCODEdb_accession(new_encode_df,database_filename)
   
   if(length(new_accession_df) != 1){
@@ -65,10 +65,10 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
 }
 
 
-#' Create the RSQLite databse for the tables in ENCODE
+#' Create the list of data.table for the tables in ENCODE
 #' 
 #' @return is a \code{list} with selected tables from ENCODE that were used to
-#' create the \code{RSQLite} database.
+#' create the list of \code{data.table} .
 #'
 #' @param database_filename The name of the file to save the database into.
 #' @param types The names of the tables to extract from ENCODE rest api.
@@ -76,10 +76,10 @@ update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqli
 #' Default: \code{FALSE}.
 #' 
 #' @examples
-#' prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
-#' file.remove("platform.sql")
+#' prepare_ENCODEdb(database_filename = "tables.RDA", types = "platform")
+#' file.remove("platform.RDA")
 #'     \dontrun{
-#'         prepare_ENCODEdb("ENCODEdb.sqlite")
+#'         prepare_ENCODEdb("ENCODEdb.RDA")
 #'     }
 #'     
 #' @import jsonlite
@@ -93,20 +93,17 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
     warning(paste0("The file ", database_filename, " already exists. Please delete it before re-run the data preparation"))
     NULL
   } else {
-    T1<-Sys.time()
     # Extract the tables from the ENCODE rest api
     extract_type <- function(type) {
       table <- extract_table(type)
       table_clean <- clean_table(table)
     }
-    cat('The tables have been extracted ...\n')
     # List of data.frame
     tables <- lapply(types, extract_type)
     
     # Return the named tables
     names(tables) <- types
     tables[sapply(tables, is.null)] <- NULL
-    cat('Converting format ...\n')
     tables <- lapply(tables, as.data.table)
     save(tables, file=database_filename)
     
@@ -129,20 +126,19 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
   }
 }
 
-#' Extract essential informations from the RSQLite databse in a \code{list} of 
-#' \code{data.frame}s
+#' Extract essential informations from a list of data.table in a \code{list} of 
+#' \code{data.table}s
 #' 
 #'
 #' @return a \code{list} containing two elements. The first one 'experiment' is 
-#' a \code{data.frame} containing essential informations for each file part of    
-#' an experiment ; the second one 'dataset' is a \code{data.frame} containing 
+#' a \code{data.table} containing essential informations for each file part of    
+#' an experiment ; the second one 'dataset' is a \code{data.table} containing 
 #' essential informations for each file part of a dataset.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' @param mc.cores The number of cores to use. Default 1
 #'
 #' @examples
-#'     database_filename <- system.file("extdata/ENCODEdb.sqlite",
+#'     database_filename <- system.file("extdata/tables",
 #'                                                                        package = "ENCODEdb")
 #'     \dontrun{
 #'         export_ENCODEdb_matrix(database_filename = database_filename)
@@ -151,33 +147,22 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
 #' 
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
-  
-  T1<-Sys.time()
-  
+  # Step 1 : fetch all needed data.
   Tables <- step1(database_filename = database_filename)
+  # Step 2 : renaming specific column.
   Tables$files <- step2(files = Tables$files)
+  # Step 3 : updating project, paired-with, plateform and lab column.
   Tables$files <- step3(files = Tables$files, awards = Tables$awards, 
                         labs = Tables$labs, platforms = Tables$platforms)
-  
-  # suppression des tables inutiles
-  Tables$awards = NULL
-  Tables$labs = NULL
-  Tables$platforms = NULL
-  
+  # Step 4 : Uptading replicate_list and treatment column.
   Tables$files <- step4(files = Tables$files, replicates = Tables$replicates, 
                         libraries = Tables$libraries, 
                         treatments = Tables$treatments,
                         biosamples = Tables$biosamples)
-  
-  # suppression des tables inutiles
-  Tables$replicates <- NULL
-  Tables$libraries <- NULL
-  Tables$treatments <- NULL
-  
+  # Step 5 : Splitting dataset column into column : accession & dataset_types.
   Tables$files <- step5(files = Tables$files)
   
-  ### les experiences seront toutes reunies par encode_df$experiment et les autres entites seront ajoutee dans dataset
-  ### split the dataframe
+  # Grouping into two table depending on the type of the dateset.
   
   not_experiments_idx <- which(!grepl(x = Tables$files$dataset, 
                                       pattern = 'experiments'))
@@ -187,17 +172,15 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df <- list(experiment = Tables$files[experiments_idx,],
                     dataset = Tables$files[not_experiments_idx,])
   
-  # suppression des tables inutiles
-  Tables$files = NULL
-  
-  # creation des nouvelles colonnes dans experiments
+  # Creating the new column for experiment table.
   empty_vector <- rep(x = NA, times = nrow(encode_df$experiment))
+  
   encode_df$experiment <- cbind(encode_df$experiment, target = empty_vector,
            date_released = empty_vector, status = empty_vector,
            assay = empty_vector, biosample_type = empty_vector,
            biosample_name = empty_vector, controls = empty_vector)
 
-  
+  # Step 6 to step 9: Updating the content of the new column.
   encode_df$experiment$target <- step6_target(encode_df$experiment, 
                                               Tables$experiments)
   encode_df$experiment$date_released <- step6_date_released(encode_df$experiment, 
@@ -213,9 +196,6 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df$experiment$controls <- step6_control(encode_df$experiment, 
                                                  Tables$experiments)
   
-  # suppression des tables inutiles
-  Tables$experiments = NULL
-  
   encode_df$experiment <- cbind(encode_df$experiment, organism = empty_vector)
   encode_df$experiment$organism <- step7(encode_df$experiment, Tables$targets)
   encode_df$experiment$target <- step8(encode_df$experiment, Tables$targets)
@@ -229,70 +209,12 @@ export_ENCODEdb_matrix <- function(database_filename) {
                                                          Tables$datasets)
   encode_df$dataset$status <- step6_status(encode_df$dataset, Tables$datasets)
   
-  # suppression des tables inutiles
-  Tables$datasets = NULL
-  
-  # suppression des tables
   remove(Tables)
-  
-  Tdiff = Sys.time() - T1
-  print(paste0("Building ENCODE_DF : ",Tdiff, " sec"))
-  
   encode_df
 }
 
 
-#' Extract accession numbers from all the datasets of RSQLite databse in a 
-#' \code{data.frame}
-#' 
-#'
-#' @return a \code{data.frame} composed of 3 fields : accession, 
-#' files (\code{list} of files accessions) and dataset_type.
-#' 
-#' @param    df \code{list} of two \code{data.frame} containing ENCODE 
-#' experiment and dataset metadata. Default
-#' @param database_filename The name of the file to save the database into.
-#'
-#' @examples
-#'     database_filename <- system.file("extdata/ENCODEdb.sqlite",
-#'                                                                        package = "ENCODEdb")
-#'     \dontrun{
-#'         export_ENCODEdb_accession(database_filename = database_filename)
-#'     }
-#' @import RSQLite
-#' 
-#' @export
-export_ENCODEdb_accession <- function(df = NULL, database_filename){
-  
-  if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
-  
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), database_filename)
-  
-  dataset_types <- unique(c(as.character(encode_df$experiment$dataset_type), 
-                            as.character(encode_df$dataset$dataset_type)))
-  dataset_types <- gsub(x = dataset_types, pattern = '-', replacement = '_')
-  accession_df <- data.frame(accession = c(), files = list(), 
-                             dataset_type = c(), stringsAsFactors = FALSE)
-  
-  for(dataset_type in dataset_types){
-    rs <- RSQLite::dbSendQuery(con, paste0('select accession, files from ',
-                                           dataset_type, ' ;'))
-    results <- RSQLite::dbFetch(rs, n = -1)
-    RSQLite::dbClearResult(rs)
-    file_list <- strsplit(x = results$files, split = ';')
-    results <- cbind(accession = results$accession, files = file_list, 
-                     dataset_type = rep(x = dataset_type, 
-                                        times = nrow(results)))
-    accession_df <- rbind(accession_df, results)
-  }
-  
-  RSQLite::dbDisconnect(con)
-  
-  accession_df$accession <- unlist(accession_df$accession)
-  accession_df$dataset_type <- unlist(accession_df$dataset_type)
-  
-  invisible(accession_df)
-}
+
 
 step1 <- function(database_filename){
   
@@ -389,9 +311,10 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
   suppressWarnings(files$technical_replicate_number <- rep(NULL, nrow(files)))
   files[files$replicate_list %in% replicates$id, technical_replicate_number := 
           replicates$technical_replicate_number[match_vector]]
- 
+  # Updating treatment column with trreatment$treatment_term_name
   # replicate_list->library->biosample->treatment
-  # updating treatment_col with replicate$library using the link :
+  
+  # Updating treatment_col with replicate$library using the link :
   # Tables$files$replicate_list <---> replicate$id
   match_vector <- match(files$replicate_list, replicates$id)
   match_vector <- match_vector[!is.na(match_vector)]
@@ -418,9 +341,9 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
 }
 
 step5 <- function(files){
+  # Step 5 : Splitting dataset column into two column
   dataset_types <- gsub(x = files$dataset, pattern = "/(.*)s/.*/", 
                         replacement = "\\1")
-  ### => accession
   dataset_accessions <- gsub(x = files$dataset, pattern = "/.*/(.*)/", 
                              replacement = "\\1")
   
@@ -428,6 +351,7 @@ step5 <- function(files){
                  files)
   
   remove(dataset_accessions)
+  remove(dataset_types)
   
   return(files)
 }
@@ -439,8 +363,6 @@ step6_target <- function(encode_exp, experiments) {
   encode_exp$target <- as.character(encode_exp$target) 
   encode_exp[encode_exp$accession %in% experiments$accession, target :=
                experiments$target[match_target]]
-  # encode_exp$target <- gsub(encode_exp$target, pattern = "/.*/(.*)/", 
-  #                           replacement = '\\1')
   return(encode_exp$target)
 }
 
