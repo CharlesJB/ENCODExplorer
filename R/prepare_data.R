@@ -1,69 +1,3 @@
-#' Create or update all the needed data for ENCODExplorer
-#' 
-#' This function creates or updates ENCODExplorer data according the following 
-#' steps :
-#' 1) Create the list of data.table for the tables in ENCODE
-#' 2) Extract essential informations from the list of data.table in encode_df
-#' 3) Extract accession numbers from all the datasets of list of data.table in 
-#' accession_df
-#' 4) if overwrite = TRUE, the new encode_df will overwrite the former one else 
-#' return the newly generated objets.
-#' 
-#' @return none if \code{overwrite} is set to TRUE or return a \code{list} 
-#' containg two objects encode_df and accession_df.
-#'
-#' @param database_filename The name of the file to save the database into.
-#' @param overwrite Should tables already present in database be overwrited
-#' @param mc.cores The number of cores to use. Default 1
-#' Default: \code{FALSE}.
-#' 
-#' @examples
-#'
-#'     \dontrun{
-#'         update_ENCODExplorer("tables.RDA")
-#'     }
-#'     
-#' @import jsonlite
-#' @export
-update_ENCODExplorer <- function(database_filename = "inst/extdata/ENCODEdb.sqlite", overwrite = FALSE, mc.cores = 1){
-  
-  # 1) Create the RSQLite databse for the tables in ENCODE
-  ret <- prepare_ENCODEdb(database_filename = database_filename, overwrite = overwrite)
-  
-  if(is.null(ret)){
-    return(NULL)
-  }
-  
-  # 2) Extract essential informations from the list of data.table in encode_df
-  new_encode_df <- export_ENCODEdb_matrix(database_filename = database_filename,
-                                          mc.cores = mc.cores)
-  
-  if(length(new_encode_df) != 2){
-    return(NULL)
-  }
-  
-  # 3) Extract accession numbers from all the datasets  of the data.table in accession_df
-  new_accession_df <- export_ENCODEdb_accession(new_encode_df,database_filename)
-  
-  if(length(new_accession_df) != 1){
-    return(NULL)
-  }
-  
-  # 4) if overwrite = TRUE, the new encode_df will overwrite the former one
-  if(overwrite){
-    encode_df <- new_encode_df
-    accession_df <- new_accession_df
-    save(encode_df, file = 'data/encode_df.rda' )
-    save(accession_df, file = 'data/accession_df.rda' )
-  } else { # else return the update object
-    invisible(list(
-      encode_df = new_encode_df,
-      accession_df = new_accession_df
-    ))
-  }
-  
-}
-
 
 #' Create the list of data.table for the tables in ENCODE
 #' 
@@ -106,11 +40,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
     tables[sapply(tables, is.null)] <- NULL
     tables <- lapply(tables, as.data.table)
     save(tables, file=database_filename)
-    
-    
-    Tdiff = Sys.time() - T1
-    print(paste0("Extract the tables from the ENCODE rest api : ",Tdiff, " min"))
-    
+   
     # Extract data from the DB
     if(length(tables) > 0) {
       invisible(tables)

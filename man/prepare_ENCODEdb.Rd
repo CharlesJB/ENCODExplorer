@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare_data.R
 \name{prepare_ENCODEdb}
 \alias{prepare_ENCODEdb}
-\title{Create the RSQLite databse for the tables in ENCODE}
+\title{Create the list of data.table for the tables in ENCODE}
 \usage{
 prepare_ENCODEdb(database_filename = "inst/extdata/tables.RDA",
   types = get_encode_types(), overwrite = FALSE)
@@ -17,16 +17,16 @@ Default: \code{FALSE}.}
 }
 \value{
 is a \code{list} with selected tables from ENCODE that were used to
-create the \code{RSQLite} database.
+create the list of \code{data.table} .
 }
 \description{
-Create the RSQLite databse for the tables in ENCODE
+Create the list of data.table for the tables in ENCODE
 }
 \examples{
-prepare_ENCODEdb(database_filename = "platform.sql", types = "platform")
-file.remove("platform.sql")
+prepare_ENCODEdb(database_filename = "tables.RDA", types = "platform")
+file.remove("platform.RDA")
     \dontrun{
-        prepare_ENCODEdb("ENCODEdb.sqlite")
+        prepare_ENCODEdb("ENCODEdb.RDA")
     }
     
 }
