@@ -5,7 +5,7 @@ NEW FEATURES
 
     o Added quiet param to the queryEncode and searchEncode functions.
     o Added the Roadmap datasets.
-    o Updated the encode_df object with the latest changes in the ENCODE
+    o Updated the encode_df object with the latest changes in the ENCODE.
       database.
 
 BUG FIXES
@@ -14,3 +14,17 @@ BUG FIXES
       was added in the ENCODE database schemas.
     o Solved a bug with the searchEncode function caused by changes in the
       ENCODE REST API.
+
+CHANGES IN VERSION 1.5.0
+------------------------
+
+NEW FEATURES
+
+    o Updated clean_column to extract more information from ENCODE tables.
+    o Deleted export_ENCODEdb_accession function.
+    o Deleted update_ENCODEdb function.
+
+BUG FIXES
+
+	o Solved various bug directly linked with the extraction of information from
+	  ENCODE database

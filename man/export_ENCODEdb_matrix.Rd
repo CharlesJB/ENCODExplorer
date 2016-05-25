@@ -2,28 +2,26 @@
 % Please edit documentation in R/prepare_data.R
 \name{export_ENCODEdb_matrix}
 \alias{export_ENCODEdb_matrix}
-\title{Extract essential informations from the RSQLite databse in a \code{list} of 
-\code{data.frame}s}
+\title{Extract essential informations from a list of data.table in a \code{list} of 
+\code{data.table}s}
 \usage{
-export_ENCODEdb_matrix(database_filename, mc.cores = 1)
+export_ENCODEdb_matrix(database_filename)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.}
-
-\item{mc.cores}{The number of cores to use. Default 1}
 }
 \value{
 a \code{list} containing two elements. The first one 'experiment' is 
-a \code{data.frame} containing essential informations for each file part of    
-an experiment ; the second one 'dataset' is a \code{data.frame} containing 
+a \code{data.table} containing essential informations for each file part of    
+an experiment ; the second one 'dataset' is a \code{data.table} containing 
 essential informations for each file part of a dataset.
 }
 \description{
-Extract essential informations from the RSQLite databse in a \code{list} of 
-\code{data.frame}s
+Extract essential informations from a list of data.table in a \code{list} of 
+\code{data.table}s
 }
 \examples{
-    database_filename <- system.file("extdata/ENCODEdb.sqlite",
+    database_filename <- system.file("extdata/tables",
                                                                        package = "ENCODEdb")
     \dontrun{
         export_ENCODEdb_matrix(database_filename = database_filename)

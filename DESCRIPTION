@@ -28,10 +28,10 @@ Depends:
 Imports:
     tools,
     jsonlite,
-    RSQLite,
     parallel,
     RCurl,
-    tidyr
+    tidyr,
+    data.table
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,
