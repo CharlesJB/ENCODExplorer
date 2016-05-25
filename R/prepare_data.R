@@ -18,7 +18,6 @@
 #'     
 #' @import jsonlite
 #' @import data.table
-#' @import plyr
 #' @export
 prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
                              types = get_encode_types(), overwrite = FALSE) {
