@@ -271,7 +271,7 @@ clean_column <- function(column_name, table) {
   }else if((class(column) %in% type) & !(class(column) == "NULL")){
       stopifnot(length(column) == nrow(table))
   }
-  print(paste(column_name,"has been extracted", sep = " "))
+
   column
 }
 
@@ -300,10 +300,10 @@ clean_table <- function(table) {
     table <- lapply(colnames(table), clean_column, table)
     names(table) <- table_names
     table[sapply(table, is.null)] <- NULL
-    result <- as.data.frame(table)
+    result <- data.frame(table, stringsAsFactors = FALSE)
     
-    final_result <- lapply(X = result, FUN = function(x) if(class(x) == "factor") {as.character(x)} else {x})
-    final_result
+    #final_result <- lapply(X = result, FUN = function(x) if(class(x) == "factor") {as.character(x)} else {x})
+    #final_result
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
@@ -347,9 +347,8 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
       warning("No result found", call. = TRUE)
     }
   }
-  return(r)
+
   search_results = clean_table(r)
-  search_results <- search_results[,order(colnames(search_results))]
   if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
                         " entries\n"))
   search_results

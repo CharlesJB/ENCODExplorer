@@ -91,59 +91,41 @@ export_ENCODEdb_matrix <- function(database_filename) {
   # Step 5 : Splitting dataset column into column : accession & dataset_types.
   Tables$files <- step5(files = Tables$files)
   
-  # Grouping into two table depending on the type of the dateset.
+  encode_df <- Tables$files
   
-  not_experiments_idx <- which(!grepl(x = Tables$files$dataset, 
-                                      pattern = 'experiments'))
-  experiments_idx <- which(grepl(x = Tables$files$dataset, 
-                                 pattern = 'experiments'))
+  # Creating the new columns
+  empty_vector <- rep(x = NA, times = nrow(encode_df))
   
-  encode_df <- list(experiment = Tables$files[experiments_idx,],
-                    dataset = Tables$files[not_experiments_idx,])
-  
-  # Creating the new column for experiment table.
-  empty_vector <- rep(x = NA, times = nrow(encode_df$experiment))
-  
-  encode_df$experiment <- cbind(encode_df$experiment, target = empty_vector,
+  encode_df <- cbind(encode_df, target = empty_vector,
            date_released = empty_vector, status = empty_vector,
            assay = empty_vector, biosample_type = empty_vector,
            biosample_name = empty_vector, controls = empty_vector)
 
   # Step 6 to step 9: Updating the content of the new column.
-  encode_df$experiment$target <- step6_target(encode_df$experiment, 
-                                              Tables$experiments)
-  encode_df$experiment$date_released <- step6_date_released(encode_df$experiment, 
-                                                            Tables$experiments)
-  encode_df$experiment$status <- step6_status(encode_df$experiment, 
-                                              Tables$experiment)
-  encode_df$experiment$assay <- step6_assay(encode_df$experiment, 
-                                            Tables$experiments)
-  encode_df$experiment$biosample_type <- step6_biosample_type(encode_df$experiment, 
-                                                              Tables$experiments)
-  encode_df$experiment$biosample_name <- step6_biosample_name(encode_df$experiment, 
-                                                              Tables$experiments)
-  encode_df$experiment$controls <- step6_control(encode_df$experiment, 
-                                                 Tables$experiments)
+  encode_df$target <- step6_target(encode_df, Tables$experiments)
+  encode_df$date_released <- step6_date_released(encode_df, Tables$experiments)
+  encode_df$status <- step6_status(encode_df, Tables$experiments)
+  encode_df$assay <- step6_assay(encode_df, Tables$experiments)
+  encode_df$biosample_type <- step6_biosample_type(encode_df, Tables$experiments)
+  encode_df$biosample_name <- step6_biosample_name(encode_df, Tables$experiments)
+  encode_df$controls <- step6_control(encode_df, Tables$experiments)
   
-  encode_df$experiment <- cbind(encode_df$experiment, organism = empty_vector)
-  encode_df$experiment$organism <- step7(encode_df$experiment, Tables$targets)
-  encode_df$experiment$target <- step8(encode_df$experiment, Tables$targets)
-  encode_df$experiment$organism <- step9(encode_df$experiment, Tables$organisms)
+  encode_df <- cbind(encode_df, organism = empty_vector)
+  encode_df$organism <- step7(encode_df, Tables$targets)
+  encode_df$target <- step8(encode_df, Tables$targets)
+  encode_df$organism <- step9(encode_df, Tables$organisms)
   
   # Creating and updating new columns for dataset
-  empty_vector <- rep(x = NA, times = nrow(encode_df$dataset))
-  encode_df$dataset <- cbind(encode_df$dataset, date_released = empty_vector,
+  empty_vector <- rep(x = NA, times = nrow(encode_df))
+  encode_df <- cbind(encode_df, date_released = empty_vector,
                              status = empty_vector)
-  encode_df$dataset$date_released <- step6_date_released(encode_df$dataset, 
+  encode_df$date_released <- step6_date_released(encode_df, 
                                                          Tables$datasets)
-  encode_df$dataset$status <- step6_status(encode_df$dataset, Tables$datasets)
+  encode_df$status <- step6_status(encode_df, Tables$datasets)
   
   remove(Tables)
   encode_df
 }
-
-
-
 
 step1 <- function(database_filename){
   
@@ -271,7 +253,7 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
 
 step5 <- function(files){
   # Step 5 : Splitting dataset column into two column
-  dataset_types <- gsub(x = files$dataset, pattern = "/(.*)s/.*/", 
+  dataset_types <- gsub(x = files$dataset, pattern = "/(.*)/.*/", 
                         replacement = "\\1")
   dataset_accessions <- gsub(x = files$dataset, pattern = "/.*/(.*)/", 
                              replacement = "\\1")
@@ -357,8 +339,6 @@ step6_control <- function(encode_exp, experiments) {
 step7 <- function(encode_exp, tables_target){
 
   # Updating organism with the column organism from Tables$targets
-  tables_target$id <- gsub(tables_target$id, pattern = "/.*/(.*)/", 
-                           replacement = '\\1')
   match_target <- match(encode_exp$target, tables_target$id)
   match_target <- match_target[!is.na(match_target)]
   encode_exp$organism <- as.character(encode_exp$organism)
