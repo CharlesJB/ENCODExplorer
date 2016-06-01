@@ -229,20 +229,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       You can try the <searchEncode> function or set the fixed option to FALSE."
       
       s3 <- NULL
-      if(!is.null(ac)){
-        s3 <- resolveEncodeAccession(ac)
-      } else {
-        if(!is.null(da)){
-          s3 <- resolveEncodeAccession(da)
-        }
-      }
-      
-      if(!is.null(s3)) {
-        return(s3)
-      } else {
-        warning(warning_message, call. = FALSE)
-        NULL
-      }
+      return(s3)
     }
     else
     {
@@ -290,7 +277,7 @@ query_transform <- function(my.term) {
 #' res <- searchToquery(searchResults = search_res, quiet = TRUE)
 #' 
 #' @export
-searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
+searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
@@ -301,7 +288,8 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
     ids <- ids[grepl(x = ids, pattern = '/experiments/')]
     accessions <- gsub(x = ids, pattern = '/experiments/([A-Z0-9]+)/',
                        replacement = "\\1")
-    
+    accessions <-unique(accessions)
+        
     for(i in seq_along(accessions)){
       
       accession <- accessions[i]
@@ -321,28 +309,4 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
                " files / ",length(unique(res$accession))))
   }
   return(res)
-}
-
-
-#' Return a \code{data.frame} containing basic datasets information from an 
-#' accession number
-#'
-#' @param accession character, dataset accession number
-#'
-#' @return a \code{data.frame} containing basic datasets information for the 
-#' requested accession number
-#' 
-#' @examples
-#' res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
-#' 
-#' @export
-resolveEncodeAccession <- function(accession){
-  data(accession_df, envir = environment())
-  ret <- accession_df[accession_df$accession == accession,]
-  files <-  gsub(x = as.character(ret$files[[1]]), pattern = "/files/(.*)/", replacement = "\\1")
-  i <- encode_df$dataset$file_accession %in% files
-  j <- encode_df$experiment$file_accession %in% files
-  
-  list(experiment = encode_df$experiment[j,],
-       dataset = encode_df$dataset[i,])
 }
