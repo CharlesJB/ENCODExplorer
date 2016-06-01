@@ -1,5 +1,6 @@
-#' Create a design for the files associated with the result of a queryEncode or
-#' searchEncode research.
+
+#' Create a design for the files associated with the result of a queryEncode,
+#' searchEncode or fuzzySearch research.
 #' 
 #' @return is a \code{data.frame} with files for all the experiments or 
 #' a \code{list} of \code{data.frame} with all the file per experiment when
@@ -54,7 +55,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
       df <- encode_df
   }
   
-  # This function use a vector of experience accession to extract information from df
+  # This function use a vector of experiment accession to extract information from df
   extract_files <- function(data_vec){
     result <- data.frame()
     for(i in 1:length(data_vec)){
