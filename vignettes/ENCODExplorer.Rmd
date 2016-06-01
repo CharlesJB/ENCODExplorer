@@ -100,21 +100,21 @@ of two elements *experiment* and *dataset*.
 For example, to select all the fastq files produced by RNA-seq assay on human
 cell MCF-7:
 ```{r query_results, collapse=TRUE}
-query_results <- queryEncode(assay = "RNA-seq", organism = "Homo sapiens",
+query_results <- queryEncode(organism = "Homo sapiens",
                        biosample = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
 
 The same request with approximate spelling of the assay type and `fixed` option
 to `TRUE`, will give no results :
 ```{r query_results_2, collapse=TRUE}
-query_results <- queryEncode(assay = "rnaseq", organism = "Homo sapiens",
-                       biosample = "MCF-7", file_format = "fastq", fixed = TRUE)
+query_results <- queryEncode(organism = "Homo sapiens",
+                       biosample = "mcf7", file_format = "fastq", fixed = TRUE)
 ```
 
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
 ```{r query_results_3, collapse=TRUE}
-query_results <- queryEncode(assay = "rnaseq", organism = "Homo sapiens",
-                       biosample = "MCF-7", file_format = "fastq",
+query_results <- queryEncode(organism = "Homo sapiens",
+                       biosample = "mcf7", file_format = "fastq",
                        fixed = FALSE)
 ```
 

@@ -228,8 +228,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       warning_message <- "No result found in encode_df. 
       You can try the <searchEncode> function or set the fixed option to FALSE."
       
-      s3 <- NULL
-      return(s3)
+      return(s)
     }
     else
     {
