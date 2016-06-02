@@ -37,7 +37,7 @@
 createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
                           format="long", output_type="data.frame", ID=c(1,2)){
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(type_file %in% c("bam", "fastq"))
+  stopifnot(type_file %in% c("bam", "fastq", "sam"))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
   stopifnot(datatype %in% c("experiments", "ucsc-browser-composites", "annotations",
