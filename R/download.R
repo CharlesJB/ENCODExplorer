@@ -8,11 +8,10 @@
 #' set, its origin (searchEncode or queryEncode), the file format and finally
 #' the destination directory.
 #' 
-#' @param     df \code{list} of two \code{data.frame} containing ENCODE experiment
-#' and dataset metadata.
+#' @param     df \code{data.frame} containing ENCODE files
 #' @param resultSet the results set.
 #' @param resultOrigin name of the function used to generate the result set
-#' (\code{searchEncode} or \code{queryEncode})
+#' (\code{searchEncode} or \code{queryEncode} or \code{fuzzySearch})
 #' @param format file format, default = all
 #' @param dir the name of the directory where the downloaded file will be saved.
 #' Default = current directory
@@ -26,13 +25,14 @@
 #'      downloadEncode(resultSet = resultSet, dir = ".")
 #'      }
 #' @import tools
+#' @import downloader
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
                            format = "all", dir = ".", force = TRUE) {
   
   if(is.null(df)) {
-    data(encode_df, envir = environment())
+    load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
   } else {
     encode_df = df
   }
@@ -43,18 +43,15 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
     warning(warning_msg, call. = FALSE)
     NULL
   } else {
-    if(resultOrigin %in% c("searchEncode", "queryEncode")) {
+    if(resultOrigin %in% c("searchEncode", "queryEncode", "fuzzySearch")) {
       encode_root = "https://www.encodeproject.org"
       if(file.access(dir, mode = 2) == 0) {
         filesId = getFileId(encode_df, resultSet = resultSet, 
                             resultOrigin = resultOrigin, format = format)
         
-        temp = subset(encode_df$experiment, 
-                      encode_df$experiment$file_accession %in% filesId)
-        temp2 = subset(encode_df$dataset, 
-                       encode_df$dataset$file_accession %in% filesId)
-        hrefs = c(as.character(temp$href), as.character(temp2$href))
-        md5sums = c(as.character(temp$md5sum), as.character(temp2$md5sum))
+        temp = subset(encode_df, encode_df$file_accession %in% filesId)
+        hrefs = c(as.character(temp$href))
+        md5sums = c(as.character(temp$md5sum))
         
         downloaded <- character()
         for (i in seq_along(hrefs)) {
@@ -65,8 +62,7 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
           md5sum_file = tools::md5sum(paste0(fileName))
           if (force == TRUE | !(file.exists(fileName)) |
               (file.exists(fileName) & md5sum_file != md5sums[i])) {
-            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                          destfile = fileName, method =     "curl", extra = "-L" )
+            download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
             md5sum_file = tools::md5sum(paste0(fileName))
           }
           if(md5sum_file != md5sums[i]) {
@@ -114,24 +110,18 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
     }
     
   }
-  else
-  {
-    if(class(resultSet) == "list" && length(resultSet) == 2)
-    {
+  else if (resultOrigin %in% c("queryEncode","fuzzySearch)")){
       d = resultSet
-    }
-    else
-    {
+  }else{
       warning("Unexpected format for a result set coming from our queryEncode 
                                    function", call. = FALSE)
       NULL
-    }
   }
+  
   
   if (! is.null(d)) {
     r = c()
-    formats = unique(c(as.character(encode_df$experiment$file_format),
-                       as.character(encode_df$dataset$file_format)))
+    formats = unique(c(as.character(encode_df$file_format)))
     if(format != "all") {
       if(!(format %in% formats)) {
         warning("Unknown file format", call. = FALSE)
@@ -139,8 +129,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
       }
       else
       {
-        avail_format =     unique(c(as.character(d$experiment$file_format),
-                                    as.character(d$dataset$file_format)))
+        avail_format =     unique(c(as.character(d$file_format)))
         if(!(format %in% avail_format)) {
           warning("This file format is not available in your dataset", 
                   call. = FALSE)
@@ -148,16 +137,13 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
         }
         else
         {
-          temp = subset(d$experiment, d$experiment$file_format == format)
-          temp2 = subset(d$dataset, d$dataset$file_format == format)
-          r = c(as.character(temp$file_accession), 
-                as.character(temp2$file_accession))
+          temp = subset(d, dt$file_format == format)
+          r = c(as.character(temp$file_accession))
         }
       }
     }
     else {
-      r = c(as.character(d$experiment$file_accession), 
-            as.character(d$dataset$file_accession))
+      r = c(as.character(d$file_accession))
     }
     
     r
@@ -165,22 +151,8 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
 }
 # to use with search results
 getFileDetails <- function(encode_df,resultSet) {
-  details = list(
-    experiment = getExperimentDetails(encode_df,resultSet),
-    dataset = getDatasetDetails(encode_df,resultSet)
-  )
-  details
+  acc = resultSet$accession
+  subset(encode_df,encode_df$accession %in% acc)
 }
 
-# to use with search results
-getExperimentDetails <- function(encode_df,resultSet) {
-  exp = resultSet$accession
-  subset(encode_df$experiment,encode_df$experiment$accession %in% exp)
-}
-
-# to use with search results
-getDatasetDetails <- function(encode_df,resultSet) {
-  ds = resultSet$accession
-  subset(encode_df$dataset,encode_df$dataset$accession %in% ds)
-}
 
