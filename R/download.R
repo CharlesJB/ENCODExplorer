@@ -20,7 +20,7 @@
 #'
 #' @return The downloaded file names, if download worked correctly.
 #' @examples
-#'      resultSet <- queryEncode(biosample = "A549", file_format = "bam")
+#'      resultSet <- queryEncode(biosample_name = "A549", file_format = "bam")
 #'      \dontrun{
 #'      downloadEncode(resultSet = resultSet, dir = ".")
 #'      }
