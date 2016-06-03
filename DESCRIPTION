@@ -32,6 +32,7 @@ Imports:
     RCurl,
     tidyr,
     dplyr,
+    downloader,
     data.table
 Suggests:
     RUnit,BiocGenerics,knitr,
