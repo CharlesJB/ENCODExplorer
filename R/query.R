@@ -13,7 +13,7 @@
 #' @param    set_accession character string to select the experiment or dataset 
 #' accession
 #' @param    assay character string to select the assay type
-#' @param    biosample character string to select the biosample name
+#' @param    biosample_name character string to select the biosample name
 #' @param    dataset_accession character string to select the dataset accession
 #' @param    file_accession character string to select the file accesion
 #' @param    file_format character string to select the file format
@@ -22,6 +22,7 @@
 #' @param    target character string to select the experimental target
 #' @param    treatment character string to select the treatment
 #' @param    project character string to select the project
+#' @param    biosample_type character string to select the biosample type
 #' @param    file_status character string to select the file status 
 #' ("released", "revoked", "all"). Default "released"
 #' @param    status character string to select the dataset/experiment status

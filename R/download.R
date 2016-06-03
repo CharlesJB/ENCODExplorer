@@ -31,11 +31,6 @@
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
                            format = "all", dir = ".", force = TRUE) {
   
-  if(is.null(df)) {
-    load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
-  } else {
-    encode_df = df
-  }
   
   if(is.null(resultSet) || is.null(resultOrigin)) {
     warning_msg <- "You have to provide both results set and its origin to use"
@@ -43,6 +38,12 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
     warning(warning_msg, call. = FALSE)
     NULL
   } else {
+    
+    if(is.null(df)) {
+      load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+    } else {
+      encode_df = df
+    }
     if(resultOrigin %in% c("searchEncode", "queryEncode", "fuzzySearch")) {
       encode_root = "https://www.encodeproject.org"
       if(file.access(dir, mode = 2) == 0) {

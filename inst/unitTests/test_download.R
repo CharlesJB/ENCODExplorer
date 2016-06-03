@@ -38,9 +38,10 @@ test.mandatory_results_missing <- function() {
 #check when arguments are incorrect
 test.argument_consistency_ori <- function() {
   obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "web"),error=function(e) e, warning=conditionMessage)
+  print(obs)
   exp = "You have to provide a valid results set origin to use the downloadEncode function : searchEncode or queryEncode"
   msg = "the function should return a NULL value if the result set origin is different from searchEncode or queryEncode"
-  
+  print("//////---------------------------------------/////")
   checkIdentical(obs, exp, msg)
   
 }
