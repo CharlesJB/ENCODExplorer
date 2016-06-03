@@ -99,23 +99,23 @@ of two elements *experiment* and *dataset*.
 
 For example, to select all the fastq files produced on human
 cell MCF-7:
-```{r query_results, collapse=TRUE}
-query_results <- queryEncode(organism = "Homo sapiens",
-                       biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
-```
+# ```{r query_results, collapse=TRUE}
+# query_results <- queryEncode(organism = "Homo sapiens",
+#                        biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
+# ```
 
 The same request with approximate spelling of the assay type and `fixed` option
 to `TRUE`, will give no results :
-```{r query_results_2, collapse=TRUE}
-query_results <- queryEncode(organism = "Homo sapiens",
-                       biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
-```
+# ```{r query_results_2, collapse=TRUE}
+# query_results <- queryEncode(organism = "Homo sapiens",
+#                        biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
+# ```
 
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
-```{r query_results_3, collapse=TRUE}
-query_results <- queryEncode(organism = "Homo sapiens",
-                       biosample_name = "mcf7", file_format = "fastq",
-                       fixed = FALSE)
+# ```{r query_results_3, collapse=TRUE}
+# query_results <- queryEncode(organism = "Homo sapiens",
+#                       biosample_name = "mcf7", file_format = "fastq",
+#                       fixed = FALSE)
 ```
 
 These criteria correspond to the filters that you can find on ENCODE portal : 
