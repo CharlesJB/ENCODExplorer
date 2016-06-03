@@ -8,13 +8,12 @@ downloadEncode(df = NULL, resultSet = NULL, resultOrigin = NULL,
   format = "all", dir = ".", force = TRUE)
 }
 \arguments{
-\item{df}{\code{list} of two \code{data.frame} containing ENCODE experiment
-and dataset metadata.}
+\item{df}{\code{data.frame} containing ENCODE files}
 
 \item{resultSet}{the results set.}
 
 \item{resultOrigin}{name of the function used to generate the result set
-(\code{searchEncode} or \code{queryEncode})}
+(\code{searchEncode} or \code{queryEncode} or \code{fuzzySearch})}
 
 \item{format}{file format, default = all}
 

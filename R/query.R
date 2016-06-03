@@ -33,7 +33,7 @@
 #' experiments and datasets
 #'
 #' @examples
-#'     queryEncode(biosample = "A549", file_format = "bam")
+#'     queryEncode(biosample_name = "A549", file_format = "bam")
 #'
 #' @export
 queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, 
