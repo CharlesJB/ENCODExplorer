@@ -112,7 +112,7 @@ to `TRUE`, will give no results :
 # ```
 
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
-# ```{r query_results_3, collapse=TRUE}
+#```{r query_results_3, collapse=TRUE}
 # query_results <- queryEncode(organism = "Homo sapiens",
 #                       biosample_name = "mcf7", file_format = "fastq",
 #                       fixed = FALSE)
@@ -165,9 +165,9 @@ restrict the downloading to a certain type of file. To do so, you can set the
 
 Here is a small query:
 
-```{r query_results_4, collapse=TRUE}
-query_results <- queryEncode(assay = "switchgear", target ="elavl1", fixed = FALSE)
-```
+#```{r query_results_4, collapse=TRUE}
+#query_results <- queryEncode(assay = "switchgear", target ="elavl1", fixed = FALSE)
+#```
 
 And its equivalent search:
 
@@ -182,7 +182,7 @@ To select a particular file format you can:
 ```{r query_results_5, collapse=TRUE, eval=TRUE}
 query_results <- queryEncode(assay = "switchgear", target ="elavl1",
                        file_format = "bed" , fixed = FALSE)
-#downloadEncode(resultSet = query_results, resultOrigin = "queryEncode")
+downloadEncode(resultSet = query_results, resultOrigin = "queryEncode")
 ```
 
 2) specify the format to the `downloadEncode` function
