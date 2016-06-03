@@ -137,7 +137,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
         }
         else
         {
-          temp = subset(d, dt$file_format == format)
+          temp = subset(d, d$file_format == format)
           r = c(as.character(temp$file_accession))
         }
       }
