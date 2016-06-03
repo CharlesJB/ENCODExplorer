@@ -22,8 +22,6 @@ extract_table <- function(type) {
     }
   } else {
     
-    #temp <- strsplit(type, split = '')[[1]]
-    #utype <- paste(c(toupper(temp[1]), temp[-1]), collapse = '')
     temp <- strsplit(type, split="_")[[1]]
     utype <- sapply(temp,function(x){paste0(toupper(substr(x,1,1)),
                                            substr(x,2,nchar(x)))})

@@ -130,7 +130,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       }
       
     } else {
-      # retirer ignorer les espaces, les tirets et la casse
+      # Removing and ignoring space and hyphen
       # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
       
       if(!is.null(ac)) {
