@@ -107,17 +107,17 @@ query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
 
 The same request with approximate spelling of the assay type and `fixed` option
 to `TRUE`, will give no results :
-# ```{r query_results_2, collapse=TRUE}
-# query_results <- queryEncode(organism = "Homo sapiens",
-#                        biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
-# ```
+```{r query_results_2, collapse=TRUE}
+query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
+                       biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
+```
 
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
-#```{r query_results_3, collapse=TRUE}
-# query_results <- queryEncode(organism = "Homo sapiens",
-#                       biosample_name = "mcf7", file_format = "fastq",
-#                      fixed = FALSE)
-#```
+```{r query_results_3, collapse=TRUE}
+query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
+                    biosample_name = "mcf7", file_format = "fastq",
+                     fixed = FALSE)
+```
 
 These criteria correspond to the filters that you can find on ENCODE portal : 
 
@@ -166,9 +166,10 @@ restrict the downloading to a certain type of file. To do so, you can set the
 
 Here is a small query:
 
-#```{r query_results_4, collapse=TRUE}
-#query_results <- queryEncode(assay = "switchgear", target ="elavl1", fixed = FALSE)
-#```
+```{r query_results_4, collapse=TRUE}
+query_results <- queryEncode(df=encode_df, assay = "switchgear",
+                             target ="elavl1", fixed = FALSE)
+```
 
 And its equivalent search:
 
@@ -180,16 +181,17 @@ To select a particular file format you can:
 
 1) add this filter to your query and then run the `downloadEncode` function
 
-#```{r query_results_5, collapse=TRUE, eval=TRUE}
-#query_results <- queryEncode(assay = "switchgear", target ="elavl1",
-#                       file_format = "bed" , fixed = FALSE)
-#downloadEncode(resultSet = query_results, resultOrigin = "queryEncode")
-#```
+```{r query_results_5, collapse=TRUE, eval=TRUE}
+query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
+                       file_format = "bed" , fixed = FALSE)
+downloadEncode(df=encode_df, resultSet = query_results, resultOrigin = "queryEncode")
+```
 
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=TRUE}
-#downloadEncode(resultSet = search_results, resultOrigin = "searchEncode", format = "bed")
+downloadEncode(df=encode_df, resultSet = search_results,
+               resultOrigin = "searchEncode", format = "bed")
 ```
 
 
