@@ -13,7 +13,7 @@
 #' @param    set_accession character string to select the experiment or dataset 
 #' accession
 #' @param    assay character string to select the assay type
-#' @param    biosample character string to select the biosample name
+#' @param    biosample_name character string to select the biosample name
 #' @param    dataset_accession character string to select the dataset accession
 #' @param    file_accession character string to select the file accesion
 #' @param    file_format character string to select the file format
@@ -22,6 +22,7 @@
 #' @param    target character string to select the experimental target
 #' @param    treatment character string to select the treatment
 #' @param    project character string to select the project
+#' @param    biosample_type character string to select the biosample type
 #' @param    file_status character string to select the file status 
 #' ("released", "revoked", "all"). Default "released"
 #' @param    status character string to select the dataset/experiment status
@@ -33,23 +34,25 @@
 #' experiments and datasets
 #'
 #' @examples
-#'     queryEncode(biosample = "A549", file_format = "bam")
-#'
+#'     \dontrun{
+#'     queryEncode(biosample_name = "A549", file_format = "bam")
+#'     }
 #' @export
 queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, 
-                        biosample = NULL, dataset_accession = NULL, 
+                        biosample_name = NULL, dataset_accession = NULL, 
                         file_accession = NULL, file_format = NULL, 
                         lab = NULL, organism = NULL, target = NULL, 
-                        treatment = NULL, project = NULL,
+                        treatment = NULL, project = NULL, biosample_type = NULL,
                         file_status = "released", status = "released", 
                         fixed = TRUE, quiet = FALSE) {
   
-  if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
+  if(is.null(df)) {load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))}
   
-  if(is.null(set_accession) && is.null(assay) && is.null(biosample) && 
+  if(is.null(set_accession) && is.null(assay) && is.null(biosample_name) && 
      is.null(dataset_accession) && is.null(file_accession) && 
      is.null(file_format) && is.null(lab) && is.null(organism) &&
-     is.null(target) && is.null(treatment) && is.null(project))
+     is.null(target) && is.null(treatment) && is.null(project) &&
+     is.null(biosample_type))
   {
     warning("Please provide at least one valid criteria", call. = FALSE)
     NULL
@@ -59,7 +62,8 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
     
     ac = set_accession
     as = assay
-    bs = biosample
+    bn = biosample_name
+    bt = biosample_type
     da = dataset_accession
     fa = file_accession
     ff = file_format
@@ -81,10 +85,12 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
         s <- subset(s, s$assay == as)
       }
       
-      if(!is.null(bs)) {
-        s <- subset(s, s$biosample_name == bs)
+      if(!is.null(bn)) {
+        s <- subset(s, s$biosample_name == bn)
       }
-      
+      if(!is.null(bt)){
+        s <-subset(s, s$biosample_type == bt)
+      }
       if(!is.null(da)) {
         s <- subset(s, s$dataset_accession == da)
       }
@@ -126,7 +132,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       }
       
     } else {
-      # retirer ignorer les espaces, les tirets et la casse
+      # Removing and ignoring space and hyphen
       # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
       
       if(!is.null(ac)) {
@@ -144,9 +150,15 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
 
       }
       
-      if(!is.null(bs)) {
-        query.transfo = query_transform(bs)
+      if(!is.null(bn)) {
+        query.transfo = query_transform(bn)
         select.entries = grepl(x = s$biosample_name, pattern = query.transfo, 
+                               ignore.case =TRUE, perl =TRUE)
+        s = s[select.entries,]
+      }
+      if(!is.null(bt)) {
+        query.transfo = query_transform(bt)
+        select.entries = grepl(x = s$biosample_type, pattern = query.transfo, 
                                ignore.case =TRUE, perl =TRUE)
         s = s[select.entries,]
       }
@@ -228,21 +240,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       warning_message <- "No result found in encode_df. 
       You can try the <searchEncode> function or set the fixed option to FALSE."
       
-      s3 <- NULL
-      if(!is.null(ac)){
-        s3 <- resolveEncodeAccession(ac)
-      } else {
-        if(!is.null(da)){
-          s3 <- resolveEncodeAccession(da)
-        }
-      }
-      
-      if(!is.null(s3)) {
-        return(s3)
-      } else {
-        warning(warning_message, call. = FALSE)
-        NULL
-      }
+      return(s)
     }
     else
     {
@@ -250,7 +248,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       if(!quiet) 
         cat(paste0("results : ",
                    nrow(query_results),
-                   " files / ",length(unique(query_results$accession))))
+                   " / files ",length(unique(query_results$accession)),"\n"))
       query_results
     }
     
@@ -290,7 +288,7 @@ query_transform <- function(my.term) {
 #' res <- searchToquery(searchResults = search_res, quiet = TRUE)
 #' 
 #' @export
-searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
+searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
   
   if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
   
@@ -301,7 +299,8 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
     ids <- ids[grepl(x = ids, pattern = '/experiments/')]
     accessions <- gsub(x = ids, pattern = '/experiments/([A-Z0-9]+)/',
                        replacement = "\\1")
-    
+    accessions <-unique(accessions)
+        
     for(i in seq_along(accessions)){
       
       accession <- accessions[i]
@@ -321,28 +320,4 @@ searchToquery <- function(df = NULL, searchResults, quiet = FALSE){
                " files / ",length(unique(res$accession))))
   }
   return(res)
-}
-
-
-#' Return a \code{data.frame} containing basic datasets information from an 
-#' accession number
-#'
-#' @param accession character, dataset accession number
-#'
-#' @return a \code{data.frame} containing basic datasets information for the 
-#' requested accession number
-#' 
-#' @examples
-#' res <- resolveEncodeAccession(accession = 'ENCSR361ONJ')$accession
-#' 
-#' @export
-resolveEncodeAccession <- function(accession){
-  data(accession_df, envir = environment())
-  ret <- accession_df[accession_df$accession == accession,]
-  files <-  gsub(x = as.character(ret$files[[1]]), pattern = "/files/(.*)/", replacement = "\\1")
-  i <- encode_df$dataset$file_accession %in% files
-  j <- encode_df$experiment$file_accession %in% files
-  
-  list(experiment = encode_df$experiment[j,],
-       dataset = encode_df$dataset[i,])
 }

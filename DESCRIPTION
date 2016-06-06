@@ -31,7 +31,9 @@ Imports:
     parallel,
     RCurl,
     tidyr,
-    data.table
+    data.table,
+    downloader,
+    dplyr
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

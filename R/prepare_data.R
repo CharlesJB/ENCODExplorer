@@ -88,7 +88,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
                         libraries = Tables$libraries, 
                         treatments = Tables$treatments,
                         biosamples = Tables$biosamples)
-  # Step 5 : Splitting dataset column into column : accession & dataset_types.
+  
   Tables$files <- step5(files = Tables$files)
   
   encode_df <- Tables$files
@@ -117,8 +117,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   # Creating and updating new columns for dataset
   empty_vector <- rep(x = NA, times = nrow(encode_df))
-  encode_df <- cbind(encode_df, date_released = empty_vector,
-                             status = empty_vector)
+  encode_df <- cbind(encode_df, date_released = empty_vector)
   encode_df$date_released <- step6_date_released(encode_df, 
                                                          Tables$datasets)
   encode_df$status <- step6_status(encode_df, Tables$datasets)
