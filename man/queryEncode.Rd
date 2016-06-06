@@ -65,7 +65,8 @@ By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
 \examples{
+    \dontrun{
     queryEncode(biosample_name = "A549", file_format = "bam")
-
+    }
 }
 
