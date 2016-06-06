@@ -1,5 +1,6 @@
-#' Create a design for the files associated with the result of a queryEncode or
-#' searchEncode research.
+
+#' Create a design for the files associated with the result of a queryEncode,
+#' searchEncode or fuzzySearch research.
 #' 
 #' @return is a \code{data.frame} with files for all the experiments or 
 #' a \code{list} of \code{data.frame} with all the file per experiment when
@@ -20,23 +21,23 @@
 #' Default: experiments
 #' @param format The format (long or wide) to represent the data. The 'long' format
 #' will contain three columns (File, Experiment, Value). The 'wide' format
-#' organize the data as an array with the experiments as columns and files as rows/
+#' organize the data as an array with the experiments as columns and files as rows.
 #' Default: long
 #' @param output_type The type of output of the function, can be \code{data.frame}
-#' or a \code(data.table)
+#' or a \code{data.table}
 #' Default: \code{data.frame}
 #' @param ID A two element numeric vector, that first element is the value assign
 #' to replicate and the second is the value assign to control.
 #' Default: 1 and 2 
 #'     
-#' @import dplyr
-#' @import tidyr
 #' @import data.table
-#' @export
+#' @importFrom tidyr spread
+#' @importFrom dplyr filter
+#' 
 createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
                           format="long", output_type="data.frame", ID=c(1,2)){
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(type_file %in% c("bam", "fastq"))
+  stopifnot(type_file %in% c("bam", "fastq", "sam"))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
   stopifnot(datatype %in% c("experiments", "ucsc-browser-composites", "annotations",
@@ -54,7 +55,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
       df <- encode_df
   }
   
-  # This function use a vector of experience accession to extract information from df
+  # This function use a vector of experiment accession to extract information from df
   extract_files <- function(data_vec){
     result <- data.frame()
     for(i in 1:length(data_vec)){

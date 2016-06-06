@@ -5,13 +5,14 @@
 \title{Produce a subset of data following predefined criteria}
 \usage{
 queryEncode(df = NULL, set_accession = NULL, assay = NULL,
-  biosample = NULL, dataset_accession = NULL, file_accession = NULL,
+  biosample_name = NULL, dataset_accession = NULL, file_accession = NULL,
   file_format = NULL, lab = NULL, organism = NULL, target = NULL,
-  treatment = NULL, project = NULL, file_status = "released",
-  status = "released", fixed = TRUE, quiet = FALSE)
+  treatment = NULL, project = NULL, biosample_type = NULL,
+  file_status = "released", status = "released", fixed = TRUE,
+  quiet = FALSE)
 }
 \arguments{
-\item{df}{\code{list} of two \code{data.frame} containing ENCODE 
+\item{df}{\code{data.frame} containing ENCODE 
 experiment and dataset metadata}
 
 \item{set_accession}{character string to select the experiment or dataset 
@@ -19,7 +20,7 @@ accession}
 
 \item{assay}{character string to select the assay type}
 
-\item{biosample}{character string to select the biosample name}
+\item{biosample_name}{character string to select the biosample name}
 
 \item{dataset_accession}{character string to select the dataset accession}
 
@@ -37,6 +38,8 @@ accession}
 
 \item{project}{character string to select the project}
 
+\item{biosample_type}{character string to select the biosample type}
+
 \item{file_status}{character string to select the file status 
 ("released", "revoked", "all"). Default "released"}
 
@@ -48,7 +51,7 @@ accession}
 when setting at TRUE.}
 }
 \value{
-a \code{list} of two \code{data.frame}s containing data about ENCODE 
+a \code{data.frame}s containing data about ENCODE 
 experiments and datasets
 }
 \description{
@@ -62,7 +65,8 @@ By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
 \examples{
-    queryEncode(biosample = "A549", file_format = "bam")
-
+    \dontrun{
+    queryEncode(biosample_name = "A549", file_format = "bam")
+    }
 }
 
