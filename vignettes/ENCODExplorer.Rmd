@@ -101,7 +101,7 @@ of two elements *experiment* and *dataset*.
 For example, to select all the fastq files produced on human
 cell MCF-7:
 ```{r query_results, collapse=TRUE}
-load(file=system.file("data/encode_df.rda", package="ENCODExplorer"))
+load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
 query_results <- queryEncode(organism = "Homo sapiens",
                       biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
