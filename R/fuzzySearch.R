@@ -2,6 +2,7 @@
 # column. Value of 1 is the column is selected and 0 if its not.
 # accesion - dataset_type - lab - title - file_type - platform - project - control
 # biosample_type - replicate - organism
+#' @importFrom dplyr filter
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL, inputIsList=FALSE,
                         filterVector=NULL, filter=FALSE, fixed = FALSE){

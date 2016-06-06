@@ -30,9 +30,9 @@
 #' to replicate and the second is the value assign to control.
 #' Default: 1 and 2 
 #'     
-#' @import dplyr
-#' @import tidyr
 #' @import data.table
+#' @importFrom tidyr spread
+#' @importFrom dplyr filter
 #' 
 createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
                           format="long", output_type="data.frame", ID=c(1,2)){
