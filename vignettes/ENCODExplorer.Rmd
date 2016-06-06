@@ -181,7 +181,7 @@ To select a particular file format you can:
 
 1) add this filter to your query and then run the `downloadEncode` function
 
-```{r query_results_5, collapse=TRUE, eval=TRUE}
+```{r query_results_5, collapse=TRUE, eval=FALSE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
                        file_format = "bed" , fixed = FALSE)
 downloadEncode(df=encode_df, resultSet = query_results, resultOrigin = "queryEncode")
