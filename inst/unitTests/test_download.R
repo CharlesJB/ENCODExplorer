@@ -39,7 +39,7 @@ test.mandatory_results_missing <- function() {
 test.argument_consistency_ori <- function() {
   obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "web"),error=function(e) e, warning=conditionMessage)
   print(obs)
-  exp = "You have to provide a valid results set origin to use the downloadEncode function : searchEncode or queryEncode"
+  exp = "You have to provide a valid results set origin to use the downloadEncode function : searchEncode,fuzzySearch or queryEncode"
   msg = "the function should return a NULL value if the result set origin is different from searchEncode or queryEncode"
   print("//////---------------------------------------/////")
   checkIdentical(obs, exp, msg)
@@ -50,7 +50,7 @@ test.argument_consistency_dir <- function() {
   obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", 
                                     dir = "/aabbbccc"),error=function(e) e, warning=conditionMessage)
   exp = "Can't write in /aabbbccc"
-  msg = "the function should return a NULL value if the result set origin is different from searchEncode or queryEncode"
+  msg = "the function should return a NULL value if the result set origin is different from searchEncode,fuzzySearch or queryEncode"
   
   checkIdentical(obs, exp, msg) 
 }
