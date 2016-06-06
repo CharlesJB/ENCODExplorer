@@ -189,7 +189,7 @@ downloadEncode(df=encode_df, resultSet = query_results, resultOrigin = "queryEnc
 
 2) specify the format to the `downloadEncode` function
 
-```{r collapse=TRUE, eval=TRUE}
+```{r collapse=TRUE, eval=FALSE}
 downloadEncode(df=encode_df, resultSet = search_results,
                resultOrigin = "searchEncode", format = "bed")
 ```
