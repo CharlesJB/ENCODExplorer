@@ -20,6 +20,8 @@ accession}
 
 \item{assay}{character string to select the assay type}
 
+\item{biosample_name}{character string to select the biosample name}
+
 \item{dataset_accession}{character string to select the dataset accession}
 
 \item{file_accession}{character string to select the file accesion}
@@ -36,6 +38,8 @@ accession}
 
 \item{project}{character string to select the project}
 
+\item{biosample_type}{character string to select the biosample type}
+
 \item{file_status}{character string to select the file status 
 ("released", "revoked", "all"). Default "released"}
 
@@ -45,8 +49,6 @@ accession}
 
 \item{quiet}{logical enables to switch off the result summary information 
 when setting at TRUE.}
-
-\item{biosample}{character string to select the biosample name}
 }
 \value{
 a \code{data.frame}s containing data about ENCODE 

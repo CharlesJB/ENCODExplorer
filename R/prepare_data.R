@@ -88,7 +88,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
                         libraries = Tables$libraries, 
                         treatments = Tables$treatments,
                         biosamples = Tables$biosamples)
-  # Step 5 : Splitting dataset column into column : accession & dataset_types.
+  
   Tables$files <- step5(files = Tables$files)
   
   encode_df <- Tables$files

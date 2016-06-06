@@ -3,7 +3,6 @@ if(FALSE) {
   library( "ENCODExplorer" )
 }
 
-load(file = "inst/extdata/test_matrices.rda") # matrices
 load(file = "inst/extdata/test_rest_query_file.rda") #query_file
 load(file = "inst/extdata/test_rest_search_file.rda") #search_file
 
@@ -18,8 +17,8 @@ checkTrue(is.null(getFileId(resultSet = search_file, resultOrigin = "searchEncod
           msg = "the function should return a NULL value if the format is not available in the subset") 
 
 # check results
-fileIds = getFileId(resultSet = search_file, resultOrigin = "searchEncode", format = "bed_broadPeak")  
+fileIds = getFileId(resultSet = search_file, resultOrigin = "searchEncode", format = "bed")  
 checkEquals(fileIds, "ENCFF001VCK")
 
-fileIds = getFileId(resultSet = query_file, resultOrigin = "queryEncode", format = "bed_broadPeak")  
+fileIds = getFileId(resultSet = query_file, resultOrigin = "queryEncode", format = "bed")  
 checkEquals(fileIds, "ENCFF001VCK")

@@ -21,10 +21,10 @@
 #' Default: experiments
 #' @param format The format (long or wide) to represent the data. The 'long' format
 #' will contain three columns (File, Experiment, Value). The 'wide' format
-#' organize the data as an array with the experiments as columns and files as rows/
+#' organize the data as an array with the experiments as columns and files as rows.
 #' Default: long
 #' @param output_type The type of output of the function, can be \code{data.frame}
-#' or a \code(data.table)
+#' or a \code{data.table}
 #' Default: \code{data.frame}
 #' @param ID A two element numeric vector, that first element is the value assign
 #' to replicate and the second is the value assign to control.
@@ -33,7 +33,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import data.table
-#' @export
+#' 
 createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
                           format="long", output_type="data.frame", ID=c(1,2)){
   stopifnot(output_type %in% c("data.frame", "data.table"))

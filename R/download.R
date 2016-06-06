@@ -26,6 +26,7 @@
 #'      }
 #' @import tools
 #' @import downloader
+#' @import data.table
 #' 
 #' @export
 downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
@@ -44,10 +45,12 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
     } else {
       encode_df = df
     }
+    
     if(resultOrigin %in% c("searchEncode", "queryEncode", "fuzzySearch")) {
+      
       encode_root = "https://www.encodeproject.org"
       if(file.access(dir, mode = 2) == 0) {
-        filesId = getFileId(encode_df, resultSet = resultSet, 
+        filesId = getFileId(df=encode_df, resultSet = resultSet, 
                             resultOrigin = resultOrigin, format = format)
         
         temp = subset(encode_df, encode_df$file_accession %in% filesId)
@@ -88,41 +91,56 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
       # origin farfelue 
       warning_msg <- "You have to provide a valid results set origin to use the"
       warning_msg <- paste0(warning_msg, " downloadEncode function : ")
-      warning_msg <- paste0(warning_msg, "searchEncode or queryEncode")
+      warning_msg <- paste0(warning_msg, "searchEncode, fuzzySearch or queryEncode")
       warning(warning_msg, call. = FALSE)
       NULL
     }
   }
 }
 
-getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
-  d = NULL
+
+# Return a character vector with al the accession for the given format
+getFileId <- function(df=NULL, resultSet, resultOrigin, format = "all") {
+  
+  #Verifying the resultOrigin match with the resultSet
+  if((resultOrigin == "searchEncode") & (is.data.table(resultSet))){
+    warning_msg <- "The resultOrigin isn't compatible with the resultSet"
+    warning(warning_msg, call. = FALSE)
+    return(NULL)
+  }
+  if (resultOrigin %in% c("queryEncode","fuzzySearch") & (!(is.data.table(resultSet)))){
+    warning_msg <- "The resultOrigin isn't compatible with the resultSet"
+    warning(warning_msg, call. = FALSE)
+    return(NULL)
+  }
+  
+  d <- NULL
+  if(is.null(df)) {
+    load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+    df <- encode_df
+    }
   
   if(resultOrigin == "searchEncode") {
-    if(class(resultSet) == "data.frame")
-    {
-      d = getFileDetails(encode_df,resultSet)
-    }
-    else
-    {
+    if(is.data.frame(resultSet)){
+      d <- subset(encode_df, encode_df$accession %in% resultSet$accession)
+    } else {
       warning("Unexpected format for a result set coming from our searchEncode
                                    function", call. = FALSE)
-      NULL
+      return(NULL)
     }
     
-  }
-  else if (resultOrigin %in% c("queryEncode","fuzzySearch)")){
+  }else if (resultOrigin %in% c("queryEncode","fuzzySearch)")){
       d = resultSet
   }else{
       warning("Unexpected format for a result set coming from our queryEncode 
                                    function", call. = FALSE)
-      NULL
+      return(NULL)
   }
   
   
   if (! is.null(d)) {
     r = c()
-    formats = unique(c(as.character(encode_df$file_format)))
+    formats <- unique(c(as.character(df$file_Vieformat)))
     if(format != "all") {
       if(!(format %in% formats)) {
         warning("Unknown file format", call. = FALSE)
@@ -130,7 +148,7 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
       }
       else
       {
-        avail_format =     unique(c(as.character(d$file_format)))
+        avail_format <- unique(c(as.character(d$file_format)))
         if(!(format %in% avail_format)) {
           warning("This file format is not available in your dataset", 
                   call. = FALSE)
@@ -138,22 +156,14 @@ getFileId <- function(encode_df, resultSet, resultOrigin, format = "all") {
         }
         else
         {
-          temp = subset(d, d$file_format == format)
-          r = c(as.character(temp$file_accession))
+          temp <- subset(d, d$file_format == format)
+          r <- c(as.character(temp$file_accession))
         }
       }
     }
     else {
-      r = c(as.character(d$file_accession))
+      r <- c(as.character(d$file_accession))
     }
-    
     r
   }
 }
-# to use with search results
-getFileDetails <- function(encode_df,resultSet) {
-  acc = resultSet$accession
-  subset(encode_df,encode_df$accession %in% acc)
-}
-
-
