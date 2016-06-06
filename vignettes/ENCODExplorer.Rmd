@@ -66,28 +66,29 @@ In the current release, `encode_df` contains 86083 entries for experiments and
 The `queryEncode` function allow the user to find the subset of files corresponding to
 a precise query defined according to the following criteria :
 
-|parameter|available for| description|
-|---------|------------|-------------|
-|set_accession|experiment / dataset|The experiment or dataset accession|
-|assay|experiment|The assay type|
-|biosample|experiment|The biosample name|
-|dataset_access^[There is a subtle difference between the parameters **set_accession** and
+|parameter| description|
+|---------|-------------|
+|set_accession|The experiment or dataset accession|
+|assay|The assay type|
+|biosample_name|The biosample name|
+|dataset_access[There is a subtle difference between the parameters **set_accession** and
 **dataset_accession**. In fact, some files can be part of experiment, dataset or
 both. When using **set_accession**, you will get all the files directly linked with
 this accession (experiment and/or dataset). While the usage of
 **dataset_accesstion** will get the files directly link to the requested
 dataset **AND** those which are part of an experiment and indirectly link to a
 dataset (reported as related_files in the dataset and related_dataset in
-experiment).] |experiment / dataset|The dataset accession|
-|file_accession|experiment / dataset|The file accesion|
+experiment).] |The dataset accession|
+|file_accession|The file accesion|
 |file_format^[The current version of encode_df contains the following file format : 
 *fastq*,*bed*,*bigBed*,*bam*,*tsv*,*bigWig*,*rcc*,*csfasta*,*idat*,*gtf*,*tar*,
-*CEL*,*csqual*,*sam*,*wig*,*gff*,*fasta*,*tagAlign*]|experiment / dataset|The file format|
-|lab|experiment / dataset|The laboratory|
-|organism|experiment|The donor organism|
-|target|experiment|The experimental target|
-|treatment|experiment|The treatment|
-|project|experiment / dataset|The Project|
+*CEL*,*csqual*,*sam*,*wig*,*gff*,*fasta*,*tagAlign*]|The file format|
+|lab|The laboratory|
+|organism|The donor organism|
+|target|The experimental target|
+|treatment|The treatment|
+|project|The Project|
+|biosample_name|The biosample name|
 
 
 By default, the query use the exact string matching to perform the selection of 
