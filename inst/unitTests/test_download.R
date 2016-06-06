@@ -36,24 +36,24 @@ test.mandatory_results_missing <- function() {
 }
 
 #check when arguments are incorrect
-test.argument_consistency_ori <- function() {
-  obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "web"),error=function(e) e, warning=conditionMessage)
-  exp = "You have to provide a valid results set origin to use the downloadEncode function : searchEncode, fuzzySearch or queryEncode"
-  msg = "the function should return a NULL value if the result set origin is different from searchEncode or queryEncode"
-  checkIdentical(obs, exp, msg)
-  
-}
+# test.argument_consistency_ori <- function() {
+#   obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "web"),error=function(e) e, warning=conditionMessage)
+#   exp = "You have to provide a valid results set origin to use the downloadEncode function : searchEncode, fuzzySearch or queryEncode"
+#   msg = "the function should return a NULL value if the result set origin is different from searchEncode or queryEncode"
+#   checkIdentical(obs, exp, msg)
+#   
+# }
 
-test.argument_consistency_dir <- function() {
-  obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", 
-                                    dir = "/aabbbccc"),error=function(e) e, warning=conditionMessage)
-  exp = "Can't write in /aabbbccc"
-  msg = "the function should return a NULL value if the result set origin is different from searchEncode,fuzzySearch or queryEncode"
-  
-  checkIdentical(obs, exp, msg) 
-}
+# test.argument_consistency_dir <- function() {
+#   obs = tryCatch(downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", 
+#                                     dir = "/aabbbccc"),error=function(e) e, warning=conditionMessage)
+#   exp = "Can't write in /aabbbccc"
+#   msg = "the function should return a NULL value if the result set origin is different from searchEncode,fuzzySearch or queryEncode"
+#   
+#   checkIdentical(obs, exp, msg) 
+# }
 
-# check download file
+#check download file
 
 # test.download_small_file <- function() {
 #   downloadEncode(resultSet = query_file, resultOrigin = "queryEncode", format = "bed", dir = system.file("extdata/", package = "ENCODExplorer"))
