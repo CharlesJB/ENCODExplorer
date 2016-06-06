@@ -247,7 +247,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
       if(!quiet) 
         cat(paste0("results : ",
                    nrow(query_results),
-                   " files / ",length(unique(query_results$accession)),"\n"))
+                   " / files ",length(unique(query_results$accession)),"\n"))
       query_results
     }
     

@@ -20,8 +20,8 @@
 #'
 #' @return The downloaded file names, if download worked correctly.
 #' @examples
-#'      resultSet <- queryEncode(biosample_name = "A549", file_format = "bam")
 #'      \dontrun{
+#'      resultSet <- queryEncode(biosample_name = "A549", file_format = "bam")
 #'      downloadEncode(resultSet = resultSet, dir = ".")
 #'      }
 #' @import tools
@@ -118,7 +118,7 @@ getFileId <- function(df=NULL, resultSet, resultOrigin, format = "all") {
   if(is.null(df)) {
     load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
     df <- encode_df
-    }
+  }
   
   if(resultOrigin == "searchEncode") {
     if(is.data.frame(resultSet)){
@@ -140,7 +140,7 @@ getFileId <- function(df=NULL, resultSet, resultOrigin, format = "all") {
   
   if (! is.null(d)) {
     r = c()
-    formats <- unique(c(as.character(df$file_Vieformat)))
+    formats <- unique(c(as.character(df$file_format)))
     if(format != "all") {
       if(!(format %in% formats)) {
         warning("Unknown file format", call. = FALSE)
