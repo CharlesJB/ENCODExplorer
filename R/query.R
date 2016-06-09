@@ -10,8 +10,7 @@
 #' 
 #' @param    df \code{data.frame} containing ENCODE 
 #' experiment and dataset metadata 
-#' @param    set_accession character string to select the experiment or dataset 
-#' accession
+#' @param    set_accession character string to select the accession
 #' @param    assay character string to select the assay type
 #' @param    biosample_name character string to select the biosample name
 #' @param    dataset_accession character string to select the dataset accession
@@ -81,11 +80,11 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
         s <- subset(s, s$accession == ac)
       }
       
-      if(!is.null(as)) {
+      if(!is.null(as)){
         s <- subset(s, s$assay == as)
       }
       
-      if(!is.null(bn)) {
+      if(!is.null(bn)){
         s <- subset(s, s$biosample_name == bn)
       }
       if(!is.null(bt)){
@@ -99,7 +98,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
         s <- subset(s, s$file_accession == fa)
       }
       
-      if(!is.null(ff)) {
+      if(!is.null(ff)){
         s <- subset(s, s$file_format == ff)
       }
       
@@ -131,7 +130,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
         s <- subset(s, s$project == pr)
       }
       
-    } else {
+    } else { #fixed is false
       # Removing and ignoring space and hyphen
       # m cf 7 = MCf7 = mcf-7 = MCF-7 ... etc
       
@@ -226,7 +225,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
         s = s[select.entries,]
       }
       
-      if(!is.null(pr)) {
+      if(!is.null(pr)){
         query.transfo = query_transform(pr)
         select.entries = grepl(x = s$project, pattern = query.transfo, 
                                ignore.case =TRUE, perl =TRUE)
