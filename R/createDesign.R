@@ -37,11 +37,11 @@
 createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
                           format="long", output_type="data.frame", ID=c(1,2)){
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(type_file %in% c("bam", "fastq", "sam"))
+  stopifnot(type_file %in% c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig"))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
   stopifnot(datatype %in% c("experiments", "ucsc-browser-composites", "annotations",
-                            "matched-sets", "projects", "regerence-epigenomes",
+                            "matched-sets", "projects", "reference-epigenomes",
                             "references"))
   
   if (output_type == "data.frame") {
@@ -61,14 +61,14 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
     for(i in 1:length(data_vec)){
       # Catching and filtering replicates
       replicates <- filter(df, accession == data_vec[i])
-      replicates <- filter(replicates, file_type==type_file & status == "released")
+      replicates <- filter(replicates, file_format %in% type_file & status == "released")
       design_rep <- data.frame(File=replicates$href, Experiment=replicates$accession,
                                Value=rep(x=ID[1], times=nrow(replicates)),
                                stringsAsFactors=FALSE)
       # Catching and filtering controls
       controls_acc <- unique(replicates$controls)
       controls <- filter(df, dataset %in% controls_acc)
-      controls <- filter(controls, file_type==type_file & status =="released")
+      controls <- filter(controls, file_format%in%type_file & status =="released")
       design_ctrl <- data.frame(File=controls$href, Experiment=rep(replicates$accession[1],
                                times=nrow(controls)), Value=rep(x=ID[2], 
                                times=nrow(controls)), stringsAsFactors=FALSE)
@@ -82,7 +82,6 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
     }
     result
   }
-  
   
   # Creating a vector with all the experiments
   # Case 1 : Input from searchENCODE
@@ -110,5 +109,5 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
     design
   }
   
-  design
+  as.data.table(design)
 }
