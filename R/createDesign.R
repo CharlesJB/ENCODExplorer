@@ -34,8 +34,10 @@
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' 
-createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", datatype="experiments",
-                          format="long", output_type="data.frame", ID=c(1,2)){
+createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam",
+                          datatype="experiments",format="long",
+                          output_type="data.table", ID=c(1,2)){
+    
   stopifnot(output_type %in% c("data.frame", "data.table"))
   stopifnot(type_file %in% c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig"))
   stopifnot(length(ID) == 2)
@@ -80,7 +82,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
     if(format == "wide"){
       result <- spread(result, key=Experiment, value=Value, fill = NA)
     }
-    result
+    as.data.table(result)
   }
   
   # Creating a vector with all the experiments
@@ -109,5 +111,4 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam", dat
     design
   }
   
-  as.data.table(design)
 }
