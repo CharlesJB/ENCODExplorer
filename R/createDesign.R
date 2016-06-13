@@ -62,7 +62,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam",
     result <- data.frame()
     for(i in 1:length(data_vec)){
       # Catching and filtering replicates
-      replicates <- filter(df, accession == data_vec[i])
+      replicates <- filter(df, accession == data_vec[[i]])
       replicates <- filter(replicates, file_format %in% type_file & status == "released")
       design_rep <- data.frame(File=replicates$href, Experiment=replicates$accession,
                                Value=rep(x=ID[1], times=nrow(replicates)),
@@ -93,20 +93,20 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam",
     data_toKeep <- filter(input, types == datatype)
   } else {
   # Case 2 : Input from queryENCODE
-      data_toKeep <- filter(input, dataset_type == datatype)
+      data_toKeep <- filter(input, dataset_type == datatype & file_type == type_file)
   }
-  
-  data_toKeep <- unique(data_toKeep$accession)
-  if(length(data_toKeep) == 0){
+  # Extract the list of experiment
+  exp_list <- unique(data_toKeep$accession)
+  if(length(exp_list) == 0){
       print("length of experiments is 0")
       return(design)
   }
   if(!split) {
-    design <- extract_files(data_toKeep)
+    design <- extract_files(exp_list)
   } else {
-    design <- vector("list", length(data_toKeep))
-    for(i in 1:length(data_toKeep)){
-      design[[i]] <- extract_files(data_toKeep[i])
+    design <- vector("list", length(exp_list))
+    for(i in 1:length(exp_list)){
+      design[[i]] <- extract_files(exp_list[[i]])
     }
     design
   }

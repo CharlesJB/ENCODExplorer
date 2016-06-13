@@ -5,7 +5,7 @@ ui <- fluidPage(
         tabPanel("Search",sidebarLayout(
             sidebarPanel(
                 actionButton("searchAction", "Search"),
-                fileInput("df", "Database"),
+                fileInput("df", "Import your database (optional"),
                 radioButtons("typeInput","Select your type of search",
                     choices = list("Single element"=1, "Mutiple element"=2),
                     selected=1),
@@ -46,22 +46,21 @@ ui <- fluidPage(
                 ),
                 conditionalPanel(
                     
-                    condition="input.searchAction > 0 & input.designFromSearch == 0",
+                    condition="input.designFromSearch == 0",
                     dataTableOutput("searchResult")
                 ),
                 conditionalPanel(
                     condition="!input.splitFromSearch",
-                    dataTableOutput("designResult")
+                    dataTableOutput("designResultSearch")
                 ),
                 conditionalPanel(
                     condition="input.splitFromSearch",
-                    uiOutput("designSplit")
+                    uiOutput("designSplitSearch")
                 )
             ))
         ),
 
 #////------------------------------queryEncode-----------------------------////
-
         tabPanel("Advanced Search",sidebarLayout(
             sidebarPanel(
                 actionButton("searchAdvanced", "Search"),
@@ -104,11 +103,20 @@ ui <- fluidPage(
                     textInput("ctrlFromQuery",
                         "Numeric ID assigned to control file", value="2")
                 ),
-                # conditionalPanel(
-                #     condition="input.searchAdvanced > 0 & input.designFromQuery == 0",
-                #     dataTableOutput("advancedResult")
-                # ),
-                dataTableOutput("advancedResult")
+                conditionalPanel(
+                    condition="input.designFromQuery == 0",
+                    dataTableOutput("advancedResult")
+                ),
+                conditionalPanel(
+                    condition="!input.splitFromQuery",
+                    dataTableOutput("designAdvanced")
+                ),
+                conditionalPanel(
+                    condition="input.splitFromQuery",
+                    uiOutput("designSplitQuery")
+                )
+                #,
+                # dataTableOutput("advancedResult")
             ))
         ),
 
@@ -165,14 +173,14 @@ server <- function(input, output) {
     df <- encode_df
     resultGlobal <- NULL #Global variable for the result of a fuzzySearch
     resultQuery <- NULL #Global varaible for the result of a querySearch
-    
+    designExist <- 0
     #////----------------------------------fuzzySearch---------------------////
     observeEvent(input$searchAction, {
         inputIsList <- FALSE
         if(input$typeInput == "2"){
             inputIsList <- TRUE
         }
-
+        
         if(length(input$filter) == 0){
             resultGlobal <<- fuzzySearch(input$searchTerm, inputIsList=
                                              inputIsList,database=df)
@@ -200,27 +208,25 @@ server <- function(input, output) {
         dataType <- dataType[as.numeric(input$datatypeFromSearch)]
         
         if(!input$splitFromSearch){
-            designResult <- createDesign(resultGlobal,
-                                         df,split=FALSE, type_file=fileType,
+            designResultSearch <- createDesign(resultGlobal,
+                                         encode_df,split=FALSE, type_file=fileType,
                                          datatype=dataType, format=formatType,
                                          output_type="data.table", ID=IDs)
-            output$designResult <- renderDataTable(designResult,
+            output$designResultSearch <- renderDataTable(designResultSearch,
                                         options=list(searching=F))
         }else{
             require(tidyr)
+            require(dplyr)
             #Getting the list of experiment
-            temp <- createDesign(resultGlobal,
-                                 df,split=FALSE, type_file=fileType,
-                                 datatype=dataType, format="long",
-                                 output_type="data.table", ID=IDs)
-            acc <- unique(temp$Experiment)
+            temp <- filter(resultGlobal, type_file==fileType & dataset_type==dataType)
+            acc <- unique(temp$accession)
             #Creating the design
             list_design <- createDesign(resultGlobal, df,split=TRUE,
                     type_file=fileType,datatype=dataType, format="long", 
                     output_type="data.table", ID=IDs)
             lenExp <- length(list_design)
             #Creating the empty list of dataTable that will be display 
-            output$designSplit <- renderUI({
+            output$designSplitSearch <- renderUI({
                  table_output_list <- vector("list",lenExp)
                  table_output_list <- lapply(1:lenExp, function(i){
                      tablename <- paste(acc[i])
@@ -322,16 +328,19 @@ server <- function(input, output) {
                                                    options=list(searching=F))
         }else{
             require(tidyr)
+            temp <- filter(resultQuery, type_file==fileType & dataset_type==dataType)
+            acc <- unique(temp$accession)
+
             list_design <- createDesign(resultQuery, df,split=TRUE,
                                         type_file=fileType,datatype=dataType, format="long", 
                                         output_type="data.table", ID=IDs)
             lenExp <- length(list_design)
             
             #Creating a list of empty dataTable
-            output$designSplitQ <- renderUI({
+            output$designSplitQuery <- renderUI({
                 table_output_list <- vector("list",lenExp)
                 table_output_list <- lapply(1:lenExp, function(i){
-                    tablename <- paste((unique(designAdvanced$Experiment))[i])
+                    tablename <- paste(acc[i])
                     dataTableOutput(tablename)
                 })
                 tagList(table_output_list)
@@ -341,7 +350,7 @@ server <- function(input, output) {
             for(i in 1:lenExp) {
                 local({
                     my_i <- i
-                    tablename <- paste(unique(designAdvanced$Experiment)[my_i])
+                    tablename <- paste(acc[my_i])
                     output[[tablename]] <- renderDataTable(list_design[[my_i]],
                                                            options=list(searching=F))
                 })
