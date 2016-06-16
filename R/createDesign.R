@@ -13,10 +13,10 @@
 #' @param split Allow to the function to return a \code{list} of \code{data.frame}
 #' where each \code{data.frame} contain the files for a single experiment
 #' Default: \code{FALSE}.
-#' @param type_file A string that correspond to the type of the files 
+#' @param file_type A string that correspond to the type of the files 
 #' that need to be extract.
 #' Default: bam
-#' @param datatype A string that correspong to the type of dataset that
+#' @param dataset_type A string that correspong to the type of dataset that
 #' will be extrated.
 #' Default: experiments
 #' @param format The format (long or wide) to represent the data. The 'long' format
@@ -31,84 +31,90 @@
 #' Default: 1 and 2 
 #'     
 #' @import data.table
+#' @import stringr
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' 
-createDesign <- function (input=NULL, df=NULL, split=FALSE, type_file="bam",
-                          datatype="experiments",format="long",
+createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
+                          dataset_type="experiments",format="long",
                           output_type="data.table", ID=c(1,2)){
-    
+  stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(type_file %in% c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig"))
+  stopifnot(file_type %in% c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig"))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
-  stopifnot(datatype %in% c("experiments", "ucsc-browser-composites", "annotations",
-                            "matched-sets", "projects", "reference-epigenomes",
-                            "references"))
+  stopifnot(dataset_type %in% input$dataset_type)
   
-  if (output_type == "data.frame") {
-    design <- data.frame(stringsAsFactors = FALSE)
-  }else{
-    design <- data.table()
-  }
+  design <- data.table()
   
   if(is.null(df)){
       load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
       df <- encode_df
   }
   
-  # This function use a vector of experiment accession to extract information from df
-  extract_files <- function(data_vec){
-    result <- data.frame()
-    for(i in 1:length(data_vec)){
-      # Catching and filtering replicates
-      replicates <- filter(df, accession == data_vec[[i]])
-      replicates <- filter(replicates, file_format %in% type_file & status == "released")
-      design_rep <- data.frame(File=replicates$href, Experiment=replicates$accession,
-                               Value=rep(x=ID[1], times=nrow(replicates)),
-                               stringsAsFactors=FALSE)
-      # Catching and filtering controls
-      controls_acc <- unique(replicates$controls)
-      controls <- filter(df, dataset %in% controls_acc)
-      controls <- filter(controls, file_format%in%type_file & status =="released")
-      design_ctrl <- data.frame(File=controls$href, Experiment=rep(replicates$accession[1],
-                               times=nrow(controls)), Value=rep(x=ID[2], 
-                               times=nrow(controls)), stringsAsFactors=FALSE)
-      # Merging the data.frame
-      result <- rbind(result, design_rep, design_ctrl)
-    }
-    
-    # Changing format with spread when the format is set to wide
-    if(format == "wide"){
-      result <- spread(result, key=Experiment, value=Value, fill = NA)
-    }
-    as.data.table(result)
+  if(is.character(ID)){
+      ID <- as.numeric(ID)
   }
   
-  # Creating a vector with all the experiments
-  # Case 1 : Input from searchENCODE
-  if (is.null(input$dataset_type)){
-    types <- sapply(input$id, function(x) {gsub(x, pattern = "/(.*)/.*/", replacement = '\\1')})
-    input <- cbind(input, types)
-    data_toKeep <- filter(input, types == datatype)
-  } else {
-  # Case 2 : Input from queryENCODE
-      data_toKeep <- filter(input, dataset_type == datatype & file_type == type_file)
+  # The first step is to clean the main df to avoid having to do this later
+  ft <- file_type
+  dt <- dataset_type
+  clean_df <- df[file_type %in% ft & status == "released" & dataset_type == dt,] 
+
+  # Get experiment/controls matches.
+  ## One challenge is that the same control can be used by more than one experiment.
+  ## Another challenge is that some experiment don't have a matching control.
+  ## Finally, there can also be more than one control per experiment (separated by "; ").
+  replicates <- clean_df[accession %in% input$accession, unique(accession)]
+  i <- match(replicates, clean_df$accession)
+  ctrl <- clean_df[i, controls]
+  ctrl <- unlist(strsplit(ctrl, "; "))
+  ctrl <- ctrl[!is.na(ctrl)]
+  ## The counts variable is the same length as the replicates variable and will contain the
+  ## number of controls for each experiment.
+  counts <- str_count(clean_df[i, controls], ";") + 1
+  counts[is.na(counts)] <- 0
+  ## ctrl is a data.table with all the replicates and their matching controls,
+  ## with only one experiment/control combination. The trick is that if we have a count
+  ## of zero, the corresponding experiment will be removed from the vector after the rep
+  ## function call.
+  ctrl <- data.table(replicates = rep(replicates, counts), ctrl)
+
+  # Create the ctrl part of the design
+  get_ctrl_design <- function(dt) {
+    data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
+               Value = 2)
   }
-  # Extract the list of experiment
-  exp_list <- unique(data_toKeep$accession)
-  if(length(exp_list) == 0){
-      print("length of experiments is 0")
-      return(design)
+  design_ctrl <- ctrl[,get_ctrl_design(.SD), by = .(replicates, ctrl),
+               .SDcols = c("replicates","ctrl")]
+  design_ctrl <- design_ctrl[, `:=`(replicates = NULL, ctrl = NULL)]
+
+  # Create the replicate part of the design
+  design_replicates <- clean_df[accession %in% input$accession,
+                         .(File = href, Experiment = accession, Value = 1)]
+
+  # Merge the two parts
+  design <- rbind(design_replicates, design_ctrl)
+  
+  # Post-processing
+  if (output_type == "data.frame") {
+      design <- as.data.frame(design)
   }
-  if(!split) {
-    design <- extract_files(exp_list)
-  } else {
-    design <- vector("list", length(exp_list))
-    for(i in 1:length(exp_list)){
-      design[[i]] <- extract_files(exp_list[[i]])
+  if (split) {
+      design <- split(design, design$Experiment)
+  }
+  if (format == "wide") {
+    if (is.data.frame(design)) {
+      design <- spread(design, key = Experiment, value = Value)
+    } else {
+      design <- lapply(design, spread, key = Experiment, value = Value)
     }
-    design
+  }
+  
+  if(output_type == "data.frame"){
+     return(as.data.frame(design))
+  }else{
+     return(design) 
   }
   
 }
