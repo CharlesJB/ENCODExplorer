@@ -20,8 +20,14 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         print("Invalid searchTerm input")
         return()
     }
-    #Converting the list type of input into a single string
-    if(is.list(searchTerm)){
+    
+    if(is.list(searchTerm) & sum(as.numeric(lapply(searchTerm, is.character))) != length(searchTerm)){
+        warning("Error : All the searchTerm must be character", call. = FALSE)
+        return()
+    }
+
+    #Converting the list type of input, or a vector into a single string
+    if(is.list(searchTerm)|(is.character(searchTerm) && length(searchTerm) > 1)){
         multipleTerm <- TRUE
         searchTerm <- paste(searchTerm, collapse = ",")
     }
@@ -45,8 +51,8 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         filter <- TRUE
         match <- filterVector %in% filterNames
         if(sum(as.logical(match)) != length(filterVector)){
-            print(paste("These filter were invalid and will not be considered",
-                    filterVector[!match],sep=", "))
+            warning(paste("This filter is unavailable and will not be considered : ",
+                    filterVector[!match], "\n", sep=""), call. = FALSE)
             filterVector <- filterVector[match]
         }
     }
@@ -68,15 +74,15 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     for (i in 1:length(search_list)) {
         if (filter){
             if(names(encode_df)[[i]] %in% filterVector) {
-                search_list[[i]] <- grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
-                                         ignore.case=TRUE, fixed=fixed)
+                search_list[[i]] <- suppressWarnings(grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
+                                         ignore.case=TRUE, fixed=fixed))
             }else{
                 search_list[[i]] <- zeroVector
             }
             
         }else{
-            search_list[[i]] <- grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
-                                ignore.case=TRUE, fixed=fixed)
+            search_list[[i]] <- suppressWarnings(grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
+                                ignore.case=TRUE, fixed=fixed))
         }
     }
     # Compiling all the logical vector
