@@ -1,0 +1,102 @@
+if(FALSE) {
+    library( "RUnit" )
+    library( "ENCODExplorer" )
+}
+
+load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer")) #data.table to use
+load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+
+test.design_long <- function(){
+    obs <- createDesign(BRCA,encode_df)
+    checkIdentical(dim(obs),c(6L,3L))
+    
+    checkIdentical(obs[1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+                                      Experiment="ENCSR000EDB", Value=1))
+    checkIdentical(obs[2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+                                      Experiment="ENCSR000EDB", Value=1))
+    checkIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+                                      Experiment="ENCSR000EDB", Value=2))
+    checkIdentical(obs[4], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+                                      Experiment="ENCSR000EDY", Value=1))
+    checkIdentical(obs[5], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+                                      Experiment="ENCSR000EDY", Value=1))
+    checkIdentical(obs[6], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+                                      Experiment="ENCSR000EDY", Value=2))
+}
+
+test.design_wide <- function(){
+    obs <- createDesign(BRCA, encode_df, format="wide")
+    checkIdentical(dim(obs),c(6L,3L))
+    checkIdentical(obs[1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+                                      ENCSR000EDB=1, ENCSR000EDY=as.numeric(NA)))
+    checkIdentical(obs[2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+                                      ENCSR000EDB=1, ENCSR000EDY=as.numeric(NA)))
+    checkIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+                                      ENCSR000EDB=2, ENCSR000EDY=as.numeric(NA)))
+    checkIdentical(obs[4], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+                                      ENCSR000EDB=as.numeric(NA),ENCSR000EDY=1))
+    checkIdentical(obs[5], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+                                      ENCSR000EDB=as.numeric(NA), ENCSR000EDY=1))
+    checkIdentical(obs[6], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+                                      ENCSR000EDB=as.numeric(NA), ENCSR000EDY=2))
+}
+
+test.design_split_long <- function(){
+    obs <- createDesign(BRCA, encode_df, split=T)
+    checkIdentical(length(obs), 2L)
+    checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+                                           Experiment="ENCSR000EDB", Value=1))
+    checkIdentical(obs[[1]][2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+                                           Experiment="ENCSR000EDB", Value=1))
+    checkIdentical(obs[[1]][3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+                                           Experiment="ENCSR000EDB", Value=2))
+    checkIdentical(obs[[2]][1], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+                                          Experiment="ENCSR000EDY", Value=1))
+    checkIdentical(obs[[2]][2], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+                                          Experiment="ENCSR000EDY", Value=1))
+    checkIdentical(obs[[2]][3], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+                                           Experiment="ENCSR000EDY", Value=2))
+}
+
+test.design_split_wide <- function(){
+    
+    obs <- createDesign(BRCA, encode_df, format="wide", split=T)
+    checkIdentical(length(obs), 2L)
+    checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+                                           ENCSR000EDB=1))
+    checkIdentical(obs[[1]][2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+                                           ENCSR000EDB=1))
+    checkIdentical(obs[[1]][3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+                                           ENCSR000EDB=2))
+    checkIdentical(obs[[2]][1], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+                                           ENCSR000EDY=1))
+    checkIdentical(obs[[2]][2], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+                                           ENCSR000EDY=1))
+    checkIdentical(obs[[2]][3], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+                                           ENCSR000EDY=2))
+}
+
+test.design_wrong_input <- function() {
+    
+    #Testing ID input
+    obs <- tryCatch(createDesign(BRCA, encode_df, ID=c("X","Y")),error=function(e) e, warning=conditionMessage)
+    exp <- "Error : Invalid type of ID, must be numeric value. Default settings will be use"
+    checkIdentical(as.character(obs),exp)
+    
+    obs <- tryCatch(createDesign(BRCA, encode_df, ID=c(1)),error=function(e) e, warning=conditionMessage)
+    exp <- "Error: length(ID) == 2 is not TRUE\n"
+    checkIdentical(as.character(obs),exp)
+    
+    #Testing file_type 
+    obs <- tryCatch(createDesign(BRCA, encode_df,file_type="banana"),error=function(e) e, warning=conditionMessage)
+    exp <- "Error: file_type %in% unique(df$file_format) is not TRUE\n"
+    checkIdentical(as.character(obs),exp)
+    #Testing dataset_type
+    obs <- tryCatch(createDesign(BRCA, encode_df,dataset_type="banana"),error=function(e) e, warning=conditionMessage)
+    exp <- "Error: dataset_type %in% df$dataset_type is not TRUE\n"
+    checkIdentical(as.character(obs),exp)
+    
+}
+
+
+
