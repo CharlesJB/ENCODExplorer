@@ -15,8 +15,7 @@ queryEncode(df = NULL, set_accession = NULL, assay = NULL,
 \item{df}{\code{data.frame} containing ENCODE 
 experiment and dataset metadata}
 
-\item{set_accession}{character string to select the experiment or dataset 
-accession}
+\item{set_accession}{character string to select the accession}
 
 \item{assay}{character string to select the assay type}
 
