@@ -40,20 +40,31 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(file_type %in% c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig"))
+  stopifnot(file_type %in%  unique(df$file_format))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
-  stopifnot(dataset_type %in% input$dataset_type)
+  stopifnot(dataset_type %in% df$dataset_type)
   
   design <- data.table()
+  
+  if(is.data.frame(input)){
+      input <- as.data.table(input)
+  }
   
   if(is.null(df)){
       load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
       df <- encode_df
   }
   
+  #Filtering character type of ID
   if(is.character(ID)){
-      ID <- as.numeric(ID)
+      if(sum(as.numeric((is.na(suppressWarnings(as.numeric(ID))))))>0){
+          warning("Error : Invalid type of ID, must be numeric value. Default settings will be use",
+                  call. = FALSE)
+          ID <- c(1,2)
+      }else{
+        ID <- as.numeric(ID)
+      }
   }
   
   # The first step is to clean the main df to avoid having to do this later
@@ -95,7 +106,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
 
   # Merge the two parts
   design <- rbind(design_replicates, design_ctrl)
-  
+  setorder(design,"Experiment")
   # Post-processing
   if (output_type == "data.frame") {
       design <- as.data.frame(design)
