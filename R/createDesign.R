@@ -35,6 +35,7 @@
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' 
+#' @export
 createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
                           dataset_type="experiments",format="long",
                           output_type="data.table", ID=c(1,2)){
