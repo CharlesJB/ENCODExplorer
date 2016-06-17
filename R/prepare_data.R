@@ -123,7 +123,16 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df$status <- step6_status(encode_df, Tables$datasets)
   
   remove(Tables)
-  encode_df
+  #Ordering the table by the accession column
+  encode_df <- encode_df[order(accession),]
+  #shifting the file_accession column as the second column
+  file_accIndex <- grep("file_accession", colnames(encode_df))
+  encode_seq <- seq(1:ncol(encode_df))
+  encode_seq <- encode_seq[!grepl(file_accIndex,encode_seq,fixed =TRUE)]
+  encode_seq <- encode_seq[-1]
+  encode_seq <- c(1,file_accIndex, encode_seq)
+  setcolorder(encode_df, encode_seq)
+  
 }
 
 step1 <- function(database_filename){
