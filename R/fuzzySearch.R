@@ -15,19 +15,19 @@
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
                         multipleTerm=FALSE, fixed = FALSE){
-    filter <- FALSE
+    #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){
         print("Invalid searchTerm input")
         return()
     }
-    
+    #Making sure the term is a list are character
     if(is.list(searchTerm) & sum(as.numeric(lapply(searchTerm, is.character))) != length(searchTerm)){
         warning("Error : All the searchTerm must be character", call. = FALSE)
         return()
     }
 
     #Converting the list type of input, or a vector into a single string
-    if(is.list(searchTerm)|(is.character(searchTerm) && length(searchTerm) > 1)){
+    if((is.list(searchTerm)|(is.character(searchTerm))) && length(searchTerm) > 1){
         multipleTerm <- TRUE
         searchTerm <- paste(searchTerm, collapse = ",")
     }
@@ -47,6 +47,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     filterNames <- c("accession", "dataset_type", "lab", "title", "file_type", "platform",
                      "project", "type", "control", "biosample_type", "replicate", "organism",
                      "file_accession", "target", "assay", "biosample_name", "file_format")
+    filter <- FALSE
     if(!is.null(filterVector)){
         filter <- TRUE
         match <- filterVector %in% filterNames
@@ -70,7 +71,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     search_list <- vector(mode="list", ncol(encode_df))
     zeroVector <- rep(0,nrow(encode_df))
     
-    # Looking for the searchTerm in every column 
+    # Looking for the searchTerm 
     for (i in 1:length(search_list)) {
         if (filter){
             if(names(encode_df)[[i]] %in% filterVector) {
