@@ -13,7 +13,7 @@
 #' @param split Allow to the function to return a \code{list} of \code{data.frame}
 #' where each \code{data.frame} contain the files for a single experiment
 #' Default: \code{FALSE}.
-#' @param file_type A string that correspond to the type of the files 
+#' @param fileFormat A string that correspond to the type of the files 
 #' that need to be extract.
 #' Default: bam
 #' @param dataset_type A string that correspong to the type of dataset that
@@ -36,12 +36,12 @@
 #' @importFrom dplyr filter
 #' 
 #' @export
-createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
+createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
                           dataset_type="experiments",format="long",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(file_type %in%  unique(df$file_format))
+  stopifnot(fileFormat %in%  unique(df$file_format))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
   stopifnot(dataset_type %in% df$dataset_type)
@@ -69,9 +69,9 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
   }
   
   # The first step is to clean the main df to avoid having to do this later
-  ft <- file_type
+  ff <- fileFormat
   dt <- dataset_type
-  clean_df <- df[file_type %in% ft & status == "released" & dataset_type == dt,] 
+  clean_df <- df[file_format %in% ff & status == "released" & dataset_type == dt,] 
 
   # Get experiment/controls matches.
   ## One challenge is that the same control can be used by more than one experiment.
@@ -95,15 +95,18 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, file_type="bam",
   # Create the ctrl part of the design
   get_ctrl_design <- function(dt) {
     data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
-               Value = 2)
+               Value = ID[2])
   }
+  
+  #ERROR : FAIRE UN FUZZYSEARCH POUR "BRCA" ET TENTER DE FIARE UN DESIGN POUR FILE
+  #        FORMAT "bigBed"
   design_ctrl <- ctrl[,get_ctrl_design(.SD), by = .(replicates, ctrl),
                .SDcols = c("replicates","ctrl")]
   design_ctrl <- design_ctrl[, `:=`(replicates = NULL, ctrl = NULL)]
 
   # Create the replicate part of the design
   design_replicates <- clean_df[accession %in% input$accession,
-                         .(File = href, Experiment = accession, Value = 1)]
+                         .(File = href, Experiment = accession, Value = ID[1])]
 
   # Merge the two parts
   design <- rbind(design_replicates, design_ctrl)
