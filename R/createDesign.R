@@ -93,13 +93,20 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   ctrl <- data.table(replicates = rep(replicates, counts), ctrl)
 
   # Create the ctrl part of the design
+  # get_ctrl_design <- function(dt) {
+  #   data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
+  #              Value = ID[2])
+  # }
   get_ctrl_design <- function(dt) {
-    data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
-               Value = ID[2])
+      File <- clean_df[dataset == dt$ctrl, href]
+      if (length(File) > 0) {
+          data.table(File = File, Experiment = dt$replicates,
+                     Value = ID[2])
+      } else {
+          data.table(File = character(), Experiment = character(), Value = numeric())
+      }   
   }
   
-  #ERROR : FAIRE UN FUZZYSEARCH POUR "BRCA" ET TENTER DE FIARE UN DESIGN POUR FILE
-  #        FORMAT "bigBed"
   design_ctrl <- ctrl[,get_ctrl_design(.SD), by = .(replicates, ctrl),
                .SDcols = c("replicates","ctrl")]
   design_ctrl <- design_ctrl[, `:=`(replicates = NULL, ctrl = NULL)]
