@@ -16,8 +16,10 @@ server <- function(input, output) {
     viewDesign <- FALSE #Global variable that indicate if a design is currently display
     resultGlobal <- NULL #Global variable for the result of a fuzzySearch
     resultQuery <- NULL #Global variable for the result of a querySearch
+    designResultSearch <- NULL
     #////----------------------------------fuzzySearch---------------------////
     observeEvent(input$searchAction, {
+        
         output$designVis <- reactive({FALSE})
         viewDesign <<- FALSE
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
@@ -30,29 +32,35 @@ server <- function(input, output) {
             resultGlobal <<- fuzzySearch(input$searchTerm, 
                                     multipleTerm=multiple_Term, database=df)
             output$searchResult <- renderDataTable({
-                                    addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
-                                                          resultGlobal$href,'">',"")
-                                    resultGlobal <- cbind(Download=addCheckbox, resultGlobal)}, escape=FALSE,
-                                    options=list(searching=FALSE), 
-                                    callback = "function(table) {
-                                        table.on('change.dt', '#fuzzyBox:checkbox', function() {
-                                    setTimeout(function () {
-                                    Shiny.onInputChange('downloadBox', $('#fuzzyBox:checked').map(function() {
-                                    return $(this).val();
-                                    }).get())
-                                    }, 10); 
-                                    });
-                                    }")
+                # Making a checkbox column with same value as the file_accession 
+                # of this row.
+                addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
+                                        resultGlobal$file_accession,'">',"")
+                resultGlobal <- cbind(Download=addCheckbox, resultGlobal)}, escape=FALSE,
+                                options=list(searching=FALSE,pageLength = 10, scrollX = TRUE,
+                                             columnDefs=list(list(targets=1:ncol(resultGlobal), className="alignCenter"))),
+                                callback = "function(table) {
+                                table.on('change.dt', '#fuzzyBox:checkbox', function() {
+                                setTimeout(function () {
+                                Shiny.onInputChange('downloadBox', $('#fuzzyBox:checked').map(function() {
+                                return $(this).val();
+                                }).get())
+                                }, 10); 
+                                });
+                                }")
         }else{
             resultGlobal <<- fuzzySearch(input$searchTerm, 
                                         multipleTerm=multiple_Term, 
                                         database=encode_df, filterVector=
                                         allFilter[as.numeric(input$filter)])
             output$searchResult <- renderDataTable({
+                # Making a checkbox column with same value as the file_accession 
+                # of this row.
                 addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
-                                      resultGlobal$href,'">',"")
+                                      resultGlobal$file_accession,'">',"")
                 resultGlobal <- cbind(Download=addCheckbox, resultGlobal)}, escape=FALSE,
-                options=list(searching=FALSE), 
+                options=list(searching=FALSE,pageLength = 10, scrollX = TRUE,
+                             columnDefs=list(list(targets=1:ncol(resultGlobal), className="alignCenter"))),
                 callback = "function(table) {
                 table.on('change.dt', '#fuzzyBox:checkbox', function() {
                 setTimeout(function () {
@@ -64,56 +72,41 @@ server <- function(input, output) {
         }")
         }
     })
-    
-    #Download request from fuzzySearch
-    observeEvent(input$downloadFromSearch,{
-        #Getting href of selected files
-        file_toGet <- reactive({data.table(href=input$downloadBox)})
-        fileTable <- file_toGet()
-        md5sums <- vector("character", nrow(fileTable))
-        
-        
-            #Getting md5sum
-            for(i in seq_along(fileTable$href)){
-                myRow <- resultGlobal[grepl(fileTable$href[i],resultGlobal$href)]
-                md5sums[i] <- myRow$md5sum
-                fileTable$href[i] <- paste0("https://www.encodeproject.org", fileTable$href[i])
-            }
-        
-        fileTable <- cbind(fileTable,md5sums)
-        #Downloading files
-        for(i in seq_along(fileTable$href)){
-            fileName <- strsplit(fileTable$href[i], split="@@download/")[[1]][2]
-            fileName <- paste(".", fileName, sep="/")
-            download(url=fileTable$href, destfile=fileName)
-        }
-    })
-    
-    
-    
+
     #Design request from fuzzySearch
     observeEvent(input$designFromSearch,{
         output$designVis <- reactive({TRUE})
         viewDesign <<-TRUE
-        IDs <- c(as.numeric(input$repFromSearch), as.numeric(input$ctrlFromSearch))
+        IDs <- c(input$repFromSearch,input$ctrlFromSearch)
+        
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromSearch)]
+        
         fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigBed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromSearch)]
+        
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
                       "matched-sets", "projects", "reference-epigenomes",
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromSearch)]
         
         if(!input$splitFromSearch){
-            designResultSearch <- createDesign(resultGlobal,
-                                               encode_df,split=FALSE, file_type=fileType,
+            
+            # Design
+            designResultSearch <<- createDesign(resultGlobal,
+                                               encode_df,split=FALSE, fileFormat=fileType,
                                                dataset_type=dataType, format=formatType,
                                                output_type="data.table", ID=IDs)
-            output$designResultSearch <- renderDataTable({addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
-                                                                               designResultSearch$file,'">',"")
-                resultGlobal <- cbind(Download=addCheckbox, designResultSearch)}, escape=FALSE,
-                options=list(searching=FALSE), 
+            #Fetching the list of accession from the File column
+            acc_list <- gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
+                             x = designResultSearch$File)
+            
+            output$designResultSearch <- renderDataTable({
+                addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
+                                     acc_list,'">',"")
+                designResultSearch <- cbind(Download=addCheckbox, designResultSearch)}, 
+                escape=FALSE,options=list(searching=FALSE,pageLength = 25, scrollX = TRUE),
+                
                 callback = "function(table) {
                 table.on('change.dt', '#fuzzyBox:checkbox', function() {
                 setTimeout(function () {
@@ -125,18 +118,25 @@ server <- function(input, output) {
              }")
             
         }else{
+            
             require(tidyr)
             require(dplyr)
             #Getting the list of experiment
-            temp <- filter(resultGlobal, file_type==fileType)
+            temp <- filter(resultGlobal, file_format==fileType)
             temp <- filter(temp, dataset_type == dataType)
             acc <- unique(temp$accession)
             #Creating the design
-            list_design <- createDesign(resultGlobal, df, split=TRUE,
-                                        file_type=fileType, dataset_type=dataType,
-                                        format="long", 
+            designResultSearch <<- createDesign(resultGlobal, df, split=TRUE,
+                                        fileFormat=fileType,
+                                        dataset_type=dataType,format="long", 
                                         output_type="data.table", ID=IDs)
-            lenExp <- length(list_design)
+            lenExp <- length(designResultSearch)
+            #Fetching file accession  in each data frame of the list
+            acc_list <- vector("list", lenExp)
+            acc_list <- lapply(designResultSearch, function(i){
+                unique(gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
+                                      x = i$File))
+            })
             #Creating the empty list of dataTable that will be display 
             output$designSplitSearch <- renderUI({
                 table_output_list <- vector("list", lenExp)
@@ -152,12 +152,48 @@ server <- function(input, output) {
                 local({
                     my_i <- i
                     tablename <- paste(acc[my_i])
-                    output[[tablename]] <- renderDataTable(list_design[[my_i]],
-                                                           options=list(searching=F))
+                    
+                    output[[tablename]] <- renderDataTable({
+                        addCheckbox <- paste0('<input id="fuzzyBox" type="checkbox" name="downloadBox" value="',
+                                              acc_list[[my_i]],'">',"")
+                        designResultSearch[[my_i]] <- cbind(Download=addCheckbox,
+                                                         designResultSearch[[my_i]])},
+                            escape=FALSE,options=list(searching=FALSE,pageLength = 25, scrollX = TRUE),
+                            columnDefs=list(list(targets=1:64, className="dt-center")),
+                            callback = "function(table) {
+                            table.on('change.dt', '#fuzzyBox:checkbox', function() {
+                            setTimeout(function () {
+                            Shiny.onInputChange('downloadBox', $('#fuzzyBox:checked').map(function() {
+                            return $(this).val();
+                            }).get())
+                            }, 10); 
+                            });
+                            }"
+                  )
                 })
             }
             
             
+        }
+    })
+    #Download request from fuzzySearch
+    observeEvent(input$downloadFromSearch,{
+        
+        selected_file <- paste(input$downloadBox)
+        if(!viewDesign){
+            downloadEncode(df=encode_df, resultSet=resultGlobal, file_acc=selected_file,
+                      resultOrigin="queryEncode")
+        }else{
+            if(!is.data.table(designResultSearch)){
+                designResultSearch <- rbindlist(designResultSearch)
+            }
+            #Making a subset of encode_df with the file_accession from the design
+            list_file <- gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
+                 x = designResultSearch$File)
+            temp <- encode_df[encode_df$file_accession %in% list_file]
+            
+            downloadEncode(df=encode_df, resultSet=temp, file_acc=selected_file,
+                           resultOrigin="queryEncode")
         }
     })
     
@@ -213,11 +249,12 @@ server <- function(input, output) {
         else{pr <- input$project}
         
         resultQuery <<- queryEncode(df=encode_df, set_accession=ac, 
-                                    dataset_accession=da,assay=as, biosample_name=bn,
-                                    biosample_type=bt, project=pr,file_accession=fa,
-                                    file_format=ff,lab=lb, organism=og,target=tg, treatment=tr,
-                                    file_status=fileStat, quiet=TRUE,status=es,
-                                    fixed=as.logical(input$fixed))
+                                dataset_accession=da,assay=as, biosample_name=bn,
+                                biosample_type=bt, project=pr,file_accession=fa,
+                                fileFormat=ff,lab=lb, organism=og,target=tg,
+                                treatment=tr,file_status=fileStat, quiet=TRUE,
+                                status=es,fixed=as.logical(input$fixed))
+        
         output$advancedResult <- renderDataTable(resultQuery,options=
                                                      list(searching=FALSE))
     })
@@ -225,31 +262,35 @@ server <- function(input, output) {
     #Design request from advancedSearch
     observeEvent(input$designFromQuery,{
         require(dplyr)
+        
         output$designVis <- reactive({TRUE})
         IDs<-c(as.numeric(input$repFromQuery), as.numeric(input$ctrlFromQuery))
+        
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromQuery)]
+        
         fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromQuery)]
+        
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
                       "matched-sets", "projects", "reference-epigenomes",
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromQuery)]
         
         designAdvanced <- createDesign(resultQuery,
-                                       df,split=FALSE, file_type=fileType,
+                                       df,split=FALSE, fileFormat=fileType,
                                        dataset_type=dataType, format=formatType,
                                        output_type="data.table", ID=IDs)
         if(!input$splitFromQuery){
             output$designAdvanced <- renderDataTable(designAdvanced,
-                                                     options=list(searching=F))
+                                                     options=list(searching=F,,pageLength = 10, scrollX = T))
         }else{
-            temp <- filter(resultQuery, file_type==fileType)
+            temp <- filter(resultQuery, file_format==fileType)
             temp <- filter(temp, dataset_type == "dataType")
             acc <- unique(temp$accession)
             
             list_design <- createDesign(resultQuery, df,split=TRUE, format="long",
-                                        file_type=fileType, dataset_type=dataType, 
+                                        file_format=fileType, dataset_type=dataType, 
                                         output_type="data.table", ID=IDs)
             lenExp <- length(list_design)
             
@@ -269,7 +310,7 @@ server <- function(input, output) {
                     my_i <- i
                     tablename <- paste(acc[my_i])
                     output[[tablename]] <- renderDataTable(list_design[[my_i]],
-                                                options=list(searching=F))
+                                options=list(searching=F,,pageLength = 10, scrollX = T))
                 })
             }
             
@@ -299,9 +340,9 @@ server <- function(input, output) {
         dataType <- dataType[as.numeric(input$datatypeDesign)]
         
         output$design <- renderDataTable(createDesign(input=fileRDS, df=df,
-                                                      split=input$split, type_file=typeFile,
-                                                      datatype=dataType,format=formatDesignVec,
-                                                      output_type=outputTypeVec,ID=IDs),
+                                        split=input$split, type_file=typeFile,
+                                        datatype=dataType,format=formatDesignVec,
+                                        utput_type=outputTypeVec,ID=IDs),
                                          options=list(searching=FALSE))
     })
     

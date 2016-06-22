@@ -6,42 +6,49 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
         tabPanel("Search",sidebarLayout(
             sidebarPanel(
                     actionButton("searchAction", "Search"),
-                    fileInput("df", "Import your database (optional"),
+                    fileInput("df", "Import your database (optional)"),
                     radioButtons("typeInput","Select your type of search",
                         choices = list("Single element"=1, "Mutiple element"=2),
                         selected=1),
                     textInput("searchTerm", "Searching for ...", value=
                               "Seperate term with a comma"),
                     checkboxGroupInput("filter","Select your filter...",
-                        choices = list("Accession"=1, "Dataset type"=2,
-                                    "Lab"=3, "Title"=4, "File Type"=5, "Platform"=6,
+                        choices = list("Accession"=1, "File Accession"=13, "Dataset type"=2,
+                                    "Target"=14,"Lab"=3, "Title"=4, "File Type"=6, "Platform"=16,
                                     "Project"=7, "Type"=8, "Control"=9, "Biosample Type"=10,
                                     "Biosample Name"=16,"Replicate"=11, "Organism"=12,
-                                    "File Accession"=13,"Target"=14,"Assay"=15,
-                                    "File format"=17))),
+                                    "Lab"=3,"Assay"=15,"File format"=5))),
             mainPanel(
                 conditionalPanel(
                     condition = "input.searchAction > 0",
-                    actionButton("designFromSearch", "Create a design"),
-                    checkboxInput("splitFromSearch",
-                                "Split the result per experiment", value=FALSE),
-                    radioButtons("formatFromSearch", "Design format",
-                                choices=list("long"=1, "wide"=2 ),
-                                selected=1),
-                    selectInput("fileFromSearch", "File Format", choices=list(
+                    fluidRow(column(6, checkboxInput("splitFromSearch",
+                                "Split the result per experiment", value=FALSE)),
+                            column(6, radioButtons("formatFromSearch", "Design format",
+                                choices=list("long"=1, "wide"=2 ),inline=TRUE,
+                                selected=1))),
+                    fluidRow(column(3, selectInput("fileFromSearch", "File Format",
+                                choices=list(
                                 "bam"=1, "fastq"=2, "fasta"=3, "sam"=4, "bed"=5,
-                                "bigBed"=6,"bigWig"=7)),
-                    selectInput("datatypeFromSearch","Data Type", choices=list(
+                                "bigBed"=6,"bigWig"=7))),
+                            column(3, selectInput("datatypeFromSearch","Data Type",
+                                choices=list(
                                 "experiments"=1,"ucsc browser composite"=2,
                                 "annotations"=3,"matched sets"=4, "projects"=5,
-                                "reference epigenomes"=6,"references"=7)),
-                    textInput("repFromSearch",
-                            "Numeric ID assigned to replicate file",value="1"),
-                    textInput("ctrlFromSearch",
-                            "Numeric ID assigned to control file", value="2")),
+                                "reference epigenomes"=6,"references"=7)
+                                )),
+                            column(3,numericInput("repFromSearch",
+                                "Replicate ID",
+                                value=1)),
+                            column(3,numericInput("ctrlFromSearch",
+                                "Control ID",
+                                value=2))),
+                    fluidRow(column(6,actionButton("downloadFromSearch", "Download")),
+                        column(6,actionButton("designFromSearch", "Create a design")))
+                ),
                 
                 conditionalPanel(
                     condition="!output.designVis",
+                    tags$head(tags$style(".table .alignCenter {text-align:center;}")),
                     dataTableOutput("searchResult")),
                 
                 conditionalPanel(
@@ -51,7 +58,9 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                 conditionalPanel(
                     condition="output.designVis & input.splitFromSearch",
                     uiOutput("designSplitSearch"))
-                ))),
+                )
+            )
+        ),
                            
 #////------------------------------queryEncode-----------------------------////
         tabPanel("Advanced Search",sidebarLayout(
@@ -97,6 +106,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                 
                     conditionalPanel(
                         condition="!output.designVis",
+                        tags$head(tags$style(".table .alignCenter {text-align:center;}")),
                         dataTableOutput("advancedResult")),
                 
                     conditionalPanel(
