@@ -10,6 +10,8 @@
 #' 
 #' @param     df \code{data.frame} containing ENCODE files
 #' @param resultSet the results set.
+#' @param file_acc A character vector of the file accession use to filter the
+#' resultSet.
 #' @param resultOrigin name of the function used to generate the result set
 #' (\code{searchEncode} or \code{queryEncode} or \code{fuzzySearch})
 #' @param format file format, default = all
@@ -29,7 +31,8 @@
 #' @import data.table
 #' 
 #' @export
-downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
+downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
+                           resultOrigin = NULL,
                            format = "all", dir = ".", force = TRUE) {
   
   
@@ -46,6 +49,14 @@ downloadEncode <- function(df = NULL, resultSet = NULL , resultOrigin = NULL,
       encode_df = df
     }
     
+      
+    #Making a subset of the resultSet objet based on the fille_acc to keep
+    if(!is.null(file_acc)){
+        # If resultSet is a design, we"re making a subset of encode_df with the
+        # file from the design
+        resultSet <- resultSet[resultSet$file_accession %in% file_acc]
+    }
+      
     if(resultOrigin %in% c("searchEncode", "queryEncode", "fuzzySearch")) {
       
       encode_root = "https://www.encodeproject.org"
@@ -108,11 +119,11 @@ getFileId <- function(df=NULL, resultSet, resultOrigin, format = "all") {
     warning(warning_msg, call. = FALSE)
     return(NULL)
   }
-  if (resultOrigin %in% c("queryEncode","fuzzySearch") & (!(is.data.table(resultSet)))){
-    warning_msg <- "The resultOrigin isn't compatible with the resultSet"
-    warning(warning_msg, call. = FALSE)
-    return(NULL)
-  }
+  # if (resultOrigin %in% c("queryEncode","fuzzySearch") & (!(is.data.table(resultSet)(is.list(resultSet)))){
+  #   warning_msg <- "The resultOrigin isn't compatible with the resultSet"
+  #   warning(warning_msg, call. = FALSE)
+  #   return(NULL)
+  # }
   
   d <- NULL
   if(is.null(df)) {
