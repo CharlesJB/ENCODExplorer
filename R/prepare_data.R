@@ -114,24 +114,30 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df$organism <- step7(encode_df, Tables$targets)
   encode_df$target <- step8(encode_df, Tables$targets)
   encode_df$organism <- step9(encode_df, Tables$organisms)
-  
+  # Step 10 : Adjusting file_size
+  encode_df <- step10(encode_df)
   # Creating and updating new columns for dataset
   empty_vector <- rep(x = NA, times = nrow(encode_df))
-  encode_df <- cbind(encode_df, date_released = empty_vector)
-  encode_df$date_released <- step6_date_released(encode_df, 
-                                                         Tables$datasets)
+  
   encode_df$status <- step6_status(encode_df, Tables$datasets)
   
   remove(Tables)
   #Ordering the table by the accession column
   encode_df <- encode_df[order(accession),]
-  #shifting the file_accession column as the second column
-  file_accIndex <- grep("file_accession", colnames(encode_df))
-  encode_seq <- seq(1:ncol(encode_df))
-  encode_seq <- encode_seq[!grepl(file_accIndex,encode_seq,fixed =TRUE)]
-  encode_seq <- encode_seq[-1]
-  encode_seq <- c(1,file_accIndex, encode_seq)
-  setcolorder(encode_df, encode_seq)
+  
+  #reordering the table, we want to have the colunm below as the first colunm
+  #to be display.
+  colNamesList <- c("accession", "file_accession", "file_type", "file_format",
+                    "file_size", "target", "assay","platform", "biosample_type",
+                    "biosample_name", "treatment", "organism", "dataset_type", 
+                    "status", "controlled_by", "controls", "lab","assembly", "output_category",
+                    "run_type", "read_length", "paired_end", "paired_with", 
+                    "biological_replicate_number","technical_replicate_number",
+                    "notes","href")
+  colEncode <- colnames(encode_df)
+  colEncode <- colEncode[!(colEncode %in% colNamesList)]
+  colEncode <- c(colNamesList,colEncode)
+  setcolorder(encode_df, colEncode)
   
 }
 
@@ -373,4 +379,24 @@ step9 <- function(encode_exp, tables_org){
   encode_exp[encode_exp$organism %in% tables_org$id, organism :=
                tables_org$scientific_name[match_org]]
   return (encode_exp$organism)
+}
+
+step10 <- function(encode_exp) {
+    # Converting the file size from byte to the Kb, Mb or Gb
+    encode_exp$file_size <- sapply(encode_exp$file_size, function(size){
+        
+        if(!(is.na(size))){
+            if(size < 1024){
+                paste(size,"b") 
+            }else if ((size >= 1024) & (size < 1048576)){
+                paste(round(size/1024,digits = 3), "Mb")
+            }else if ((size >= 1048576) & (size < 1073741824)){
+                paste(round(size/(1048576),digits = 3), "Kb")
+            }else{
+                paste(round(size/1073741824, digits = 3), "Gb")
+            }
+        }
+    })
+    encode_exp
+    
 }
