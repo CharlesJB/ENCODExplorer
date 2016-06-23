@@ -77,7 +77,9 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
           md5sum_file = tools::md5sum(paste0(fileName))
           if (force == TRUE | !(file.exists(fileName)) |
               (file.exists(fileName) & md5sum_file != md5sums[i])) {
-            download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
+            #download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
+            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+			  destfile = fileName, method =  "curl", extra = "-L" )
             md5sum_file = tools::md5sum(paste0(fileName))
           }
           if(md5sum_file != md5sums[i]) {
