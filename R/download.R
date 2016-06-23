@@ -35,7 +35,6 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
                            resultOrigin = NULL,
                            format = "all", dir = ".", force = TRUE) {
   
-  
   if(is.null(resultSet) || is.null(resultOrigin)) {
     warning_msg <- "You have to provide both results set and its origin to use"
     warning_msg <- paste0(warning_msg, " the downloadEncode function")
@@ -77,9 +76,12 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
           md5sum_file = tools::md5sum(paste0(fileName))
           if (force == TRUE | !(file.exists(fileName)) |
               (file.exists(fileName) & md5sum_file != md5sums[i])) {
-            #download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
-            download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-			  destfile = fileName, method =  "curl", extra = "-L" )
+            if(get_os() == "windows"){
+                download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
+            }else{
+                download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
+                            destfile = fileName, method = "curl", extra = "-L" )
+            }
             md5sum_file = tools::md5sum(paste0(fileName))
           }
           if(md5sum_file != md5sums[i]) {
@@ -111,6 +113,21 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
   }
 }
 
+get_os <- function(){
+    sysinf <- Sys.info()
+    if (!is.null(sysinf)){
+        os <- sysinf['sysname']
+        if (os == 'Darwin')
+            os <- "osx"
+    } else { ## mystery machine
+        os <- .Platform$OS.type
+        if (grepl("^darwin", R.version$os))
+            os <- "osx"
+        if (grepl("linux-gnu", R.version$os))
+            os <- "linux"
+    }
+    tolower(os)
+}
 
 # Return a character vector with al the accession for the given format
 getFileId <- function(df=NULL, resultSet, resultOrigin, format = "all") {
