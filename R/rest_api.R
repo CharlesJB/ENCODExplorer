@@ -346,7 +346,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
     }
   }
   search_results = clean_table(r)
-  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
+  if(!quiet) cat(paste0("results : ",nrow(unique(search_results)),
                         " entries\n"))
   search_results
 }
