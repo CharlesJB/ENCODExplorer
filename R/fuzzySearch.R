@@ -6,15 +6,18 @@
 #' @param filterVector 
 #' @param multipleTerm A boolean that indicate if the searchTerm is a list or
 #' even multiple searchTerm separete by a comma in a single string.
-#' @param fixed Boolean use to apply a strict search for the searchTerm within
-#' the database
+# @param fixed Boolean use to apply a strict search for the searchTerm within
+# the database
 #' 
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.
+#' @import stringi
+#' @import data.table
 #' @importFrom dplyr filter
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
-                        multipleTerm=FALSE, fixed = FALSE){
+                        multipleTerm=FALSE, ignore_case=TRUE, fixed=FALSE){
+    require(stringi)
     #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){
         print("Invalid searchTerm input")
@@ -58,7 +61,6 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         }
     }
     
-    
     # Converting the list of entry in a valid format
     if(multipleTerm){
         searchTerm <- gsub(pattern="\n", replacement="", x=searchTerm)
@@ -68,25 +70,21 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         searchTerm <- gsub(pattern=",", replacement="|", x=searchTerm)
     }
     
-    search_list <- vector(mode="list", ncol(encode_df))
-    zeroVector <- rep(0,nrow(encode_df))
-    
-    # Looking for the searchTerm 
-    for (i in 1:length(search_list)) {
-        if (filter){
-            if(names(encode_df)[[i]] %in% filterVector) {
-                search_list[[i]] <- suppressWarnings(grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
-                                         ignore.case=TRUE, fixed=fixed))
-            }else{
-                search_list[[i]] <- zeroVector
-            }
-            
-        }else{
-            search_list[[i]] <- suppressWarnings(grepl(pattern=searchTerm, x=as.character(encode_df[[i]]),
-                                ignore.case=TRUE, fixed=fixed))
+    #Making a subset of encode_df
+    df <- encode_df
+    if (filter) {
+        df <- encode_df[,filterVector, with = FALSE]
+    }
+    #fun_detect return a row of 0 and 1 depending on a match with searchTerm
+    fun_detect <- function(x) {
+        if (fixed) {
+            stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
+        } else {
+            stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
         }
     }
-    # Compiling all the logical vector
-    toKeep <- as.logical(rowSums(as.data.frame(search_list)))
+    res <- df[,lapply(.SD, fun_detect)]
+    toKeep <- as.logical(rowSums(res, na.rm = TRUE))
     encode_df[toKeep,]
+    
 }
