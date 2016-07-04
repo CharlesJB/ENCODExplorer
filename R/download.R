@@ -76,20 +76,17 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
           md5sum_file = tools::md5sum(paste0(fileName))
           if (force == TRUE | !(file.exists(fileName)) |
               (file.exists(fileName) & md5sum_file != md5sums[i])) {
-              
-            if(get_os() == "windows"){
-                download(url = paste0(encode_root,hrefs[i]), destfile = fileName)
-            }else{
+            
                 download.file(url = paste0(encode_root,hrefs[i]), quiet = TRUE,
-                            destfile = fileName, method = "curl", extra = "-L" )
-            }
+                            destfile = fileName, method = "curl", extra = "-O -L" )
+            
             
             md5sum_file = tools::md5sum(paste0(fileName))
           }
           if(md5sum_file != md5sums[i]) {
-            warning(paste0("Error while downloading the file : ", fileName), 
+            warning(paste0("No md5sum match for : ", fileName), 
                     call. = FALSE)
-            NULL
+              downloaded <- c(downloaded, fileName)
           }
           else
           {
