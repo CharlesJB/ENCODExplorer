@@ -73,6 +73,7 @@ downloadEncode <- function(df = NULL, resultSet = NULL , file_acc = NULL,
           fileName = strsplit(x = hrefs[i], 
                               split = "@@download/",fixed = TRUE)[[1]][2]
           fileName <- paste(dir, fileName, sep = "/")
+          print(fileName)
           md5sum_file = tools::md5sum(paste0(fileName))
           if (force == TRUE | !(file.exists(fileName)) |
               (file.exists(fileName) & md5sum_file != md5sums[i])) {
