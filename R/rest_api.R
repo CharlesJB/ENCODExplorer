@@ -28,7 +28,7 @@ extract_table <- function(type) {
     utype <- paste(utype, collapse='')
     url <- "https://www.encodeproject.org/search/?type="
     url <- paste0(url, utype, filters)
-    
+
     if (RCurl::url.exists(url)) {
       res <- jsonlite::fromJSON(url)
       if (res[["notification"]] == "Success") {
@@ -300,8 +300,7 @@ clean_table <- function(table) {
     table[sapply(table, is.null)] <- NULL
     result <- data.frame(table, stringsAsFactors = FALSE)
     
-    #final_result <- lapply(X = result, FUN = function(x) if(class(x) == "factor") {as.character(x)} else {x})
-    #final_result
+    
 }
 
 #' Simulate a query on ENCODE website and return the result as a 
@@ -345,7 +344,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
       warning("No result found", call. = TRUE)
     }
   }
-  search_results = clean_table(r)
+  search_results = suppressWarnings(clean_table(r))
   if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
                         " entries\n"))
   search_results
