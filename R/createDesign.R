@@ -41,10 +41,8 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(fileFormat %in%  unique(df$file_format))
   stopifnot(length(ID) == 2)
   stopifnot(format %in% c("wide", "long"))
-  stopifnot(dataset_type %in% df$dataset_type)
   
   design <- data.table()
   
@@ -56,6 +54,9 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
       load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
       df <- encode_df
   }
+  
+  stopifnot(dataset_type %in% df$dataset_type)
+  stopifnot(fileFormat %in%  unique(df$file_format))
   
   #Filtering character type of ID
   if(is.character(ID)){
