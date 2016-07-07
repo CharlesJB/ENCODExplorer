@@ -33,7 +33,10 @@ Imports:
     tidyr,
     data.table,
     downloader,
-    dplyr
+    dplyr,
+    DT,
+    stringr,
+    stringi
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,
