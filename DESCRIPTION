@@ -34,7 +34,8 @@ Imports:
     data.table,
     downloader,
     dplyr,
-    stringr
+    stringr,
+    stringi
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

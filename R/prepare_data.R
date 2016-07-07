@@ -460,11 +460,11 @@ step10 <- function(encode_exp) {
             if(size < 1024){
                 paste(size,"b") 
             }else if ((size >= 1024) & (size < 1048576)){
-                paste(round(size/1024,digits = 3), "Mb")
+                paste(round(size/1024,digits = 1), "Kb")
             }else if ((size >= 1048576) & (size < 1073741824)){
-                paste(round(size/(1048576),digits = 3), "Kb")
+                paste(round(size/(1048576),digits = 1), "Mb")
             }else{
-                paste(round(size/1073741824, digits = 3), "Gb")
+                paste(round(size/1073741824, digits = 2), "Gb")
             }
         }
     })

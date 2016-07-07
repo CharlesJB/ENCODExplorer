@@ -1,23 +1,22 @@
-
 #' Fuzzysearch is a searching function for a string or a list of string 
 #' within the encode_df \code{data.table}
 #' @param searchTerm The keyword or a \code{list} of keyword to search. 
 #' @param database A \code{data.table}
-#' @param filterVector 
+#' @param filterVector A \code{character} to apply the search on specific column.
 #' @param multipleTerm A boolean that indicate if the searchTerm is a list or
 #' even multiple searchTerm separete by a comma in a single string.
-# @param fixed Boolean use to apply a strict search for the searchTerm within
-# the database
+#' @param ignore_case A \code{boolean} to enable the case sensitivity.
 #' 
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.
+#' 
 #' @import stringi
 #' @import data.table
 #' @importFrom dplyr filter
+#' @export
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
-                        multipleTerm=FALSE, ignore_case=TRUE, fixed=FALSE){
-    require(stringi)
+                        multipleTerm=FALSE, ignore_case=TRUE){
     #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){
         print("Invalid searchTerm input")
@@ -55,8 +54,8 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         filter <- TRUE
         match <- filterVector %in% filterNames
         if(sum(as.logical(match)) != length(filterVector)){
-            warning(paste("This filter is unavailable and will not be considered : ",
-                    filterVector[!match], "\n", sep=""), call. = FALSE)
+            msg <- paste0("Unavailable filter :", filterVector[!match], sep=" " )
+            warning(msg, call. = FALSE)
             filterVector <- filterVector[match]
         }
     }
@@ -77,11 +76,9 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     }
     #fun_detect return a row of 0 and 1 depending on a match with searchTerm
     fun_detect <- function(x) {
-        if (fixed) {
+        
             stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
-        } else {
-            stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
-        }
+        
     }
     res <- df[,lapply(.SD, fun_detect)]
     toKeep <- as.logical(rowSums(res, na.rm = TRUE))

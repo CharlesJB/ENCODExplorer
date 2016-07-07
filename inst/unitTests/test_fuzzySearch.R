@@ -2,30 +2,25 @@ if(FALSE) {
     library( "RUnit" )
     library( "ENCODExplorer" )
 }
-load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer")) #data.table to use
 
 test.single_term <- function() {
-    obs <- fuzzySearch("hela", BRCA)
-    checkIdentical(nrow(obs),9L)
-    #Testing fixed parameter
-    obsFixed <- fuzzySearch("HeLa-S3", BRCA, fixed=T)
-    checkIdentical(obs,obsFixed)
-    
-    obs <- fuzzySearch("hela", BRCA, fixed=T)
-    checkIdentical(nrow(obs),0L)
+  load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
+  obs <- fuzzySearch("hela", brca)
+  checkIdentical(nrow(obs),9L)
 }
 
 test.multiple_term <- function () {
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     #Testing the three possible way to pass multiple searchTerm
     #Case 1 : single string, term seperate by comma
-    obs <- fuzzySearch("reads, signal", BRCA, multipleTerm = TRUE)
+    obs <- fuzzySearch("reads, signal", brca, multipleTerm = TRUE)
     #Case 2 : list of string
     terms <- list("reads", "signal")
-    obsList <- fuzzySearch(terms, BRCA, multipleTerm = TRUE)
+    obsList <- fuzzySearch(terms, brca, multipleTerm = TRUE)
     checkIdentical(obs,obsList)
     #Case 3 : character vector
     vec <- c("reads","signal")
-    obsVec <- fuzzySearch(vec, BRCA, multipleTerm = TRUE)
+    obsVec <- fuzzySearch(vec, brca, multipleTerm = TRUE)
     checkIdentical(obs,obsVec)
     
     #All the searchTerm in a list must be character
@@ -36,14 +31,15 @@ test.multiple_term <- function () {
 }
 
 test.filter <- function () {
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     #Test invalid filter
-    obs <- tryCatch(fuzzySearch("hepG2", BRCA, filterVector = c("biosample_name", "banana","ice cream")),error=function(e) e, warning=conditionMessage)
-    exp <- "This filter is unavailable and will not be considered : banana\nThis filter is unavailable and will not be considered : ice cream\n"
+    obs <- tryCatch(fuzzySearch("hepG2", brca, filterVector = c("biosample_name", "banana","ice cream")),error=function(e) e, warning=conditionMessage)
+    exp <- "Unavailable filter :banana Unavailable filter :ice cream "
     checkIdentical(obs, exp)
     
     #Testing the handling protocol for invalid filter
-    obs <-suppressWarnings(fuzzySearch("hepG2", BRCA, filterVector = c("biosample_name", "banana","ice cream")))
-    exp <- fuzzySearch("hepG2", BRCA, filterVector = c("biosample_name"))
+    obs <- suppressWarnings(fuzzySearch("hepG2", brca, filterVector = c("biosample_name", "banana","ice cream")))
+    exp <- fuzzySearch("hepG2", brca, filterVector = c("biosample_name"))
     checkIdentical(obs, exp)
     
     

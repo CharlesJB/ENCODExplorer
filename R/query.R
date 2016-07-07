@@ -36,6 +36,7 @@
 #'     \dontrun{
 #'     queryEncode(biosample_name = "A549", file_format = "bam")
 #'     }
+#' @import data.table
 #' @export
 queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, 
                         biosample_name = NULL, dataset_accession = NULL, 
