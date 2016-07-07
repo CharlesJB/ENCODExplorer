@@ -1,4 +1,3 @@
-
 #' Fuzzysearch is a searching function for a string or a list of string 
 #' within the encode_df \code{data.table}
 #' @param searchTerm The keyword or a \code{list} of keyword to search. 
@@ -6,11 +5,12 @@
 #' @param filterVector 
 #' @param multipleTerm A boolean that indicate if the searchTerm is a list or
 #' even multiple searchTerm separete by a comma in a single string.
-# @param fixed Boolean use to apply a strict search for the searchTerm within
-# the database
+#' @param fixed Boolean use to apply a strict search for the searchTerm within
+#' the database
 #' 
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.
+#' 
 #' @import stringi
 #' @import data.table
 #' @importFrom dplyr filter

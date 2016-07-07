@@ -1,13 +1,13 @@
 if(FALSE) {
+    library( "dplyr" )
     library( "RUnit" )
     library( "ENCODExplorer" )
-    library( "dplyr" )
 }
 
-load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer")) #data.table to use
-load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
-brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
+
 test.design_long <- function(){
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca,encode_df)
     checkIdentical(dim(obs),c(6L,3L))
     
@@ -26,6 +26,8 @@ test.design_long <- function(){
 }
 
 test.design_wide <- function(){
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide")
     checkIdentical(dim(obs),c(6L,3L))
     checkIdentical(obs[1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
@@ -43,6 +45,8 @@ test.design_wide <- function(){
 }
 
 test.design_split_long <- function(){
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, split=T)
     checkIdentical(length(obs), 2L)
     checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
@@ -60,7 +64,8 @@ test.design_split_long <- function(){
 }
 
 test.design_split_wide <- function(){
-    
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide", split=T)
     checkIdentical(length(obs), 2L)
     checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
@@ -78,7 +83,8 @@ test.design_split_wide <- function(){
 }
 
 test.design_wrong_input <- function() {
-    
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     #Testing ID input
     obs <- tryCatch(createDesign(brca, encode_df, ID=c("X","Y")),error=function(e) e, warning=conditionMessage)
     exp <- "Error : Invalid type of ID, must be numeric value. Default settings will be use"

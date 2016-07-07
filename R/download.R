@@ -16,15 +16,14 @@
 #'  \dontrun{downloadEncode(file_acc = "ENCFF567UCJ")}
 #' 
 #' @import data.table
+#' @import tools
 #' @importFrom dplyr filter
 #' 
 #' @export
 
 downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
                              force = TRUE) {
-  require(dplyr)
-  require(tools)
-  require(data.table)
+
   stopifnot(is.character(file_acc))
   
   if(length(file_acc) == 0){return(NULL)}

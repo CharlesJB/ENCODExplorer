@@ -2,17 +2,18 @@ if(FALSE) {
     library( "RUnit" )
     library( "ENCODExplorer" )
 }
-load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer")) #data.table to use
 
 test.single_term <- function() {
-    obs <- fuzzySearch("hela", brca)
-    checkIdentical(nrow(obs),9L)
-    #Testing fixed parameter
-    obsFixed <- fuzzySearch("HeLa-S3", brca, fixed=T)
-    checkIdentical(obs,obsFixed)
+  load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+  obs <- fuzzySearch("hela", brca)
+  checkIdentical(nrow(obs),9L)
+  #Testing fixed parameter
+  obsFixed <- fuzzySearch("HeLa-S3", brca, fixed=T)
+  checkIdentical(obs,obsFixed)
 }
 
 test.multiple_term <- function () {
+    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
     #Testing the three possible way to pass multiple searchTerm
     #Case 1 : single string, term seperate by comma
     obs <- fuzzySearch("reads, signal", brca, multipleTerm = TRUE)
@@ -33,6 +34,7 @@ test.multiple_term <- function () {
 }
 
 test.filter <- function () {
+  load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
     #Test invalid filter
     obs <- tryCatch(fuzzySearch("hepG2", brca, filterVector = c("biosample_name", "banana","ice cream")),error=function(e) e, warning=conditionMessage)
     exp <- "This filter is unavailable and will not be considered : banana\nThis filter is unavailable and will not be considered : ice cream\n"
