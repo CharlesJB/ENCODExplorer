@@ -46,18 +46,18 @@ suppressMessages(library(ENCODExplorer))
 
 If you want regenerate ENCODExplorer data, you can use the update function.
 When you use `overwrite = TRUE`, it will overwrite the default package data, 
-otherwise it will return the list `encode_df` and the dataframe `accession_df`.
+otherwise it will return the datatable `encode_df` .
 
 ```{r, eval=FALSE}
 # the path (relative or absolute) to the future database
 database_filename <- "new.encode.sqlite"
-new_data <- update_ENCODExplorer(database_filename, overwrite = FALSE)
+new_data <- export_ENCODEdb_matrix(database_filename, overwrite = FALSE)
 ```
 
 If you want to update the data manually or partially, you have to process the 
 following steps:
 
-* generate the SQL database from ENCODE: 
+* generate a list of data tables from ENCODE: 
 
 ```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
