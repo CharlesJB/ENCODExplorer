@@ -345,8 +345,8 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
     }
   }
   search_results = suppressWarnings(clean_table(r))
-  if(!quiet) cat(paste0("results : ",length(unique(search_results$accession)),
-                        " entries\n"))
+  if(!quiet) {cat(paste0("results : ",length(unique(search_results$accession)),
+  
   search_results
 }
 
