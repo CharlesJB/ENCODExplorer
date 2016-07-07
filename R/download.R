@@ -18,6 +18,7 @@
 #' @import data.table
 #' @import tools
 #' @importFrom dplyr filter
+#' @importFrom dplyr setdiff
 #' 
 #' @export
 
