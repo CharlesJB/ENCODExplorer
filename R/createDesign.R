@@ -104,7 +104,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
                      Value = ID[2])
       } else {
           data.table(File = character(), Experiment = character(), Value = numeric())
-      }   
+      }
   }
   
   design_ctrl <- ctrl[,get_ctrl_design(.SD), by = .(replicates, ctrl),

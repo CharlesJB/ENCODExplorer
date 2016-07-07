@@ -6,7 +6,6 @@ server <- function(input, output) {
     require(tidyr)
     require(data.table)
     require(stringr)
-    require(downloader)
     require(tools)
     
     load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
@@ -23,7 +22,6 @@ server <- function(input, output) {
     designSplit <- NULL
     #////----------------------------------fuzzySearch---------------------////
     observeEvent(input$searchAction, {
-        
         output$designVis <- reactive({FALSE})
         viewDesign <<- FALSE
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
@@ -164,14 +162,13 @@ server <- function(input, output) {
     
     #Download request from fuzzySearch
     observeEvent(input$downloadFromSearch,{
-
+        
         if(!viewDesign){
             selected_rows <- paste(input$searchResult_rows_selected)
             selected_files <- resultGlobal$file_accession[as.numeric(selected_rows)]
-        
-            downloadLog <- capture.output(downloadEncode(df=encode_df,
-                            resultSet=resultGlobal, file_acc=selected_files,
-                            resultOrigin = "queryEncode"))
+            
+            downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                                    file_acc=selected_files))
         }else{
             if(!input$splitFromSearch){
                 selected_rows <- paste(input$designResultSearch_rows_selected)
@@ -198,9 +195,8 @@ server <- function(input, output) {
             })
             
             if(length(selected_files) > 0){
-                downloadLog <- capture.output(downloadEncode(df=encode_df,
-                                                             resultSet=resultGlobal, file_acc=unlist(selected_files),
-                                                             resultOrigin = "queryEncode"))
+                downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                                          file_acc=unlist(selected_files)))
             }
         }
         #Parsing the output message of the download
@@ -226,11 +222,11 @@ server <- function(input, output) {
         if (x >= 1073741824) {
             paste(as.character(round((x/1073741824),2))," Gb")
         } else if (x >= 1048576) {
-            paste(as.character(round((x/1048576), 2)), " Mb")
+            paste(as.character(round((x/1048576), 1)), " Mb")
         } else if (x >= 1024) {
-            paste(as.character(round((x/1024), 2)), " Kb")
+            paste(as.character(round((x/1024), 1)), " Kb")
         } else {
-            paste(as.character(round((x),2)), " b")
+            paste(as.character(x), " b")
         }
     }
     
@@ -261,7 +257,7 @@ server <- function(input, output) {
     
     
     #Refresh the content of fileSizeFuzzy
-    refresh_display <- eventReactive(c(input$searchResult_rows_selected,input$designResultSearch_rows_selected,
+    refresh_fuzzy_display <- eventReactive(c(input$searchResult_rows_selected,input$designResultSearch_rows_selected,
                                        input$designFromSearch, input$searchAction, input$splitFromSearch),{
         if(!(viewDesign)){ #for fuzzySearch object
             if(length(input$searchResult_rows_selected) > 0){
@@ -278,7 +274,7 @@ server <- function(input, output) {
     })
     
     output$fileSizeFuzzy <- renderText({
-        refresh_display()
+        refresh_fuzzy_display()
     })
     
     #////----------------------------------queryEncode-------------------------////
@@ -435,13 +431,12 @@ server <- function(input, output) {
     
     #Download request from queryEncode
     observeEvent(input$downloadFromQuery,{
-        output$consoleQuery <- renderPrint("Processing...")
         if(!viewDesign){
             selected_rows <- paste(input$advancedResult_rows_selected)
             selected_files <- resultQuery$file_accession[as.numeric(selected_rows)]
         
-            downloadLog <- capture.output(downloadEncode(df=encode_df, resultSet=resultQuery, file_acc=
-                           selected_files, resultOrigin = "queryEncode", dir=".."))
+            downloadLog <- capture.output(downloadEncode(dt=encode_df, file_acc=
+                           selected_files))
         }else{
             if(!designSplit){
                 selected_rows <- paste(input$designAdvanced_rows_selected)
@@ -452,9 +447,8 @@ server <- function(input, output) {
                 })
                 
                 if(length(selected_files) > 0){
-                    downloadLog <- capture.output(downloadEncode(df=encode_df,
-                        resultSet=resultQuery, file_acc=unlist(selected_files),
-                        resultOrigin = "queryEncode", dir=".."))
+                    downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                                              file_acc=unlist(selected_files)))
                 }
             }
         }
@@ -463,6 +457,50 @@ server <- function(input, output) {
         output$consoleQuery <- renderPrint(downloadLog)
     })
     
+    #Refresh the content of fileSizeQuery
+    refresh_query_display <- eventReactive(c(input$advancedResult_rows_selected,input$designAdvanced_rows_selected,
+                                            input$designFromQuery, input$searchAdvanced, input$designSplitQuery),{
+          if(!(viewDesign)){ #for fuzzySearch object
+              if(length(input$advancedResult_rows_selected) > 0){
+                  paste("Number of selected files :", length(input$advancedResult_rows_selected),
+                  " Total size of the selected files :",file_size_query(input$advancedResult_rows_selected))
+              }
+          }else{ #for design object
+              if(!input$splitFromQuery & length(input$designAdvanced_rows_selected) > 0 ){
+                 paste("Number of selected files :",length(input$designAdvanced_rows_selected),
+                 " Total size of the selected files :",file_size_query(input$designAdvanced_rows_selected,T))
+              }
+          }
+     })
+    
+    #Function that return the sum of selected files size
+    file_size_query <- function(rows=NULL,is_design=F){
+      #Getting selected row and thier size
+      if(!is_design){
+        selected_rows <- paste(rows)
+      }else{ #Coming from a design
+        selected_rows <- paste(rows)
+        selected_files <- designAdvanced$File[as.numeric(selected_rows)]
+        selected_files <- sapply(selected_files, function(i){
+          temp <- file_path_sans_ext(basename(i))
+          paste(unlist(strsplit(temp,"[.]"))[1])
+        })
+        as.character(selected_files)
+      }
+      selected_size <- resultQuery$file_size[as.numeric(selected_rows)]
+      #Converting all size in byte to apply sum
+      selected_size <- sapply(selected_size,function(i){
+        val <- unlist(str_split(i," "))
+        convert_to_byte(val)
+      })
+      sum_file <- sum(selected_size)
+      #Converting sum_file 
+      convert_to_all(sum_file)
+    }
+    
+    output$fileSizeQuery <- renderText({
+      refresh_query_display()
+    })
     #////---------------------------------Design--------------------------------////  
     
     #Design request

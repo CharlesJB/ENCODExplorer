@@ -111,7 +111,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                             column(3, numericInput("ctrlFromQuery",
                               "Control ID", value=2))),
                     fluidRow(column(3,actionButton("downloadFromQuery", "Download")),
-                            column(9,verbatimTextOutput("consoleQuery")))),
+                            column(9,verbatimTextOutput("consoleQuery"))),
+                    textOutput("fileSizeQuery")),
                 
                     conditionalPanel(
                         condition="!output.designVis",
