@@ -6,7 +6,7 @@ if(FALSE) {
 
 
 test.design_long <- function(){
-    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca,encode_df)
     checkIdentical(dim(obs),c(6L,3L))
@@ -26,7 +26,7 @@ test.design_long <- function(){
 }
 
 test.design_wide <- function(){
-    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide")
     checkIdentical(dim(obs),c(6L,3L))
@@ -45,7 +45,7 @@ test.design_wide <- function(){
 }
 
 test.design_split_long <- function(){
-    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, split=T)
     checkIdentical(length(obs), 2L)
@@ -64,7 +64,7 @@ test.design_split_long <- function(){
 }
 
 test.design_split_wide <- function(){
-    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide", split=T)
     checkIdentical(length(obs), 2L)

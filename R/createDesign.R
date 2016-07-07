@@ -31,7 +31,7 @@
 #' Default: 1 and 2 
 #'     
 #' @import data.table
-#' @import stringr
+#' @importFrom stringr str_count
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' 
