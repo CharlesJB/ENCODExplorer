@@ -1,3 +1,25 @@
+#' downloadEncode is use to download  a serie of files or experiments 
+#' by their accession. 
+#' @param file_acc A \code{character} of ENCODE file accession or 
+#' experiment accession.
+#' @param dt The reference \code{data.table} use to find the download. File 
+#' that are not available will be search directly throught the current
+#' ENCODE database. 
+#' @param format The specific file format to download.
+#' Default : all
+#' @param dir The directory to locate the downloaded files
+#' @param force \code{boolean} the allow to download a file when it already exist
+#' in the directory. 
+#' Default : TRUE
+#' 
+#' @examples 
+#'  \dontrun{downloadEncode(file_acc = "ENCFF567UCJ")}
+#' 
+#' @import data.table
+#' @importFrom dplyr filter
+#' 
+#' @export
+
 downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
                              force = TRUE) {
   require(dplyr)

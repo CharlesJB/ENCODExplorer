@@ -2,44 +2,35 @@
 % Please edit documentation in R/download.R
 \name{downloadEncode}
 \alias{downloadEncode}
-\title{Download files from the Internet.}
+\title{downloadEncode is use to download  a serie of files or experiments 
+by their accession.}
 \usage{
-downloadEncode(df = NULL, resultSet = NULL, resultOrigin = NULL,
-  format = "all", dir = ".", force = TRUE)
+downloadEncode(file_acc = NULL, dt = NULL, format = "all", dir = ".",
+  force = TRUE)
 }
 \arguments{
-\item{df}{\code{data.frame} containing ENCODE files}
+\item{file_acc}{A \code{character} of ENCODE file accession or 
+experiment accession.}
 
-\item{resultSet}{the results set.}
+\item{dt}{The reference \code{data.table} use to find the download. File 
+that are not available will be search directly throught the current
+ENCODE database.}
 
-\item{resultOrigin}{name of the function used to generate the result set
-(\code{searchEncode} or \code{queryEncode} or \code{fuzzySearch})}
+\item{format}{The specific file format to download.
+Default : all}
 
-\item{format}{file format, default = all}
+\item{dir}{The directory to locate the downloaded files}
 
-\item{dir}{the name of the directory where the downloaded file will be saved.
-Default = current directory}
-
-\item{force}{Download file is it already exists and md5sums is valid?
-Default: TRUE.}
-}
-\value{
-The downloaded file names, if download worked correctly.
+\item{force}{\code{boolean} the allow to download a file when it already exist
+in the directory. 
+Default : TRUE}
 }
 \description{
-After processing to a basic search with the \code{searchEncode} function or a
-precise search thanks to the \code{queryEncode} function, you can proceed to
-the downloading of all the corresponding files.
-}
-\details{
-This function can be used to download a set of files by providing the results
-set, its origin (searchEncode or queryEncode), the file format and finally
-the destination directory.
+downloadEncode is use to download  a serie of files or experiments 
+by their accession.
 }
 \examples{
-     \dontrun{
-     resultSet <- queryEncode(biosample_name = "A549", file_format = "bam")
-     downloadEncode(resultSet = resultSet, dir = ".")
-     }
+ \dontrun{downloadEncode(file_acc = "ENCFF567UCJ")}
+
 }
 

@@ -5,7 +5,7 @@
 \title{Create a design for the files associated with the result of a queryEncode,
 searchEncode or fuzzySearch research.}
 \usage{
-createDesign(input = NULL, df = NULL, split = FALSE, file_type = "bam",
+createDesign(input = NULL, df = NULL, split = FALSE, fileFormat = "bam",
   dataset_type = "experiments", format = "long",
   output_type = "data.table", ID = c(1, 2))
 }
@@ -20,7 +20,7 @@ Default :\code{NULL}}
 where each \code{data.frame} contain the files for a single experiment
 Default: \code{FALSE}.}
 
-\item{file_type}{A string that correspond to the type of the files 
+\item{fileFormat}{A string that correspond to the type of the files 
 that need to be extract.
 Default: bam}
 

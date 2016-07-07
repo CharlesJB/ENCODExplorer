@@ -14,6 +14,7 @@
 #' @import stringi
 #' @import data.table
 #' @importFrom dplyr filter
+#' @export
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
                         multipleTerm=FALSE, ignore_case=TRUE, fixed=FALSE){

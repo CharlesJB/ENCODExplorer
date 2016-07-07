@@ -83,7 +83,7 @@ in the `queryEncode` and `downloadEncode` function by setting the *df* option of
 functions.
 
 ```{r queryEncode, eval=FALSE}
-query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
+query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = F)
 downloadEncode(df = new_encode_df, file_acc = unlist(query_results$accessions))
 ```
 
