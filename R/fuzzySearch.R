@@ -17,7 +17,6 @@
 
 fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
                         multipleTerm=FALSE, ignore_case=TRUE){
-    require(stringi)
     #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){
         print("Invalid searchTerm input")
@@ -55,8 +54,8 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
         filter <- TRUE
         match <- filterVector %in% filterNames
         if(sum(as.logical(match)) != length(filterVector)){
-            warning(paste("This filter is unavailable and will not be considered : ",
-                    filterVector[!match], "\n", sep=""), call. = FALSE)
+            msg <- paste0("Unavailable filter :", filterVector[!match], sep=" " )
+            warning(msg, call. = FALSE)
             filterVector <- filterVector[match]
         }
     }
