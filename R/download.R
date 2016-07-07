@@ -203,7 +203,7 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
                          
           }
         }else{
-          msg <- paste0("No result found for ", unavail[[i]], " via rest-api protocol")
+          msg <- paste0("No result found for ", unavail[[i]])
           warning(msg, call. = FALSE)
         }
       }

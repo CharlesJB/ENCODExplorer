@@ -70,10 +70,6 @@ tables = prepare_ENCODEdb(database_filename)
 new_encode_df <- export_ENCODEdb_matrix(database_filename)
 ```
 
-<!-- * generate the metadata accession_df from the SQL database: -->
-<!-- ```{r new_accession_df, eval = FALSE} -->
-<!-- new_accession_df <- export_ENCODEdb_accession(new_encode_df, database_filename) -->
-<!-- ``` -->
 
 The whole process will take several minutes (30 to 60 minutes depending on your
 work environment)
@@ -88,7 +84,7 @@ functions.
 
 ```{r queryEncode, eval=FALSE}
 query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
-downloadEncode(df = new_encode_df, resultSet = query_results, resultOrigin = "queryEncode")
+downloadEncode(df = new_encode_df, file_acc = unlist(query_results$accessions))
 ```
 
 Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.

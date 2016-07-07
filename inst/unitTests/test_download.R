@@ -17,7 +17,7 @@ test.argument_acc <- function() {
 test.argument_unvail_format <- function() {
   load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
   obs <- tryCatch(downloadEncode("ENCSR000DZS", dt = brca, format = "fasta"),error=function(e) e, warning=conditionMessage)
-  exp <- "Unavailable format fasta"
+  exp <- "No fasta files within experiment ENCSR000DZS"
   checkIdentical(obs,exp)
 }
 
