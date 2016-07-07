@@ -77,7 +77,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
   # Step 1 : fetch all needed data.
-  Tables <- step1(database_filename = database_filename)
+  Tables <- step1(database_file = database_filename)
   # Step 2 : renaming specific column.
   Tables$files <- step2(files = Tables$files)
   # Step 3 : updating project, paired-with, plateform and lab column.
@@ -87,7 +87,9 @@ export_ENCODEdb_matrix <- function(database_filename) {
   Tables$files <- step4(files = Tables$files, replicates = Tables$replicates, 
                         libraries = Tables$libraries, 
                         treatments = Tables$treatments,
-                        biosamples = Tables$biosamples)
+                        biosamples = Tables$biosamples,
+                        antibody_lot = Tables$antibody,
+                        antibody_charac = Tables$antibody_charac)
   
   Tables$files <- step5(files = Tables$files)
   
@@ -112,10 +114,12 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   encode_df <- cbind(encode_df, organism = empty_vector)
   encode_df$organism <- step7(encode_df, Tables$targets)
-  encode_df$target <- step8(encode_df, Tables$targets)
+  encode_df <- step8(encode_df, Tables$targets)
   encode_df$organism <- step9(encode_df, Tables$organisms)
   # Step 10 : Adjusting file_size
   encode_df <- step10(encode_df)
+  encode_df$file_size <- as.character(encode_df$file_size)
+  encode_df$submitted_by <- step11(encode_df, Tables$user)
   # Creating and updating new columns for dataset
   empty_vector <- rep(x = NA, times = nrow(encode_df))
   
@@ -126,14 +130,23 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df <- encode_df[order(accession),]
   
   #reordering the table, we want to have the colunm below as the first colunm
-  #to be display.
+  #to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
-                    "file_size", "target", "assay","platform", "biosample_type",
-                    "biosample_name", "treatment", "organism", "dataset_type", 
-                    "status", "controlled_by", "controls", "lab","assembly", "output_category",
-                    "run_type", "read_length", "paired_end", "paired_with", 
-                    "biological_replicate_number","technical_replicate_number",
-                    "notes","href")
+                    "file_size","output_category", "output_type", "target", "investigated_as",
+                    "nucleic_acid_term", "assay", "treatment", "biosample_type","biosample_name", 
+                    "replicate_library","replicate_antibody", "antibody_target",
+                    "antibody_characterization", "antibody_caption", 
+                    "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
+                    "lab","run_type", "read_length", "paired_end",
+                    "paired_with", "platform", "notes","href", "biological_replicates",
+                    "biological_replicate_number","technical_replicate_number","replicate_list")
+  encode_df$controls <- gsub(encode_df$controls,
+                              pattern = "/.*/(.*)/", replacement = "\\1")
+  encode_df$controlled_by <- gsub(encode_df$controlled_by,
+                              pattern = "/.*/(.*)/", replacement = "\\1")
+  encode_df$replicate_list <- gsub(encode_df$replicate_list ,
+                              pattern = "/.*/(.*)/", replacement = "\\1")
+  
   colEncode <- colnames(encode_df)
   colEncode <- colEncode[!(colEncode %in% colNamesList)]
   colEncode <- c(colNamesList,colEncode)
@@ -141,22 +154,25 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
 }
 
-step1 <- function(database_filename){
+step1 <- function(database_file){
   
   ### Step 1 : fetch all needed data
-  all_files <- tables$file
-  all_experiments <- tables$experiment
-  all_datasets <- tables$dataset
-  all_matched_sets <- tables$matched_set
-  all_labs <- tables$lab
-  all_awards <- tables$award
-  all_targets <- tables$target
-  all_biosamples <- tables$biosample
-  all_libraries <- tables$library
-  all_organisms <- tables$organism
-  all_treatments <- tables$treatment
-  all_replicates <- tables$replicate
-  all_platforms <- tables$platform
+  all_files <- database_file$file
+  all_experiments <- database_file$experiment
+  all_datasets <- database_file$dataset
+  all_matched_sets <- database_file$matched_set
+  all_labs <- database_file$lab
+  all_awards <- database_file$award
+  all_targets <- database_file$target
+  all_biosamples <- database_file$biosample
+  all_libraries <- database_file$library
+  all_organisms <- database_file$organism
+  all_treatments <- database_file$treatment
+  all_replicates <- database_file$replicate
+  all_platforms <- database_file$platform
+  all_user <- database_file$user
+  all_antibody <- database_file$antibody_lot
+  all_antibody_info <- database_file$antibody_characterization
   
   return(list(
     files = all_files,
@@ -171,7 +187,10 @@ step1 <- function(database_filename){
     organisms = all_organisms,
     treatments = all_treatments,
     replicates = all_replicates,
-    platforms = all_platforms
+    platforms = all_platforms,
+    users = all_user,
+    antibody = all_antibody,
+    antibody_charac = all_antibody_info
   ))
 }
 
@@ -220,7 +239,8 @@ step3 <- function(files, awards, labs, platforms){
   return(files)
 }
 
-step4 <- function(files, replicates, libraries, treatments, biosamples){
+step4 <- function(files, replicates, libraries, treatments, biosamples,
+                  antibody_lot, antibody_charac){
  
   # Updating biological_replicate_list with replicates$biological_replicate_number
   
@@ -229,13 +249,45 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
   suppressWarnings(files$biological_replicate_number <- rep(NULL,nrow(files)))
   files[files$replicate_list %in% replicates$id, biological_replicate_number := 
                   as.character(replicates$biological_replicate_number[match_vector])]
+  # Creating replicate library column
+  suppressWarnings(files$replicate_library <- rep(NULL,nrow(files)))
+  files[files$replicate_list %in% replicates$id, replicate_library := 
+            as.character(replicates$library[match_vector])]
+  # Creating replicate antibody column
+  suppressWarnings(files$replicate_antibody <- rep(NULL,nrow(files)))
+  files[files$replicate_list %in% replicates$id, replicate_antibody := 
+            as.character(replicates$antibody[match_vector])]
 
+  # Creating antibody target
+  suppressWarnings(files$antibody_target <- rep(NULL, nrow(files)))
+  match_antibody <- match(files$replicate_antibody, antibody_lot$id)
+  match_antibody = match_antibody[!is.na(match_antibody)]
+  files[files$replicate_antibody %in% antibody_lot$id, antibody_target :=
+            as.character(antibody_lot$targets[match_antibody])]
+  
+  # Creating antibody_characterization
+  suppressWarnings(files$antibody_characterization <- rep(NULL, nrow(files)))
+  # pasting the ID
+  files[files$replicate_antibody %in% antibody_lot$id, antibody_characterization :=
+            as.character(antibody_lot$characterizations[match_antibody])]
+  
+  match_antibodyC <- match(files$antibody_characterization, antibody_charac$id)
+  match_antibodyC = match_antibodyC[!is.na(match_antibodyC)]
+  # Creating antibody_caption
+  suppressWarnings(files$antibody_caption <- rep(NULL, nrow(files)))
+  files[files$antibody_characterization %in% antibody_charac$id ,
+        antibody_caption := as.character(antibody_charac$caption[match_antibodyC])]
+  #updating antibody_characterization
+  files[files$antibody_characterization %in% antibody_charac$id ,
+        antibody_characterization := antibody_charac$characterization_method[match_antibodyC]]
+  
   # Updating technical_replicate_list with replicates$technical_replicate_number
   match_vector <- match(files$replicate_list, replicates$id)
   match_vector = match_vector[!is.na(match_vector)]
   suppressWarnings(files$technical_replicate_number <- rep(NULL, nrow(files)))
   files[files$replicate_list %in% replicates$id, technical_replicate_number := 
           replicates$technical_replicate_number[match_vector]]
+  
   # Updating treatment column with trreatment$treatment_term_name
   # replicate_list->library->biosample->treatment
   
@@ -262,6 +314,20 @@ step4 <- function(files, replicates, libraries, treatments, biosamples){
   files[files$treatment %in% treatments$id, treatment :=
            treatments$treatment_term_name[match_vector]]
   
+  #Creating nucleic_acid_term from tables$library$nucleic_acid_term_name
+  suppressWarnings(files$nucleic_acid_term <- rep(NULL, nrow(files)))
+  match_library <- match(files$replicate_library, libraries$id)
+  match_library <- match_library[!is.na(match_library)]
+  files[files$replicate_library %in% libraries$id, nucleic_acid_term :=
+            libraries$nucleic_acid_term_name[match_library]]
+  
+  
+  files$replicate_library <- gsub(files$replicate_library, pattern = "/.*/(.*)/",
+                                  replacement = "\\1")
+  files$replicate_antibody <- gsub(files$replicate_antibody,
+                                   pattern = "/.*/(.*)/", replacement = "\\1")
+  files$antibody_target <- gsub(files$antibody_target,
+                                pattern = "/.*/(.*)/", replacement = "\\1")
   return(files)
 }
 
@@ -363,12 +429,17 @@ step7 <- function(encode_exp, tables_target){
 }
 
 step8 <- function(encode_exp, tables_target){
-  # Updating target with the label columns of Tables$targets
+  
   match_target <- match(encode_exp$target, tables_target$id)
   match_target <- match_target[!is.na(match_target)]
+  #Adding investigated_as column comming from Tables$target.
+  suppressWarnings(encode_exp$investigated_as <- rep(NULL,(nrow(encode_exp))))
+  encode_exp[encode_exp$target %in% tables_target$id, investigated_as :=
+                 tables_target$investigated_as[match_target]]
+  # Updating target with the label columns of Tables$targets
   encode_exp[encode_exp$target %in% tables_target$id, target :=
                tables_target$label[match_target]]
-  return(encode_exp$target)
+  return(encode_exp)
 }
 
 step9 <- function(encode_exp, tables_org){
@@ -399,4 +470,13 @@ step10 <- function(encode_exp) {
     })
     encode_exp
     
+}
+
+step11 <- function(encode_exp, tables_user){
+    #Updating submitted_by column with Tables$user
+    match_user <- match(encode_exp$submitted_by, tables_user$id)
+    match_user <- match_user[!is.na(match_user)]
+    encode_exp[encode_exp$submitted_by %in% tables_user$id, submitted_by :=
+                   tables_user$title[match_user]]
+    return (encode_exp$submitted_by)
 }
