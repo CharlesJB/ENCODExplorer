@@ -1,3 +1,7 @@
+#' @import shiny
+#' @import shinythemes
+#' @import DT
+
 library(shiny)
 library(shinythemes)
 library(DT)

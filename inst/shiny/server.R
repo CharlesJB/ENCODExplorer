@@ -1,3 +1,10 @@
+#' @import shiny
+#' @import shinythemes
+#' @import data.table
+#' @import tools
+#' @import stringr
+#' @import dplyr filter
+#' 
 library(shiny)
 library(shinythemes)
 
@@ -119,8 +126,6 @@ server <- function(input, output) {
             
             }else{
                 designSplit <<- TRUE
-                require(tidyr)
-                require(dplyr)
                 #Getting the list of experiment
                 temp <- filter(resultGlobal, file_format==fileType)
                 temp <- filter(temp, dataset_type == dataType)
@@ -354,7 +359,6 @@ server <- function(input, output) {
     
     #Design request from advancedSearch
     observeEvent(input$designFromQuery,{
-        require(dplyr)
         output$consoleQuery <- renderPrint("Click on rows to select files and than use the Download button")
         output$designVis <- reactive({TRUE})
         viewDesign <<- TRUE
