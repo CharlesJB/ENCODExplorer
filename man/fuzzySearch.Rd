@@ -6,20 +6,19 @@
 within the encode_df \code{data.table}}
 \usage{
 fuzzySearch(searchTerm = NULL, database = NULL, filterVector = NULL,
-  multipleTerm = FALSE, ignore_case = TRUE, fixed = FALSE)
+  multipleTerm = FALSE, ignore_case = TRUE)
 }
 \arguments{
 \item{searchTerm}{The keyword or a \code{list} of keyword to search.}
 
 \item{database}{A \code{data.table}}
 
-\item{filterVector}{}
+\item{filterVector}{A \code{character} to apply the search on specific column.}
 
 \item{multipleTerm}{A boolean that indicate if the searchTerm is a list or
 even multiple searchTerm separete by a comma in a single string.}
 
-\item{fixed}{Boolean use to apply a strict search for the searchTerm within
-the database}
+\item{ignore_case}{A \code{boolean} to enable the case sensitivity.}
 }
 \value{
 A \code{data.table} corresponding the every row of the database that

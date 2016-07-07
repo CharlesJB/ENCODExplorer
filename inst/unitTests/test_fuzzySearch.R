@@ -7,9 +7,6 @@ test.single_term <- function() {
   load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
   obs <- fuzzySearch("hela", brca)
   checkIdentical(nrow(obs),9L)
-  #Testing fixed parameter
-  obsFixed <- fuzzySearch("HeLa-S3", brca, fixed=T)
-  checkIdentical(obs,obsFixed)
 }
 
 test.multiple_term <- function () {
