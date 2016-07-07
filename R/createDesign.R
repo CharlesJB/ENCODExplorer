@@ -34,6 +34,7 @@
 #' @importFrom stringr str_count
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
+#' @importFrom dplyr setdiff
 #' 
 #' @export
 createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
