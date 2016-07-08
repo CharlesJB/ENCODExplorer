@@ -15,7 +15,7 @@ test.design_long <- function(){
                                       Experiment="ENCSR000EDB", Value=1))
     RUnit::checkIdentical(obs[2], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
                                       Experiment="ENCSR000EDB", Value=1))
-    RUnit::heckIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+    RUnit::checkIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
                                       Experiment="ENCSR000EDB", Value=2))
     RUnit::checkIdentical(obs[4], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
                                       Experiment="ENCSR000EDY", Value=1))
