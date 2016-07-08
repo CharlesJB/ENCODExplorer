@@ -40,30 +40,6 @@ test.query_4_dataset <- function() {
               msg = "this query should return this precise result")
 }
 
-# /----------------------------------------------------------------------/
-
-#No more overlap between experiment and dataset accession numbers
-# test.query_4_dataset_and_exp <- function() {
-#   res_exp_dataset = queryEncode(dataset_access = "ENCSR403MYH")
-#   checkTrue(nrow(res_exp_dataset$dataset) > 0,
-#             msg = "this query should return at least one dataset result")
-# 
-#   checkTrue(nrow(res_exp_dataset$experiment) > 0,
-#             msg = "this query should return at least one experiment result")
-# }
-
-# test.combined_query_on_custom_df <- function() {
-#   load(file = system.file("extdata/test_small_encode_df.rda", package = "ENCODExplorer"))
-#   res_combo_custom = queryEncode(df = small_encode_df, target = "ELAVL1-human",
-#                                  fixed = F, file_status = "all")
-# 
-#   checkEquals(as.character(res_combo_custom$file_accession), "ENCFF001VCK",
-#               msg = "this combined query should return this precise result")
-# 
-# }
-
-#/-----------------------------------------------------------------------------/
-
 test.query_revoked_file <- function() {
   data("encode_df")
   res_revok = queryEncode(assay = "chipseq", biosample_name = "mcf7", fixed = F,

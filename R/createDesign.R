@@ -31,9 +31,10 @@
 #' Default: 1 and 2 
 #'     
 #' @import data.table
-#' @import stringr
+#' @import stringr 
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
+#' @importFrom dplyr setdiff
 #' 
 #' @export
 createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
@@ -85,7 +86,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   ctrl <- ctrl[!is.na(ctrl)]
   ## The counts variable is the same length as the replicates variable and will contain the
   ## number of controls for each experiment.
-  counts <- str_count(clean_df[i, controls], ";") + 1
+  counts <- stringr::str_count(clean_df[i, controls], ";") + 1
   counts[is.na(counts)] <- 0
   ## ctrl is a data.table with all the replicates and their matching controls,
   ## with only one experiment/control combination. The trick is that if we have a count
@@ -94,10 +95,6 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   ctrl <- data.table(replicates = rep(replicates, counts), ctrl)
 
   # Create the ctrl part of the design
-  # get_ctrl_design <- function(dt) {
-  #   data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
-  #              Value = ID[2])
-  # }
   get_ctrl_design <- function(dt) {
       File <- clean_df[accession == dt$ctrl, href]
       if (length(File) > 0) {
@@ -128,9 +125,9 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   }
   if (format == "wide") {
     if (is.data.frame(design)) {
-      design <- spread(design, key = Experiment, value = Value)
+      design <- tidyr::spread(design, key = Experiment, value = Value)
     } else {
-      design <- lapply(design, spread, key = Experiment, value = Value)
+      design <- lapply(design, tidyr::spread, key = Experiment, value = Value)
     }
   }
   

@@ -3,17 +3,14 @@
 #' @import data.table
 #' @import tools
 #' @import stringr
-#' @import dplyr filter
+#' @importFrom tidyr spread
+#' @importFrom dplyr filter
+#' @importFrom dplyr setdiff
 #' 
 library(shiny)
 library(shinythemes)
 
 server <- function(input, output) {
-    require(dplyr)
-    require(tidyr)
-    require(data.table)
-    require(stringr)
-    require(tools)
     
     load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
     allFilter <- c("accession", "dataset_type","lab", "title", "file_type",
