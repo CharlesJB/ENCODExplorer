@@ -6,7 +6,7 @@
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
 
-Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Charles Joly Beauparlant,Louis Gendron and Arnaud Droit.
 
 This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -25,7 +25,7 @@ This package has been designed to facilitate the data access by compiling the
 metadata associated with file, experiment, dataset, biosample, and treatment. 
 
 We first extract ENCODE schema from its public github repository to rebuild 
-the ENCODE database into an SQLite database. Thanks to this package, the user 
+the ENCODE database into a data.table database. Thanks to this package, the user 
 will be enable to generate, store and query ENCODE database locally. We also 
 developped a function which can extract the essential metadata in a R object to 
 aid data exploration.
@@ -34,7 +34,7 @@ We implemented time-saving features to select ENCODE files by querying their
 metadata, downloading them and validating that the file was correctly
 downloaded.
 
-The SQLite database can be regenerated at will to keep it up-to-date.
+The data.table database can be regenerated at will to keep it up-to-date.
 
 This vignette will introduce all the main features of the ENCODExplorer package.
 
@@ -48,16 +48,22 @@ suppressMessages(library(ENCODExplorer))
 
 Up to date, there are 7 types of dataset in ENCODE : annotation, experiment, 
 matched-set, project, reference, reference-epigenome and ucsc-browser-composite.
-This package comes with a up-to-date list of `data.frame` containing the essential
-of ENCODE files metadata: `encode_df`. This list contains two elements.
-The first one `encode_df$experiment` is a `data.frame` containing information for
-each file part of an experiment dataset ; the second one `encode_df$dataset` is a
-`data.frame` containing information for each file part of a non-experiment dataset. 
+This package comes with a up-to-date  `data.table` containing the essential
+of ENCODE files metadata: `encode_df`. This database contain every files from all
+dataset type.
 
 The `encode_df` object is **mandatory** for the functions provided in this package.
+Most of the provided functions will load `encode_df` as default database. For
+faster processing, we recommend you to load `encode_df` and pass it as an argument.
 
-In the current release, `encode_df` contains 86083 entries for experiments and 
-4747 entries for non-experiment datasets.
+To load `encode_df` :
+```{r load_encodeDF,collapse=TRUE}
+    data("encode_df", package = "ENCODExplorer")
+```
+
+
+In the current release, `encode_df` contains 130540 entries for experiments and 
+5475 entries for non-experiment datasets.
 
 ### Main functions
 
@@ -95,8 +101,7 @@ By default, the query use the exact string matching to perform the selection of
 the relevant entries. This behavior can be changed by setting the `fixed` option 
 to **FALSE**.
 
-The structure of the result set is similar to the `encode_df` structure : a list 
-of two elements *experiment* and *dataset*.
+The structure of the result set is similar to the `encode_df` structure.
 
 For example, to select all the fastq files produced on human
 cell MCF-7:
@@ -127,6 +132,25 @@ These criteria correspond to the filters that you can find on ENCODE portal :
 dismiss the dataset results because this information isn't available for that
 type of data.*
 
+#### fuzzySearch
+This function is a more friendly version of queryEncode that also perform a
+research on the `encode_df` object. The main difference is that the user doesn't
+have to know the specific colunm that contain the information. In fact, the term
+is research in every column of the data.table. Selecting specific column can be
+done by using the filterVector parameter.
+
+To following request will produce a data.table with every files that contain
+the term brca.
+```{r fuzzy_results, collapse=TRUE}
+fuzzy_results <- fuzzySearch(searchTerm = c("brca"), database = encode_df)
+```
+
+Multiple terms can be search at the same time, this example will extract all the
+files that contain brca or ZNF24 within the target column.
+```{r fuzzy_results_2, collapse=TRUE}
+fuzzy_results <- fuzzySearch(searchTerm = c("brca", "ZNF24"), database = encode_df,
+                             filterVector = c("target"), multipleTerm = TRUE)
+```
 
 #### Search
 This function simulates a key word search that you could perform through the

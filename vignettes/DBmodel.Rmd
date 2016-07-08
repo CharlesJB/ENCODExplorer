@@ -44,11 +44,11 @@ suppressMessages(library(ENCODExplorer))
 
 ### Data preparation
 
-To generate the SQL database from ENCODE: 
+To generate the list of data.table from ENCODE: 
 
 ```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename = "encode.sqlite"
+database_filename = "encode.dt"
 tables = prepare_ENCODEdb(database_filename)
 ```
 

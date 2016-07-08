@@ -3,7 +3,8 @@
 \name{fuzzySearch}
 \alias{fuzzySearch}
 \title{Fuzzysearch is a searching function for a string or a list of string 
-within the encode_df \code{data.table}}
+within the encode_df \code{data.table}. For faster processing, pass encode_df
+object as database parameter.}
 \usage{
 fuzzySearch(searchTerm = NULL, database = NULL, filterVector = NULL,
   multipleTerm = FALSE, ignore_case = TRUE)
@@ -11,7 +12,7 @@ fuzzySearch(searchTerm = NULL, database = NULL, filterVector = NULL,
 \arguments{
 \item{searchTerm}{The keyword or a \code{list} of keyword to search.}
 
-\item{database}{A \code{data.table}}
+\item{database}{A \code{data.table} with similar format as encode_df database.}
 
 \item{filterVector}{A \code{character} to apply the search on specific column.}
 
@@ -26,6 +27,14 @@ contain at least of one the searchTerm.
 }
 \description{
 Fuzzysearch is a searching function for a string or a list of string 
-within the encode_df \code{data.table}
+within the encode_df \code{data.table}. For faster processing, pass encode_df
+object as database parameter.
+}
+\examples{
+ \dontrun{
+   fuzzySearch(searchTerm=c("ELAVL1","atf7"),
+       database = encode_df, filterVector ="target", mutilpleTerm = TRUE)
+ } 
+
 }
 

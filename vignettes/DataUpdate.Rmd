@@ -50,7 +50,7 @@ otherwise it will return the datatable `encode_df` .
 
 ```{r, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename <- "new.encode.sqlite"
+database_filename <- "new.encode.rda"
 new_data <- export_ENCODEdb_matrix(database_filename, overwrite = FALSE)
 ```
 
@@ -61,13 +61,13 @@ following steps:
 
 ```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename = "new.encode.sqlite"
+database_filename = "new.encode.rda"
 tables = prepare_ENCODEdb(database_filename)
 ```
 
 * generate the metadata encode_df from a list of data.table:
 ```{r new_encode_df, eval = FALSE}
-new_encode_df <- export_ENCODEdb_matrix(database_filename)
+new_encode_df <- export_ENCODEdb_matrix(tables)
 ```
 
 
@@ -84,10 +84,10 @@ functions.
 
 ```{r queryEncode, eval=FALSE}
 query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = F)
-downloadEncode(df = new_encode_df, file_acc = unlist(query_results$accessions))
+downloadEncode(df = new_encode_df, file_acc = query_results$file_accession)
 ```
 
 Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.
 
-You can also use the SQL database for own purpose. The imputed database 
+You can also use the list of data.table database for own purpose. The imputed database 
 model is available in the [dedicated vignette](DBmodel.html)

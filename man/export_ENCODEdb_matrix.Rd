@@ -21,8 +21,7 @@ Extract essential informations from a list of data.table in a \code{list} of
 \code{data.table}s
 }
 \examples{
-    database_filename <- system.file("extdata/tables",
-                                                                       package = "ENCODEdb")
+    database_filename <- system.file("extdata/tables",package = "ENCODExplorer")
     \dontrun{
         export_ENCODEdb_matrix(database_filename = database_filename)
     }

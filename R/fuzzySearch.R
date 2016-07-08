@@ -1,17 +1,24 @@
 #' Fuzzysearch is a searching function for a string or a list of string 
-#' within the encode_df \code{data.table}
+#' within the encode_df \code{data.table}. For faster processing, pass encode_df
+#' object as database parameter.
 #' @param searchTerm The keyword or a \code{list} of keyword to search. 
-#' @param database A \code{data.table}
+#' @param database A \code{data.table} with similar format as encode_df database.
 #' @param filterVector A \code{character} to apply the search on specific column.
 #' @param multipleTerm A boolean that indicate if the searchTerm is a list or
 #' even multiple searchTerm separete by a comma in a single string.
 #' @param ignore_case A \code{boolean} to enable the case sensitivity.
 #' 
+#' @examples 
+#'  \dontrun{
+#'    fuzzySearch(searchTerm=c("ELAVL1","atf7"),
+#'        database = encode_df, filterVector ="target", mutilpleTerm = TRUE)
+#'  } 
+#'
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.
 #' 
-#' @import stringi
 #' @import data.table
+#' @importFrom stringi stri_detect_regex
 #' @importFrom dplyr filter
 #' @export
 
@@ -76,9 +83,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     }
     #fun_detect return a row of 0 and 1 depending on a match with searchTerm
     fun_detect <- function(x) {
-        
-            stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
-        
+            stringi::stri_detect_regex(as.character(x), searchTerm, case_insensitive = ignore_case)
     }
     res <- df[,lapply(.SD, fun_detect)]
     toKeep <- as.logical(rowSums(res, na.rm = TRUE))
