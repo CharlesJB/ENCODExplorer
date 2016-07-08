@@ -32,7 +32,6 @@ Imports:
     RCurl,
     tidyr,
     data.table,
-    downloader,
     dplyr,
     stringr,
     stringi
