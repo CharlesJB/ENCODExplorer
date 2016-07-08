@@ -32,7 +32,7 @@
 #'     
 #' @import data.table
 #' @import stringr 
-#' @import tidyr 
+#' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
 #' 
