@@ -31,8 +31,8 @@
 #' Default: 1 and 2 
 #'     
 #' @import data.table
-#' @importFrom stringr str_count
-#' @importFrom tidyr spread
+#' @import stringr 
+#' @import tidyr 
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
 #' 
@@ -129,9 +129,9 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   }
   if (format == "wide") {
     if (is.data.frame(design)) {
-      design <- spread(design, key = Experiment, value = Value)
+      design <- tidyr::spread(design, key = Experiment, value = Value)
     } else {
-      design <- lapply(design, spread, key = Experiment, value = Value)
+      design <- lapply(design, tidyr::spread, key = Experiment, value = Value)
     }
   }
   
