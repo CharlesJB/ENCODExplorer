@@ -95,10 +95,6 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   ctrl <- data.table(replicates = rep(replicates, counts), ctrl)
 
   # Create the ctrl part of the design
-  # get_ctrl_design <- function(dt) {
-  #   data.table(File = clean_df[dataset == dt$ctrl, href], Experiment = dt$replicates,
-  #              Value = ID[2])
-  # }
   get_ctrl_design <- function(dt) {
       File <- clean_df[accession == dt$ctrl, href]
       if (length(File) > 0) {

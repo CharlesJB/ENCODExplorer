@@ -65,7 +65,7 @@ test.design_split_long <- function(){
 
 test.design_split_wide <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
-    brca <- filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
+    brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide", split=T)
     RUnit::checkIdentical(length(obs), 2L)
     RUnit::checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
