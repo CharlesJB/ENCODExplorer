@@ -82,8 +82,8 @@ test.design_split_wide <- function(){
                                            ENCSR000EDY=2))
 }
 
-test.design_wrong_input <- function() {
-    load(file = system.file("inst/extdata/BRCA.rda", package = "ENCODExplorer"))
+test.design_ID <- function() {
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     #Testing ID input
     obs <- tryCatch(createDesign(brca, encode_df, ID=c("X","Y")),error=function(e) e, warning=conditionMessage)
@@ -93,7 +93,10 @@ test.design_wrong_input <- function() {
     obs <- tryCatch(createDesign(brca, encode_df, ID=c(1)),error=function(e) e, warning=conditionMessage)
     exp <- "Error: length(ID) == 2 is not TRUE\n"
     RUnit::checkIdentical(as.character(obs),exp)
-    
+}
+test.design_format <- function() {
+    load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
+    brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     #Testing file_type 
     obs <- tryCatch(createDesign(brca, encode_df,fileFormat="banana"),error=function(e) e, warning=conditionMessage)
     exp <- "Error: fileFormat %in% unique(df$file_format) is not TRUE\n"
@@ -102,5 +105,4 @@ test.design_wrong_input <- function() {
     obs <- tryCatch(createDesign(brca, encode_df,dataset_type="banana"),error=function(e) e, warning=conditionMessage)
     exp <- "Error: dataset_type %in% df$dataset_type is not TRUE\n"
     RUnit::checkIdentical(as.character(obs),exp)
-    
 }

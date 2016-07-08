@@ -6,7 +6,7 @@ if(FALSE) {
 library("RUnit")
 test.argument_acc <- function() {
   load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
-  obs = tryCatch(downloadEncode("invalid_accession"),error=function(e) e, warning=conditionMessage)
+  obs = tryCatch(downloadEncode("invalid_accession", dt = brca),error=function(e) e, warning=conditionMessage)
   exp = "No result found for invalid_accession"
   RUnit::checkIdentical(obs,exp)
 }
@@ -34,7 +34,7 @@ test.argument_format_exp <- function() {
 
 test.argument_consistency_dir <- function() {
   load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
-  obs = tryCatch(downloadEncode("ENCSR868RFZ",dir = "/aabbbccc"),
+  obs = tryCatch(downloadEncode("ENCSR868RFZ",dt = brca,dir = "/aabbbccc"),
                  error=function(e) e, warning=conditionMessage)
   exp = "Can't write in /aabbbccc"
   RUnit::checkIdentical(obs, exp)
