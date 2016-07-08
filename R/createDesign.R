@@ -86,7 +86,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   ctrl <- ctrl[!is.na(ctrl)]
   ## The counts variable is the same length as the replicates variable and will contain the
   ## number of controls for each experiment.
-  counts <- str_count(clean_df[i, controls], ";") + 1
+  counts <- stringr::str_count(clean_df[i, controls], ";") + 1
   counts[is.na(counts)] <- 0
   ## ctrl is a data.table with all the replicates and their matching controls,
   ## with only one experiment/control combination. The trick is that if we have a count
