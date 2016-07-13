@@ -1,4 +1,4 @@
-#' downloadEncode is use to download  a serie of files or experiments 
+#' downloadEncode is use to download  a serie of files or dataset 
 #' by their accession. 
 #' @param file_acc A \code{character} of ENCODE file accession or 
 #' experiment accession.
@@ -45,8 +45,8 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
   #Step 1 : Handling available file accession and experience accession via encode_df
   
   avail_file <- file_acc[file_acc %in% dt$file_accession]
-  avail_exp <- file_acc[file_acc %in% dt$accession]
-  unavail <- setdiff(file_acc, c(avail_file,avail_exp))
+  avail_ds <- file_acc[file_acc %in% dt$accession]
+  unavail <- setdiff(file_acc, c(avail_file,avail_ds))
   
   encode_root = "https://www.encodeproject.org"
   
@@ -64,7 +64,7 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
       }
   }
   
-  exp_dt <- filter(dt, accession %in% avail_exp)
+  exp_dt <- filter(dt, accession %in% avail_ds)
   if(nrow(exp_dt)>0 & format != "all"){
       temp <- unique(exp_dt$accession)
       exp_dt <- filter(exp_dt, file_format == format)
@@ -139,13 +139,15 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
     }
     
     # Step 2 : Handling unavailable files via ENCODE rest-api
-    
+    url_search <- "https://www.encodeproject.org/search/?searchTerm="
     url_file <- "https://www.encodeproject.org/search/?type=file&title="
-    url_exp <- "https://www.encodeproject.org/search/?type=file&dataset=/experiments/"
-    filter <- "&frame=object&format=json&limit=all"
+    url_ds <- "https://www.encodeproject.org/search/?type=file&dataset=/"
+    filter <- "/&frame=object&format=json&limit=all"
+    
+    #Simple rest-api query to
     
     if(length(unavail) > 0) {
-      #sapply(unavail_file, function(acc){
+      
       for(i in 1:length(unavail)){
         #Step 2.1 : Handling files
         if(RCurl::url.exists(paste0(url_file,unavail[[i]],filter))){ 
@@ -190,41 +192,54 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
             msg <- paste0("No result found for ", unavail[[i]])
             warning(msg, call. = FALSE)
           }
-          #Step 2.2 Handling experiment
-        } else if (RCurl::url.exists(paste0(url_exp,unavail[[i]],"/",filter))) { 
-          res <- jsonlite::fromJSON(paste0(url_exp,unavail[[i]],"/",filter))
-          if (res[["notification"]] == "Success") {
-            results <- res[["@graph"]]
-            
-            for(y in 1:nrow(results)){
-              if(!is.null(results$href[[y]])){
-                #checking the format
-                if(format != "all" & results$file_format[[y]] != format){next}
-                fileName = strsplit(x = results$href[[y]],split = "@@download/",fixed = TRUE)[[1]][2]
-                fileName <- paste0(dir,"/", fileName, sep="")
-                href <- as.character(results$href[[y]])
-                md5sum_file <- tools::md5sum(paste(dir, fileName, sep="/"))
-                md5sum_restapi <- as.character(results$md5sum[[y]])
-                if (force == TRUE | !(file.exists(fileName)) |
-                    (file.exists(fileName) & md5sum_file != md5sum_restapi)){
-                  download.file(url=paste0(encode_root, href), quiet=TRUE,
-                                destfile=fileName, method = "curl",
-                                extra = "-O -L" )
-                  md5sum_file = tools::md5sum(paste0(fileName))
-                }
-                #Validating the download
-                if(md5sum_file != md5sum_restapi) {
-                  warning(paste0("No md5sum match for : ", fileName),
-                          call. = FALSE)
-                }else{
-                  print(paste0("Success downloading file :", fileName))
-                  downloaded <- c(downloaded, fileName)
+          #Step 2.2 Handling dataset-
+        } else if (RCurl::url.exists(paste0(url_search, unavail[[i]],
+                                            "&format=json&limit=all"))) {
+          exp_json <- jsonlite::fromJSON(paste0(url_search, unavail[[i]],
+                                                  "&format=json&limit=all"))
+          exp_dataset <- exp_json[["@graph"]][["@id"]]
+          exp_dataset <- gsub(exp_dataset, pattern="/(.*)/.*/", replacement =
+                                  "\\1")
+          
+          if(RCurl::url.exists(paste0(url_ds, exp_dataset,"/", unavail[[i]],
+                                      filter))){
+            exp_tab <- jsonlite::fromJSON(paste0(url_ds, exp_dataset,"/",
+                                                 unavail[[i]],filter))
+            if (exp_tab[["notification"]] == "Success") {
+              results <- exp_tab[["@graph"]]
+              
+              for(y in 1:nrow(results)){
+                if(!is.null(results$href[[y]])){
+                  #checking the format
+                  if(format != "all" & results$file_format[[y]] != format){next}
+                  fileName = strsplit(x = results$href[[y]],split = "@@download/",fixed = TRUE)[[1]][2]
+                  fileName <- paste0(dir,"/", fileName, sep="")
+                  href <- as.character(results$href[[y]])
+                  md5sum_file <- tools::md5sum(paste(dir, fileName, sep="/"))
+                  md5sum_restapi <- as.character(results$md5sum[[y]])
+                  if (force == TRUE | !(file.exists(fileName)) |
+                      (file.exists(fileName) & md5sum_file != md5sum_restapi)){
+                    download.file(url=paste0(encode_root, href), quiet=TRUE,
+                                  destfile=fileName, method = "curl",
+                                  extra = "-O -L" )
+                    md5sum_file = tools::md5sum(paste0(fileName))
+                  }
+                  #Validating the download
+                  if(md5sum_file != md5sum_restapi) {
+                    warning(paste0("No md5sum match for : ", fileName),
+                            call. = FALSE)
+                  }else{
+                    print(paste0("Success downloading file :", fileName))
+                    downloaded <- c(downloaded, fileName)
+                  }
                 }
               }
+              
             }
-                         
           }
-        }else{
+            
+        
+        } else {
           msg <- paste0("No result found for ", unavail[[i]])
           warning(msg, call. = FALSE)
         }
