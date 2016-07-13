@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{downloadEncode}
 \alias{downloadEncode}
-\title{downloadEncode is use to download  a serie of files or experiments 
+\title{downloadEncode is use to download  a serie of files or dataset 
 by their accession.}
 \usage{
 downloadEncode(file_acc = NULL, dt = NULL, format = "all", dir = ".",
@@ -26,7 +26,7 @@ in the directory.
 Default : TRUE}
 }
 \description{
-downloadEncode is use to download  a serie of files or experiments 
+downloadEncode is use to download  a serie of files or dataset 
 by their accession.
 }
 \examples{
