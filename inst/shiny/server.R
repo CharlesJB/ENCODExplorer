@@ -91,7 +91,7 @@ server <- function(input, output) {
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromSearch)]
         
-        fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigBed", "bigWig")
+        fileType <- c("bam", "fastq", "sam", "bed", "bigBed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromSearch)]
         
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
@@ -124,8 +124,8 @@ server <- function(input, output) {
             }else{
                 designSplit <<- TRUE
                 #Getting the list of experiment
-                temp <- filter(resultGlobal, file_format==fileType)
-                temp <- filter(temp, dataset_type == dataType)
+                temp <- dplyr::filter(resultGlobal, file_format == fileType)
+                temp <- dplyr::filter(temp, dataset_type == dataType)
                 acc <- unique(temp$accession)
                 #Creating the design
                 designResultSearch <<- createDesign(resultGlobal, df, split=TRUE,
@@ -192,7 +192,7 @@ server <- function(input, output) {
             }
             
             selected_files <- sapply(selected_files, function(i){
-                temp <- file_path_sans_ext(basename(i))
+                temp <- tools::file_path_sans_ext(basename(i))
                 paste(unlist(strsplit(temp,"[.]"))[1])
             })
             
@@ -241,7 +241,7 @@ server <- function(input, output) {
             selected_rows <- paste(rows)
             selected_files <- designResultSearch$File[as.numeric(selected_rows)]
             selected_files <- sapply(selected_files, function(i){
-                temp <- file_path_sans_ext(basename(i))
+                temp <- tools::file_path_sans_ext(basename(i))
                 paste(unlist(strsplit(temp,"[.]"))[1])
             })
             as.character(selected_files)
@@ -249,7 +249,7 @@ server <- function(input, output) {
         selected_size <- resultGlobal$file_size[as.numeric(selected_rows)]
         #Converting all size in byte to apply sum
         selected_size <- sapply(selected_size,function(i){
-            val <- unlist(str_split(i," "))
+            val <- unlist(strsplit(i," "))
             convert_to_byte(val)
         })
         sum_file <- sum(selected_size)
@@ -259,8 +259,10 @@ server <- function(input, output) {
     
     
     #Refresh the content of fileSizeFuzzy
-    refresh_fuzzy_display <- eventReactive(c(input$searchResult_rows_selected,input$designResultSearch_rows_selected,
-                                       input$designFromSearch, input$searchAction, input$splitFromSearch),{
+    refresh_fuzzy_display <- eventReactive(c(input$searchResult_rows_selected,
+                                input$designResultSearch_rows_selected,
+                                input$designFromSearch, input$searchAction,
+                                input$splitFromSearch),{
         if(!(viewDesign)){ #for fuzzySearch object
             if(length(input$searchResult_rows_selected) > 0){
                 paste("Number of selected files :", length(input$searchResult_rows_selected),
@@ -364,7 +366,7 @@ server <- function(input, output) {
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromQuery)]
         
-        fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig")
+        fileType <- c("bam", "fastq", "sam", "bed", "bigbed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromQuery)]
         
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
@@ -443,7 +445,7 @@ server <- function(input, output) {
                 selected_rows <- paste(input$designAdvanced_rows_selected)
                 selected_files <- designAdvanced$File[as.numeric(selected_rows)]
                 selected_files <- sapply(selected_files, function(i){
-                    temp <- file_path_sans_ext(basename(i))
+                    temp <- tools::file_path_sans_ext(basename(i))
                     paste(unlist(strsplit(temp,"[.]"))[1])
                 })
                 
@@ -483,7 +485,7 @@ server <- function(input, output) {
         selected_rows <- paste(rows)
         selected_files <- designAdvanced$File[as.numeric(selected_rows)]
         selected_files <- sapply(selected_files, function(i){
-          temp <- file_path_sans_ext(basename(i))
+          temp <- tools::file_path_sans_ext(basename(i))
           paste(unlist(strsplit(temp,"[.]"))[1])
         })
         as.character(selected_files)
@@ -491,7 +493,7 @@ server <- function(input, output) {
       selected_size <- resultQuery$file_size[as.numeric(selected_rows)]
       #Converting all size in byte to apply sum
       selected_size <- sapply(selected_size,function(i){
-        val <- unlist(str_split(i," "))
+        val <- unlist(strsplit(i," "))
         convert_to_byte(val)
       })
       sum_file <- sum(selected_size)
@@ -505,29 +507,26 @@ server <- function(input, output) {
     #////---------------------------------Design--------------------------------////  
     
     #Design request
-    observeEvent(input$actionDesign,{
+    observeEvent(input$designFromDesign,{
         
-        a <- as.numeric(input$replicateID)
-        b <- as.numeric(input$controlID)
-        IDs <- c(a,b)
-        fileRDS <- readRDS(input$searchTable$datapath)
-        
-        outputTypeVec <- c("data.table","data.frame")
-        outputTypeVec <- outputTypeVec[as.numeric(input$outputDesign)]
-        typeFile <- c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig")
-        typeFile <- typeFile[as.numeric(input$fileFormatDesign)]
+        IDs <- c(as.numeric(input$repFromDesign), as.numeric(input$ctrlFromDesign))
+        fileRDS <- readRDS(input$inputTable$datapath)
+        typeFile <- c("bam", "fastq", "sam", "bed", "bigbed", "bigWig")
+        typeFile <- typeFile[as.numeric(input$fileFromDesign)]
         formatDesignVec <- c("long", "wide")
-        formatDesignVec <- formatDesignVec[as.numeric(input$formatStyle)]
+        formatDesignVec <- formatDesignVec[as.numeric(input$formatFromDesign)]
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
                       "matched-sets", "projects", "reference-epigenomes",
                       "references")
-        dataType <- dataType[as.numeric(input$datatypeDesign)]
-        
-        output$design <- renderDataTable(createDesign(input=fileRDS, df=df,
-                                        split=input$split, type_file=typeFile,
-                                        datatype=dataType,format=formatDesignVec,
-                                        utput_type=outputTypeVec,ID=IDs),
-                                         options=list(searching=FALSE))
+        dataType <- dataType[as.numeric(input$datatypeFromDesign)]
+        print(typeFile)
+        print(dataType)
+        print(formatDesignVec)
+        #output$design <- DT::renderDataTable(as.data.table(fileRDS))
+        output$design <- DT::renderDataTable(createDesign(input=fileRDS,
+                                      df=df,split=input$split, fileFormat = typeFile,
+                                      dataset_type=dataType, format=formatDesignVec, ID=IDs),
+                                      options=list(searching=FALSE))
     })
     
 }

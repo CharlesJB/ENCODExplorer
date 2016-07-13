@@ -246,9 +246,9 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
     {
       query_results = s
       if(!quiet) 
-        cat(paste0("results : ",
+        cat(paste0("Results : ",
                    nrow(query_results),
-                   " / files ",length(unique(query_results$accession)),"\n"))
+                   " files, ",length(unique(query_results$accession))," datasets","\n"))
       query_results
     }
     
@@ -315,9 +315,8 @@ searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
   }
   
   if(!quiet){
-    cat(paste0("Total : results",
-               nrow(res),
-               " files / ",length(unique(res$accession))))
+    cat(paste0("Results : ", nrow(res)," files , ",
+               length(unique(res$accession)), " datasets", "\n"))
   }
   return(res)
 }

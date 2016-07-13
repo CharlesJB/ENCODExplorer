@@ -6,7 +6,7 @@
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
 
-Audrey Lemacon, Charles Joly Beauparlant,Louis Gendron and Arnaud Droit.
+Audrey Lemacon, Charles Joly Beauparlant, Louis Gendron and Arnaud Droit.
 
 This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -49,9 +49,9 @@ suppressMessages(library(ENCODExplorer))
 Up to date, there are 7 types of dataset in ENCODE : annotation, experiment, 
 matched-set, project, reference, reference-epigenome and ucsc-browser-composite.
 This package comes with a up-to-date  `data.table` containing the essential
-of ENCODE files metadata: `encode_df`. This database contain every files from all
-dataset type.
-
+of ENCODE files metadata: `encode_df`. This database contain every files from all dataset type.
+The accession column correspond to the accession of the dataset and the file_accession
+column correspond to the actual accession of the file.
 The `encode_df` object is **mandatory** for the functions provided in this package.
 Most of the provided functions will load `encode_df` as default database. For
 faster processing, we recommend you to load `encode_df` and pass it as an argument.
@@ -86,7 +86,7 @@ dataset **AND** those which are part of an experiment and indirectly link to a
 dataset (reported as related_files in the dataset and related_dataset in
 experiment).] |The dataset accession|
 |file_accession|The file accesion|
-|file_format^[The current version of encode_df contains the following file format : 
+|file_format[The current version of encode_df contains the following file format : 
 *fastq*,*bed*,*bigBed*,*bam*,*tsv*,*bigWig*,*rcc*,*csfasta*,*idat*,*gtf*,*tar*,
 *CEL*,*csqual*,*sam*,*wig*,*gff*,*fasta*,*tagAlign*]|The file format|
 |lab|The laboratory|
@@ -139,7 +139,7 @@ have to know the specific colunm that contain the information. In fact, the term
 is research in every column of the data.table. Selecting specific column can be
 done by using the filterVector parameter.
 
-To following request will produce a data.table with every files that contain
+The following request will produce a data.table with every files that contain
 the term brca.
 ```{r fuzzy_results, collapse=TRUE}
 fuzzy_results <- fuzzySearch(searchTerm = c("brca"), database = encode_df)
@@ -157,7 +157,12 @@ This function simulates a key word search that you could perform through the
 ENCODE web portal.
 
 The `searchEncode` function returns a data frame which corresponds to the result page
-provided by ENCODE portal.
+provided by ENCODE portal. If a specific file or dataset isn't available with 
+fuzzySearch or queryEncode (i.e. within `encode_df`), access  to the latest data
+of ENCODE database with the searchEncode function.
+searchResult may provide more result such as different and complementary dataset.
+Look for `searchToquery` to convert the result of a search to a data.table with 
+the same design as `encode_df`.
 
 Here is the example of the following search : *"a549 chip-seq homo sapiens"*.
 
@@ -173,19 +178,16 @@ search_results <- searchEncode(searchTerm = "a549 chip-seq homo sapiens",
 
 #### Download
 
-Following a search or a query, you may want to download the corresponding files.
-
-Our `downloadEncode` function is a real time saving feature. To use it, you have to 
-provide the results set that you've just get from the `searchEncode` or `queryEncode` 
-function, indicate the origin of the dataset ("searchEncode" or "queryEncode") and then the 
-path to the directory where you want to copy the downloaded files
+Allow the user to download a file or an entire dataset.
+Our `downloadEncode` function is a real time saving feature. To use it, you have to provide the file accession or the accession of the dataset (accession column in `encode_df` object).
+If the accession doesn't exist within the actual `encode_df` data.table, the function will search the accession directly in the ENCODE database.
+User may specify the path to the directory where you want to copy the downloaded files
 (default: `/tmp`).
 
 To ensure that the downloading have succeeded, we conduct a check md5 sum 
 comparison for each file.
 
-Moreover, if your results set stem from the `searchEncode` function, you may want to 
-restrict the downloading to a certain type of file. To do so, you can set the 
+Moreover, if the accession is a a dataset accession, the function will download every files in this dataset. Download specific files by using the
 `format` option (which is set by defaul to `all`)
 
 Here is a small query:
@@ -208,22 +210,21 @@ To select a particular file format you can:
 ```{r query_results_5, collapse=TRUE, eval=FALSE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
                        file_format = "bed" , fixed = FALSE)
-downloadEncode(df=encode_df, resultSet = query_results, resultOrigin = "queryEncode")
+downloadEncode(file_acc=query_results$file_accession, dt = encode_df)
 ```
 
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=FALSE}
-downloadEncode(df=encode_df, resultSet = search_results,
-               resultOrigin = "searchEncode", format = "bed")
+downloadEncode(file_acc = search_results$accession, dt=encode_df,
+                format = "bed")
 ```
 
 
 #### Conversion
 The function `searchToquery` enables to convert a `searchEncode` output in a `queryEncode` output based on the found accession numbers. Thus the user can benefit from all the collected metadata.
 
-The structure of the result set is similar to the `encode_df` structure : a list 
-of two dataframe *experiment* and *dataset*.
+The structure of the result set is similar to the `encode_df` structure.
 
 Let's try it with the previous example :
 
@@ -234,7 +235,12 @@ search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 ```
 
 2) convert
-```{r conert_results_1, collapse=TRUE}
+```{r convert_results_1, collapse=TRUE}
 convert_results <- searchToquery(searchResults = search_results)
 ```
 
+### shinyEncode
+This function is the shinyApp of ENCODExplorer that implement the queryEncode 
+and the fuzzySearch function. The createDesign and downdloadEncode function can also be
+use on the search results.
+Files related with the shiny app can be found at ENCODExplorer/inst/shiny

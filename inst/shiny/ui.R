@@ -36,8 +36,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                                 selected=1))),
                     fluidRow(column(3, selectInput("fileFromSearch", "File Format",
                                 choices=list(
-                                "bam"=1, "fastq"=2, "fasta"=3, "sam"=4, "bed"=5,
-                                "bigBed"=6,"bigWig"=7))),
+                                "bam"=1, "fastq"=2, "sam"=3, "bed"=4,
+                                "bigBed"=5, "bigWig"=6))),
                             column(3, selectInput("datatypeFromSearch","Data Type",
                                 choices=list(
                                 "experiments"=1,"ucsc browser composite"=2,
@@ -104,8 +104,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                             column(4, radioButtons("formatFromQuery", "Design format",
                                  choices =list("long"=1, "wide"=2 ), selected=1))),
                     fluidRow(column(3, selectInput("fileFromQuery", "File Format",
-                                choices = list("bam"=1, "fastq"=2, "fasta"=3,
-                                        "sam"=4, "bed"=5,"bigBed"=6,"bigWig"=7))),
+                                choices = list("bam"=1, "fastq"=2,
+                                        "sam"=3, "bed"=4,"bigBed"=5,"bigWig"=6))),
                             column(3, selectInput("datatypeFromQuery","Data Type",
                                 choices =list("experiments"=1,"ucsc browser composite"=2,
                                 "annotations"=3,"matched sets"=4, "projects"=5,
@@ -137,31 +137,23 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
         tabPanel("Design",sidebarLayout(
              sidebarPanel(
                 actionButton("designFromDesign", "Create a design"),
-                fileInput("searchTable", "Import your file as rds format"),
+                fileInput("inputTable", "Import your file as rds format"),
                 fileInput("df", "Import your database (optional)"),
                 checkboxInput("splitFromDesign", 
                               "Split the result per experiment",value=FALSE),
                 radioButtons("formatFromDesign", "Design format", choices =list(
-                             "long"=1, "wide"=2 ), selected=1),
-                textInput("repFromDesign","Numeric ID assigned to replicate file",value="1"),
-                textInput("ctrlFromDesign","Numeric ID assigned to control file", value="2"),
-                radioButtons("outputFromDesign", "Type of result", choices =list(
-                            "data.table"=1, "data.frame"=2 ), selected=1),
-                selectInput("formatFromDesign", "File Format", choices = list(
-                            "bam"=1, "fastq"=2, "fasta"=3, "sam"=4, "bed"=5,
-                            "bigBed"=6,"bigWig"=7)),
+                             "long"=1, "wide"=2  ), selected=1),
+                numericInput("repFromDesign", "Replicate ID", value=1),
+                numericInput("ctrlFromDesign", "Control ID", value=2),
+                selectInput("fileFromDesign", "File Format", choices = list(
+                            "bam"=1, "fastq"=2, "sam"=3, "bed"=4,
+                            "bigBed"=5,"bigWig"=6)),
                 selectInput("datatypeFromDesign","Data Type", choices =list(
                             "experiments"=1,"ucsc browser composite"=2, 
                             "annotations"=3,"matched sets"=4, "projects"=5,
                             "reference epigenomes"=6,"references"=7))),
-            mainPanel(dataTableOutput("design")))
-        ),
+            mainPanel(DT::dataTableOutput("design")))
+        )
                            
-#////-----------------------------searchEncode-----------------------------////        
-        tabPanel("Search from ENCODE"),
-                           
-                           
-#////-------------------------------About ---------------------------------////
-        tabPanel("About")
     )
 )
