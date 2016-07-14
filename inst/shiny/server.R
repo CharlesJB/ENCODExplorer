@@ -294,9 +294,6 @@ server <- function(input, output) {
         if(input$setAccession == ""){ac <- NULL}
         else{ac <- input$setAccession}
         
-        if(input$datasetAccession == ""){da <- NULL}
-        else{da <- input$datasetAccession}
-        
         if(input$assay == ""){as <- NULL}
         else{as <- input$assay}
         
@@ -329,12 +326,11 @@ server <- function(input, output) {
         
         if(input$project ==""){pr <- NULL}
         else{pr <- input$project}
-        
         resultQuery <<- queryEncode(df=encode_df, set_accession=ac, 
-                                dataset_accession=da,assay=as, biosample_name=bn,
+                                assay=as, biosample_name=bn,
                                 biosample_type=bt, project=pr,file_accession=fa,
                                 file_format=ff,lab=lb, organism=og,target=tg,
-                                treatment=tr,file_status=fileStat, quiet=TRUE,
+                                treatment=tr,file_status=fileStat, quiet=F,
                                 status=es,fixed=as.logical(input$fixed))
         #Removing empty specific and empty row
         resultQuery <<- resultQuery[ , !c("antibody_characterization","uuid",
@@ -342,9 +338,9 @@ server <- function(input, output) {
         resultQuery <<- resultQuery[,sapply(resultQuery, function(i){
             !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
         if(nrow(resultQuery) == 0){
-            output$advancedResult <- DT::renderDataTable(data.table())
+            output$resultQuery <- DT::renderDataTable(data.table())
         }else{
-            output$advancedResult <- DT::renderDataTable(resultQuery, escape=F,
+            output$resultQuery <- DT::renderDataTable(resultQuery, escape=F,
                 options=list(searching=F, fixedHeader=T, pageLength=25,
                     scrollY="600px", scrollCollapse=T, scrollX=T, deferRender=T,
                     columnDefs=list(list(targets=1:ncol(resultQuery),
@@ -432,7 +428,7 @@ server <- function(input, output) {
     #Download request from queryEncode
     observeEvent(input$downloadFromQuery,{
         if(!viewDesign){
-            selected_rows <- paste(input$advancedResult_rows_selected)
+            selected_rows <- paste(input$searchFuzzy_rows_selected)
             selected_files <- resultQuery$file_accession[as.numeric(selected_rows)]
         
             downloadLog <- capture.output(downloadEncode(dt=encode_df, file_acc=
@@ -458,12 +454,12 @@ server <- function(input, output) {
     })
     
     #Refresh the content of fileSizeQuery
-    refresh_query_display <- eventReactive(c(input$advancedResult_rows_selected,input$designQuery_rows_selected,
-                                            input$designFromQuery, input$searchAdvanced, input$designSplitQuery),{
+    refresh_query_display <- eventReactive(c(input$resultQuery_rows_selected,input$designQuery_rows_selected,
+                                            input$designQuery, input$searchAdvanced, input$designSplitQuery),{
           if(!(viewDesign)){ #for fuzzySearch object
-              if(length(input$advancedResult_rows_selected) > 0){
-                  paste("Number of selected files :", length(input$advancedResult_rows_selected),
-                  " Total size of the selected files :",file_size_query(input$advancedResult_rows_selected))
+              if(length(input$resultQuery_rows_selected) > 0){
+                  paste("Number of selected files :", length(input$resultQuery_rows_selected),
+                  " Total size of the selected files :",file_size_query(input$resultQuery_rows_selected))
               }
           }else{ #for design object
               if(!input$splitFromQuery & length(input$designQuery_rows_selected) > 0 ){
