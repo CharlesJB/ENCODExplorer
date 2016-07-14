@@ -128,9 +128,9 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
         if(md5sum_file != md5sum_encode) {
           warning(paste0("No md5sum match for : ", fileName),
                   call. = FALSE)
-          #Si on as une erreur de telechargement, on tente de supprimer le fichier ?
+          
         }else{
-          print(paste0("Success downloading experience :", unique(exp_dt$accession[[i]]),
+          print(paste0("Success downloading experiment :", unique(exp_dt$accession[[i]]),
                        ",file :", fileName))
           downloaded <- c(downloaded, fileName)
         }
