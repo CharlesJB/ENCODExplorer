@@ -58,15 +58,15 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                 conditionalPanel(
                     condition="!output.designVis",
                     tags$head(tags$style(".table .alignCenter {text-align:center;}")),
-                    DT::dataTableOutput("searchResult")),
+                    DT::dataTableOutput("searchFuzzy")),
                 
                 conditionalPanel(
                     condition="output.designVis & !input.splitFromSearch",
-                    DT::dataTableOutput("designResultSearch")),
+                    DT::dataTableOutput("designFuzzy")),
 
                 conditionalPanel(
                     condition="output.designVis & input.splitFromSearch",
-                    uiOutput("designSplitSearch"))
+                    uiOutput("designSplitFuzzy"))
                 )
             )
         ),
@@ -121,11 +121,11 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                     conditionalPanel(
                         condition="!output.designVis",
                         tags$head(tags$style(".table .alignCenter {text-align:center;}")),
-                        DT::dataTableOutput("advancedResult")),
+                        DT::dataTableOutput("resultQuery")),
                 
                     conditionalPanel(
                         condition="output.designVis & !input.splitFromQuery",
-                        DT::dataTableOutput("designAdvanced")),
+                        DT::dataTableOutput("designQuery")),
                 
                     conditionalPanel(
                         condition="output.designVis & input.splitFromQuery",
