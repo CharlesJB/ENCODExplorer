@@ -70,6 +70,15 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
       }
   }
   
+  #Before we start creating the design, we have to make sure the input object
+  #has file for the given fileFormat
+  if (nrow(dplyr::filter(input, file_format == fileFormat)) == 0) {
+    msg <- c("Error : there is no ", fileFormat, " file available ")
+    warning(msg, call. = FALSE)
+    return(data.table(File=character(), Experiement=character(), Value=c()))
+  }
+  
+  
   # The first step is to clean the main df to avoid having to do this later
   ff <- fileFormat
   dt <- dataset_type
