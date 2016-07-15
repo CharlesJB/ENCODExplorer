@@ -1,7 +1,8 @@
 #' downloadEncode is use to download  a serie of files or dataset 
 #' by their accession. 
 #' @param file_acc A \code{character} of ENCODE file accession or 
-#' experiment accession.
+#' experiment accession. Can also be a data.table coming from any ENCODExplorer
+#' research function.
 #' @param df The reference \code{data.table} use to find the download. File 
 #' that are not available will be search directly throught the current
 #' ENCODE database. 
@@ -24,10 +25,17 @@
 
 downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
                              force = TRUE) {
-
+  #Extraction the accession if the user pass a data.table as input
+  if(class(file_acc) == "data.table" | class(file_acc) == "data.frame"){
+    if (!is.null(file_acc$file_accession)){
+      file_acc <- as.character(file_acc$file_accession)
+    } else if (!is.null(file_acc$accession)) {
+      file_acc <- file_acc$accession
+    }
+  }
   stopifnot(is.character(file_acc))
+  stopifnot(length(file_acc) > 0)
   
-  if(length(file_acc) == 0){return(NULL)}
   if(is.null(df)) {
     load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
     df <- encode_df

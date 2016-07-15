@@ -10,7 +10,8 @@ downloadEncode(file_acc = NULL, df = NULL, format = "all", dir = ".",
 }
 \arguments{
 \item{file_acc}{A \code{character} of ENCODE file accession or 
-experiment accession.}
+experiment accession. Can also be a data.table coming from any ENCODExplorer
+research function.}
 
 \item{df}{The reference \code{data.table} use to find the download. File 
 that are not available will be search directly throught the current
