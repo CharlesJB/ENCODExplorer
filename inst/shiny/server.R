@@ -19,17 +19,17 @@ server <- function(input, output) {
                    "biosample_name","file_format")
     df <- encode_df
     viewDesign <- FALSE #Global variable that indicate if a design is currently display
-    resultGlobal <- NULL #Global variable for the result of a fuzzySearch
+    resultFuzzy <- NULL #Global variable for the result of a fuzzySearch
     resultQuery <- NULL #Global variable for the result of a querySearch
-    designResultSearch <- NULL #Global variable for the design from fuzzySearch
-    designAdvanced <- NULL #Global variable for design from queryEncode
+    designFuzzy <- NULL #Global variable for the design from fuzzySearch
+    designQuery <- NULL #Global variable for design from queryEncode
     designSplit <- NULL
     #////----------------------------------fuzzySearch---------------------////
     observeEvent(input$searchAction, {
         output$designVis <- reactive({FALSE})
         viewDesign <<- FALSE
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
-        output$consoleSearch <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleSearch <- renderPrint(cat("Select row before using Download button"))
         multiple_Term <- FALSE
         
         if(input$typeInput == "2"){
@@ -37,44 +37,46 @@ server <- function(input, output) {
         }
         
         if(length(input$filter) == 0){
-            resultGlobal <<- fuzzySearch(input$searchTerm, 
+            resultFuzzy <<- fuzzySearch(input$searchTerm, 
                                     multipleTerm=multiple_Term, database=df)
             #Removing empty row and a few specific row
-            resultGlobal <<- resultGlobal[ , !c("antibody_characterization",
+            resultFuzzy <<- resultFuzzy[ , !c("antibody_characterization",
                                                 "uuid","notes"), with=F]
-            resultGlobal <<- resultGlobal[,sapply(resultGlobal, function(i){
+            resultFuzzy <<- resultFuzzy[,sapply(resultFuzzy, function(i){
                 !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
             
-            if(nrow(resultGlobal)>0){
-                output$searchResult <- DT::renderDataTable(resultGlobal,
+            if(nrow(resultFuzzy)>0){
+                output$searchFuzzy <- DT::renderDataTable(resultFuzzy,
                     options=list(searching=FALSE, fixedHeader=T, pageLength=25,
                         scrollY="600px", scrollCollapse=T,scrollX=T, deferRender=T,
-                        columnDefs=list(list(targets=1:ncol(resultGlobal),
+                        columnDefs=list(list(targets=1:ncol(resultFuzzy),
                                              className="dt-center")))
                 )
             }else{
-                output$searchResult <- DT::renderDataTable(data.table())
+                output$consoleSearch <- renderPrint(cat("Error : No result found"))
+                output$searchFuzzy <- DT::renderDataTable(data.table())
             }
         }else{
-            resultGlobal <<- fuzzySearch(input$searchTerm, 
+            resultFuzzy <<- fuzzySearch(input$searchTerm, 
                                         multipleTerm=multiple_Term, 
                                         database=encode_df, filterVector=
                                         allFilter[as.numeric(input$filter)])
             #Removing empty row and a few specific row
-            resultGlobal <<- resultGlobal[ , !c("antibody_characterization",
+            resultFuzzy <<- resultFuzzy[ , !c("antibody_characterization",
                                                 "uuid","notes"), with=F]
-            resultGlobal <<- resultGlobal[,sapply(resultGlobal, function(i){
+            resultFuzzy <<- resultFuzzy[,sapply(resultFuzzy, function(i){
                 !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
             
-            if(nrow(resultGlobal) > 0){
-                output$searchResult <- DT::renderDataTable(resultGlobal,
+            if(nrow(resultFuzzy) > 0){
+                output$searchFuzzy <- DT::renderDataTable(resultFuzzy,
                     options=list(searching=FALSE, fixedHeader=T,  pageLength=25,
                             scrollY="600px", scrollCollapse=T,
                             scrollX=T, deferRender=T, columnDefs=list(list(
-                            targets=1:ncol(resultGlobal), className="dt-center")))
+                            targets=1:ncol(resultFuzzy), className="dt-center")))
                 )
             }else{
-                output$searchResult <- DT::renderDataTable(data.table())
+              output$consoleSearch <- renderPrint(cat("Error : No result found"))
+              output$searchFuzzy <- DT::renderDataTable(data.table())
             }
         
     }})
@@ -84,14 +86,14 @@ server <- function(input, output) {
     observeEvent(input$designFromSearch,{
         output$designVis <- reactive({TRUE})
         viewDesign <<- TRUE
-        output$consoleSearch <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleSearch <- renderPrint(cat("Select row before using Download button"))
         
-        IDs <- c(input$repFromSearch,input$ctrlFromSearch)
+        IDs <- c(as.numeric(input$repFromSearch),as.numeric(input$ctrlFromSearch))
         
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromSearch)]
         
-        fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigBed", "bigWig")
+        fileType <- c("bam", "fastq", "sam", "bed", "bigBed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromSearch)]
         
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
@@ -99,23 +101,27 @@ server <- function(input, output) {
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromSearch)]
         
-        if(nrow(resultGlobal) == 0){
-            output$designResultSearch <- DT::renderDataTable(data.table(
+        if(nrow(resultFuzzy) == 0){
+            output$designFuzzy <- DT::renderDataTable(data.table(
+                File=character(),Experiment=character(),Value=numeric()))
+        }else if (nrow(dplyr::filter(resultFuzzy, file_format == fileType)) == 0){
+            output$consoleSearch <- renderPrint(cat("Error : could not find files for this format"))
+            output$designFuzzy <- DT::renderDataTable(data.table(
                 File=character(),Experiment=character(),Value=numeric()))
         }else{
         
             if(!input$splitFromSearch){
                 designSplit <<- FALSE
                 # Design
-                designResultSearch <<- createDesign(resultGlobal,
+                designFuzzy <<- createDesign(resultFuzzy,
                                                encode_df,split=FALSE, fileFormat=fileType,
                                                dataset_type=dataType, format=formatType,
                                                output_type="data.table", ID=IDs)
                 #Fetching the list of accession from the File column
                 acc_list <- gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
-                             x = designResultSearch$File)
+                             x = designFuzzy$File)
             
-                output$designResultSearch <- DT::renderDataTable(designResultSearch, 
+                output$designFuzzy <- DT::renderDataTable(designFuzzy, 
                    options=list(searching=FALSE,pageLength = 25,searching=FALSE,
                                 fixedHeader=T, scrollX=T, scrollY="600px", 
                                 scrollCollapse=T, deferRender=T)
@@ -124,23 +130,23 @@ server <- function(input, output) {
             }else{
                 designSplit <<- TRUE
                 #Getting the list of experiment
-                temp <- filter(resultGlobal, file_format==fileType)
-                temp <- filter(temp, dataset_type == dataType)
+                temp <- dplyr::filter(resultFuzzy, file_format == fileType)
+                temp <- dplyr::filter(temp, dataset_type == dataType)
                 acc <- unique(temp$accession)
                 #Creating the design
-                designResultSearch <<- createDesign(resultGlobal, df, split=TRUE,
+                designFuzzy <<- createDesign(resultFuzzy, df, split=TRUE,
                                         fileFormat=fileType,
                                         dataset_type=dataType,format="long", 
                                         output_type="data.table", ID=IDs)
-                lenExp <- length(designResultSearch)
+                lenExp <- length(designFuzzy)
                 #Fetching file accession  in each data frame of the list
                 acc_list <- vector("list", lenExp)
-                acc_list <- lapply(designResultSearch, function(i){
+                acc_list <- lapply(designFuzzy, function(i){
                     unique(gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
                                       x = i$File))
                 })
                 #Creating the empty list of dataTable that will be display 
-                output$designSplitSearch <- renderUI({
+                output$designSplitFuzzy <- renderUI({
                     table_output_list <- vector("list", lenExp)
                     table_output_list <- lapply(1:lenExp, function(i){
                         tablename <- paste(acc[i])
@@ -154,7 +160,7 @@ server <- function(input, output) {
                     local({
                         my_i <- i
                         tablename <- paste(acc[my_i])
-                        output[[tablename]] <- DT::renderDataTable(designResultSearch[[my_i]],
+                        output[[tablename]] <- DT::renderDataTable(designFuzzy[[my_i]],
                                 options=list(searching=FALSE, paging=F))
                     })
                 }
@@ -166,18 +172,17 @@ server <- function(input, output) {
     observeEvent(input$downloadFromSearch,{
         
         if(!viewDesign){
-            selected_rows <- paste(input$searchResult_rows_selected)
-            selected_files <- resultGlobal$file_accession[as.numeric(selected_rows)]
-            
-            downloadLog <- capture.output(downloadEncode(dt=encode_df,
+            selected_rows <- paste(input$searchFuzzy_rows_selected)
+            selected_files <- resultFuzzy$file_accession[as.numeric(selected_rows)]
+            downloadLog <- capture.output(downloadEncode(df=encode_df,
                                     file_acc=selected_files))
         }else{
             if(!input$splitFromSearch){
-                selected_rows <- paste(input$designResultSearch_rows_selected)
-                selected_files <- designResultSearch$File[as.numeric(selected_rows)]
+                selected_rows <- paste(input$designFuzzy_rows_selected)
+                selected_files <- designFuzzy$File[as.numeric(selected_rows)]
                 
             }else{
-                unsplitDesign <-rbindlist(designResultSearch)
+                unsplitDesign <-rbindlist(designFuzzy)
                 acc <- unique(unsplitDesign$Experiment)
                 row_to_get <- vector("list",length(acc))
                 for(i in 1:length(acc)){
@@ -192,12 +197,12 @@ server <- function(input, output) {
             }
             
             selected_files <- sapply(selected_files, function(i){
-                temp <- file_path_sans_ext(basename(i))
+                temp <- tools::file_path_sans_ext(basename(i))
                 paste(unlist(strsplit(temp,"[.]"))[1])
             })
             
             if(length(selected_files) > 0){
-                downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                downloadLog <- capture.output(downloadEncode(df=encode_df,
                                           file_acc=unlist(selected_files)))
             }
         }
@@ -235,21 +240,18 @@ server <- function(input, output) {
     #Function that return the sum of selected files size
     file_size_fuzzy <- function(rows=NULL,is_design=F){
         #Getting selected row and thier size
+        selected_rows <- paste(rows)
         if(!is_design){
-            selected_rows <- paste(rows)
+            selected_size <- resultFuzzy$file_size[as.numeric(selected_rows)]
         }else{ #Coming from a design
-            selected_rows <- paste(rows)
-            selected_files <- designResultSearch$File[as.numeric(selected_rows)]
-            selected_files <- sapply(selected_files, function(i){
-                temp <- file_path_sans_ext(basename(i))
-                paste(unlist(strsplit(temp,"[.]"))[1])
-            })
-            as.character(selected_files)
+            selected_files <- designFuzzy$File[as.numeric(selected_rows)]
+            selected_size <- dplyr::filter(encode_df, href %in% selected_files)
+            selected_size <- selected_size$file_size
         }
-        selected_size <- resultGlobal$file_size[as.numeric(selected_rows)]
+
         #Converting all size in byte to apply sum
         selected_size <- sapply(selected_size,function(i){
-            val <- unlist(str_split(i," "))
+            val <- unlist(strsplit(i," "))
             convert_to_byte(val)
         })
         sum_file <- sum(selected_size)
@@ -259,17 +261,19 @@ server <- function(input, output) {
     
     
     #Refresh the content of fileSizeFuzzy
-    refresh_fuzzy_display <- eventReactive(c(input$searchResult_rows_selected,input$designResultSearch_rows_selected,
-                                       input$designFromSearch, input$searchAction, input$splitFromSearch),{
+    refresh_fuzzy_display <- eventReactive(c(input$searchFuzzy_rows_selected,
+                                input$designFuzzy_rows_selected,
+                                input$designFromSearch, input$searchAction,
+                                input$splitFromSearch),{
         if(!(viewDesign)){ #for fuzzySearch object
-            if(length(input$searchResult_rows_selected) > 0){
-                paste("Number of selected files :", length(input$searchResult_rows_selected),
-                      " Total size of the selected files :",file_size_fuzzy(input$searchResult_rows_selected))
+            if(length(input$searchFuzzy_rows_selected) > 0){
+                paste("Number of selected files :", length(input$searchFuzzy_rows_selected),
+                      " Total size of the selected files :",file_size_fuzzy(input$searchFuzzy_rows_selected))
             }
         }else{ #for design object
-            if(!input$splitFromSearch & length(input$designResultSearch_rows_selected) > 0 ){
-                paste("Number of selected files :",length(input$designResultSearch_rows_selected),
-                      " Total size of the selected files :",file_size_fuzzy(input$designResultSearch_rows_selected,T))
+            if(!input$splitFromSearch & length(input$designFuzzy_rows_selected) > 0 ){
+                paste("Number of selected files :",length(input$designFuzzy_rows_selected),
+                      " Total size of the selected files :",file_size_fuzzy(input$designFuzzy_rows_selected,T))
             }
             
         }
@@ -285,7 +289,7 @@ server <- function(input, output) {
     observeEvent(input$searchAdvanced,{
         output$designVis <- reactive({FALSE})
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
-        output$consoleQuery <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleQuery <- renderPrint("Select row before using Download button")
         
         
         fileStat <- c("released","revoked", "all")
@@ -294,9 +298,6 @@ server <- function(input, output) {
         #Parsing the input values of the filters
         if(input$setAccession == ""){ac <- NULL}
         else{ac <- input$setAccession}
-        
-        if(input$datasetAccession == ""){da <- NULL}
-        else{da <- input$datasetAccession}
         
         if(input$assay == ""){as <- NULL}
         else{as <- input$assay}
@@ -330,12 +331,11 @@ server <- function(input, output) {
         
         if(input$project ==""){pr <- NULL}
         else{pr <- input$project}
-        
         resultQuery <<- queryEncode(df=encode_df, set_accession=ac, 
-                                dataset_accession=da,assay=as, biosample_name=bn,
+                                assay=as, biosample_name=bn,
                                 biosample_type=bt, project=pr,file_accession=fa,
                                 file_format=ff,lab=lb, organism=og,target=tg,
-                                treatment=tr,file_status=fileStat, quiet=TRUE,
+                                treatment=tr,file_status=fileStat, quiet=F,
                                 status=es,fixed=as.logical(input$fixed))
         #Removing empty specific and empty row
         resultQuery <<- resultQuery[ , !c("antibody_characterization","uuid",
@@ -343,9 +343,10 @@ server <- function(input, output) {
         resultQuery <<- resultQuery[,sapply(resultQuery, function(i){
             !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
         if(nrow(resultQuery) == 0){
-            output$advancedResult <- DT::renderDataTable(data.table())
+          output$consoleQuery <- renderPrint(cat("Error : No result found"))
+          output$resultQuery <- DT::renderDataTable(data.table())
         }else{
-            output$advancedResult <- DT::renderDataTable(resultQuery, escape=F,
+            output$resultQuery <- DT::renderDataTable(resultQuery, escape=F,
                 options=list(searching=F, fixedHeader=T, pageLength=25,
                     scrollY="600px", scrollCollapse=T, scrollX=T, deferRender=T,
                     columnDefs=list(list(targets=1:ncol(resultQuery),
@@ -356,7 +357,7 @@ server <- function(input, output) {
     
     #Design request from advancedSearch
     observeEvent(input$designFromQuery,{
-        output$consoleQuery <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleQuery <- renderPrint(cat("Select row before using Download button"))
         output$designVis <- reactive({TRUE})
         viewDesign <<- TRUE
         IDs<-c(as.numeric(input$repFromQuery), as.numeric(input$ctrlFromQuery))
@@ -364,7 +365,7 @@ server <- function(input, output) {
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromQuery)]
         
-        fileType <- c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig")
+        fileType <- c("bam", "fastq", "sam", "bed", "bigbed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromQuery)]
         
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
@@ -372,20 +373,24 @@ server <- function(input, output) {
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromQuery)]
         
-        if(nrow(resultQuery) == 0){DT::renderDataTable(data.table())}
-        else{
-            designAdvanced <<- createDesign(resultQuery,
+        if(nrow(resultQuery) == 0){DT::renderDataTable(data.table())
+        }else if (nrow(dplyr::filter(resultQuery, file_format == fileType)) == 0){
+          output$consoleQuery <- renderPrint(cat("Error : could not find files for this format"))
+          output$designQuery <- DT::renderDataTable(data.table(
+            File=character(),Experiment=character(),Value=numeric()))
+        }else{
+            designQuery <<- createDesign(resultQuery,
                                        df,split=FALSE, fileFormat=fileType,
                                        dataset_type=dataType, format=formatType,
                                        output_type="data.table", ID=IDs)
             if(!input$splitFromQuery){ #Not split
                 designSplit <<- FALSE
                 acc_list <- gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
-                             x = designAdvanced$File)
-                output$designAdvanced <- DT::renderDataTable(designAdvanced,
+                             x = designQuery$File)
+                output$designQuery <- DT::renderDataTable(designQuery,
                     options=list(searching=F, pageLength = 25, scrollX = T,
                                 scrollY="600px", scrollCollapse=T, deferRender=T,
-                                columnDefs=list(list(targets=1:ncol(designAdvanced),
+                                columnDefs=list(list(targets=1:ncol(designQuery),
                                                      className="dt-center")))
                 )
             }else{ #Split
@@ -394,13 +399,13 @@ server <- function(input, output) {
                 temp <- filter(temp, dataset_type == dataType)
                 acc <- unique(temp$accession)
             
-                designAdvanced <<- createDesign(resultQuery, df,split=TRUE, format="long",
+                designQuery <<- createDesign(resultQuery, df,split=TRUE, format="long",
                                         fileFormat=fileType, dataset_type=dataType, 
                                         output_type="data.table", ID=IDs)
-                lenExp <- length(designAdvanced)
+                lenExp <- length(designQuery)
                 #Fetching file accession  in each data frame of the list
                 acc_list <- vector("list", lenExp)
-                acc_list <- lapply(designAdvanced, function(i){
+                acc_list <- lapply(designQuery, function(i){
                     unique(gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
                             x = i$File))
                 })
@@ -419,7 +424,7 @@ server <- function(input, output) {
                 local({
                     my_i <- i
                     tablename <- paste(acc[my_i])
-                    output[[tablename]] <- DT::renderDataTable(designAdvanced[[my_i]],
+                    output[[tablename]] <- DT::renderDataTable(designQuery[[my_i]],
                         options=list(searching=FALSE,
                                             pageLength = 25, scrollX = TRUE))
                 })
@@ -433,65 +438,62 @@ server <- function(input, output) {
     #Download request from queryEncode
     observeEvent(input$downloadFromQuery,{
         if(!viewDesign){
-            selected_rows <- paste(input$advancedResult_rows_selected)
+            selected_rows <- paste(input$searchFuzzy_rows_selected)
             selected_files <- resultQuery$file_accession[as.numeric(selected_rows)]
         
-            downloadLog <- capture.output(downloadEncode(dt=encode_df, file_acc=
+            downloadLog <- capture.output(downloadEncode(df=encode_df, file_acc=
                            selected_files))
         }else{
             if(!designSplit){
-                selected_rows <- paste(input$designAdvanced_rows_selected)
-                selected_files <- designAdvanced$File[as.numeric(selected_rows)]
+                selected_rows <- paste(input$designQuery_rows_selected)
+                selected_files <- designQuery$File[as.numeric(selected_rows)]
                 selected_files <- sapply(selected_files, function(i){
-                    temp <- file_path_sans_ext(basename(i))
+                    temp <- tools::file_path_sans_ext(basename(i))
                     paste(unlist(strsplit(temp,"[.]"))[1])
                 })
                 
                 if(length(selected_files) > 0){
-                    downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                    downloadLog <- capture.output(downloadEncode(df=encode_df,
                                               file_acc=unlist(selected_files)))
                 }
             }
         }
         downloadLog <- gsub(x=downloadLog, pattern = "\\[\\d\\] ", replacement = "")
         downloadLog <- gsub(x=downloadLog, pattern='\"', replacement="")
-        output$consoleQuery <- renderPrint(downloadLog)
+        output$consoleQuery <- renderPrint(cat(downloadLog))
     })
     
     #Refresh the content of fileSizeQuery
-    refresh_query_display <- eventReactive(c(input$advancedResult_rows_selected,input$designAdvanced_rows_selected,
-                                            input$designFromQuery, input$searchAdvanced, input$designSplitQuery),{
+    refresh_query_display <- eventReactive(c(input$resultQuery_rows_selected,input$designQuery_rows_selected,
+                                            input$designQuery, input$searchAdvanced, input$designSplitQuery),{
           if(!(viewDesign)){ #for fuzzySearch object
-              if(length(input$advancedResult_rows_selected) > 0){
-                  paste("Number of selected files :", length(input$advancedResult_rows_selected),
-                  " Total size of the selected files :",file_size_query(input$advancedResult_rows_selected))
+              if(length(input$resultQuery_rows_selected) > 0){
+                  paste("Number of selected files :", length(input$resultQuery_rows_selected),
+                  " Total size of the selected files :",file_size_query(input$resultQuery_rows_selected))
               }
           }else{ #for design object
-              if(!input$splitFromQuery & length(input$designAdvanced_rows_selected) > 0 ){
-                 paste("Number of selected files :",length(input$designAdvanced_rows_selected),
-                 " Total size of the selected files :",file_size_query(input$designAdvanced_rows_selected,T))
+              if(!input$splitFromQuery & length(input$designQuery_rows_selected) > 0 ){
+                 paste("Number of selected files :",length(input$designQuery_rows_selected),
+                 " Total size of the selected files :",file_size_query(input$designQuery_rows_selected,T))
               }
           }
      })
     
     #Function that return the sum of selected files size
     file_size_query <- function(rows=NULL,is_design=F){
+      selected_rows <- paste(rows)
       #Getting selected row and thier size
       if(!is_design){
-        selected_rows <- paste(rows)
+        selected_size <- resultQuery$file_size[as.numeric(selected_rows)]
       }else{ #Coming from a design
-        selected_rows <- paste(rows)
-        selected_files <- designAdvanced$File[as.numeric(selected_rows)]
-        selected_files <- sapply(selected_files, function(i){
-          temp <- file_path_sans_ext(basename(i))
-          paste(unlist(strsplit(temp,"[.]"))[1])
-        })
-        as.character(selected_files)
+        selected_files <- designQuery$File[as.numeric(selected_rows)]
+        selected_size <- dplyr::filter(encode_df, href %in% selected_files)
+        selected_size <- selected_size$file_size
       }
-      selected_size <- resultQuery$file_size[as.numeric(selected_rows)]
+      
       #Converting all size in byte to apply sum
       selected_size <- sapply(selected_size,function(i){
-        val <- unlist(str_split(i," "))
+        val <- unlist(strsplit(i," "))
         convert_to_byte(val)
       })
       sum_file <- sum(selected_size)
@@ -505,29 +507,26 @@ server <- function(input, output) {
     #////---------------------------------Design--------------------------------////  
     
     #Design request
-    observeEvent(input$actionDesign,{
+    observeEvent(input$designFromDesign,{
         
-        a <- as.numeric(input$replicateID)
-        b <- as.numeric(input$controlID)
-        IDs <- c(a,b)
-        fileRDS <- readRDS(input$searchTable$datapath)
-        
-        outputTypeVec <- c("data.table","data.frame")
-        outputTypeVec <- outputTypeVec[as.numeric(input$outputDesign)]
-        typeFile <- c("bam", "fastq", "fasta", "sam", "bed", "bigbed", "bigWig")
-        typeFile <- typeFile[as.numeric(input$fileFormatDesign)]
+        IDs <- c(as.numeric(input$repFromDesign), as.numeric(input$ctrlFromDesign))
+        fileRDS <- readRDS(input$inputTable$datapath)
+        typeFile <- c("bam", "fastq", "sam", "bed", "bigbed", "bigWig")
+        typeFile <- typeFile[as.numeric(input$fileFromDesign)]
         formatDesignVec <- c("long", "wide")
-        formatDesignVec <- formatDesignVec[as.numeric(input$formatStyle)]
+        formatDesignVec <- formatDesignVec[as.numeric(input$formatFromDesign)]
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
                       "matched-sets", "projects", "reference-epigenomes",
                       "references")
-        dataType <- dataType[as.numeric(input$datatypeDesign)]
-        
-        output$design <- renderDataTable(createDesign(input=fileRDS, df=df,
-                                        split=input$split, type_file=typeFile,
-                                        datatype=dataType,format=formatDesignVec,
-                                        utput_type=outputTypeVec,ID=IDs),
-                                         options=list(searching=FALSE))
+        dataType <- dataType[as.numeric(input$datatypeFromDesign)]
+        print(typeFile)
+        print(dataType)
+        print(formatDesignVec)
+        #output$design <- DT::renderDataTable(as.data.table(fileRDS))
+        output$design <- DT::renderDataTable(createDesign(input=fileRDS,
+                                      df=df,split=input$split, fileFormat = typeFile,
+                                      dataset_type=dataType, format=formatDesignVec, ID=IDs),
+                                      options=list(searching=FALSE))
     })
     
 }

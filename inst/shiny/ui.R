@@ -18,7 +18,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                     textInput("searchTerm", "Searching for ...", value=
                               "Seperate term with a comma"),
                     checkboxGroupInput("filter","Select your filter...",
-                        choices = list("Accession"=1, "File Accession"=13, "Dataset type"=2,
+                        choices = list("Set Accession"=1, "File Accession"=13, "Dataset type"=2,
                                     "Target"=14,"Lab"=3, "Title"=4, "File Type"=6, "Platform"=16,
                                     "Project"=7, "Type"=8, "Control"=9, "Biosample Type"=10,
                                     "Biosample Name"=16,"Replicate"=11, "Organism"=12,
@@ -36,8 +36,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                                 selected=1))),
                     fluidRow(column(3, selectInput("fileFromSearch", "File Format",
                                 choices=list(
-                                "bam"=1, "fastq"=2, "fasta"=3, "sam"=4, "bed"=5,
-                                "bigBed"=6,"bigWig"=7))),
+                                "bam"=1, "fastq"=2, "sam"=3, "bed"=4,
+                                "bigBed"=5, "bigWig"=6))),
                             column(3, selectInput("datatypeFromSearch","Data Type",
                                 choices=list(
                                 "experiments"=1,"ucsc browser composite"=2,
@@ -58,15 +58,15 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                 conditionalPanel(
                     condition="!output.designVis",
                     tags$head(tags$style(".table .alignCenter {text-align:center;}")),
-                    DT::dataTableOutput("searchResult")),
+                    DT::dataTableOutput("searchFuzzy")),
                 
                 conditionalPanel(
                     condition="output.designVis & !input.splitFromSearch",
-                    DT::dataTableOutput("designResultSearch")),
+                    DT::dataTableOutput("designFuzzy")),
 
                 conditionalPanel(
                     condition="output.designVis & input.splitFromSearch",
-                    uiOutput("designSplitSearch"))
+                    uiOutput("designSplitFuzzy"))
                 )
             )
         ),
@@ -75,18 +75,16 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
         tabPanel("Advanced Search",sidebarLayout(
             sidebarPanel(
                 actionButton("searchAdvanced", "Search"),
-                fileInput("df", "Import your database (optional)"),
                 checkboxInput("fixed", "Fixed Search", value=FALSE),
                 textInput("setAccession", "Set Accession"),
+                textInput("fileAccession", "File Accession"),
+                textInput("fileFormat", "File Format"),
+                textInput("target", "Target"),
                 textInput("assay", "Assay"),
                 textInput("biosampleName", "Biosample Name"),
                 textInput("biosampleType", "Biosample Type"),
-                textInput("datasetAccession", "Dataset Accession",value=NULL),
-                textInput("fileAccession", "File Accession"),
-                textInput("fileFormat", "File Format"),
                 textInput("lab", "Lab"),
                 textInput("organism", "Organism"),
-                textInput("target", "Target"),
                 textInput("treatment", "Treatment"),
                 textInput("project", "Project"),
                 selectInput("fileStatus", "FileStatus", choices = list(
@@ -104,8 +102,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                             column(4, radioButtons("formatFromQuery", "Design format",
                                  choices =list("long"=1, "wide"=2 ), selected=1))),
                     fluidRow(column(3, selectInput("fileFromQuery", "File Format",
-                                choices = list("bam"=1, "fastq"=2, "fasta"=3,
-                                        "sam"=4, "bed"=5,"bigBed"=6,"bigWig"=7))),
+                                choices = list("bam"=1, "fastq"=2,
+                                        "sam"=3, "bed"=4,"bigBed"=5,"bigWig"=6))),
                             column(3, selectInput("datatypeFromQuery","Data Type",
                                 choices =list("experiments"=1,"ucsc browser composite"=2,
                                 "annotations"=3,"matched sets"=4, "projects"=5,
@@ -121,11 +119,11 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                     conditionalPanel(
                         condition="!output.designVis",
                         tags$head(tags$style(".table .alignCenter {text-align:center;}")),
-                        DT::dataTableOutput("advancedResult")),
+                        DT::dataTableOutput("resultQuery")),
                 
                     conditionalPanel(
                         condition="output.designVis & !input.splitFromQuery",
-                        DT::dataTableOutput("designAdvanced")),
+                        DT::dataTableOutput("designQuery")),
                 
                     conditionalPanel(
                         condition="output.designVis & input.splitFromQuery",
@@ -137,31 +135,23 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
         tabPanel("Design",sidebarLayout(
              sidebarPanel(
                 actionButton("designFromDesign", "Create a design"),
-                fileInput("searchTable", "Import your file as rds format"),
+                fileInput("inputTable", "Import your file as rds format"),
                 fileInput("df", "Import your database (optional)"),
                 checkboxInput("splitFromDesign", 
                               "Split the result per experiment",value=FALSE),
                 radioButtons("formatFromDesign", "Design format", choices =list(
-                             "long"=1, "wide"=2 ), selected=1),
-                textInput("repFromDesign","Numeric ID assigned to replicate file",value="1"),
-                textInput("ctrlFromDesign","Numeric ID assigned to control file", value="2"),
-                radioButtons("outputFromDesign", "Type of result", choices =list(
-                            "data.table"=1, "data.frame"=2 ), selected=1),
-                selectInput("formatFromDesign", "File Format", choices = list(
-                            "bam"=1, "fastq"=2, "fasta"=3, "sam"=4, "bed"=5,
-                            "bigBed"=6,"bigWig"=7)),
+                             "long"=1, "wide"=2  ), selected=1),
+                numericInput("repFromDesign", "Replicate ID", value=1),
+                numericInput("ctrlFromDesign", "Control ID", value=2),
+                selectInput("fileFromDesign", "File Format", choices = list(
+                            "bam"=1, "fastq"=2, "sam"=3, "bed"=4,
+                            "bigBed"=5,"bigWig"=6)),
                 selectInput("datatypeFromDesign","Data Type", choices =list(
                             "experiments"=1,"ucsc browser composite"=2, 
                             "annotations"=3,"matched sets"=4, "projects"=5,
                             "reference epigenomes"=6,"references"=7))),
-            mainPanel(dataTableOutput("design")))
-        ),
+            mainPanel(DT::dataTableOutput("design")))
+        )
                            
-#////-----------------------------searchEncode-----------------------------////        
-        tabPanel("Search from ENCODE"),
-                           
-                           
-#////-------------------------------About ---------------------------------////
-        tabPanel("About")
     )
 )

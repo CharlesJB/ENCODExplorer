@@ -38,7 +38,7 @@
 #' 
 #' @export
 createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
-                          dataset_type="experiments",format="long",
+                          dataset_type="experiments", format="long",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
@@ -69,6 +69,15 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
         ID <- as.numeric(ID)
       }
   }
+  
+  #Before we start creating the design, we have to make sure the input object
+  #has file for the given fileFormat
+  if (nrow(dplyr::filter(input, file_format == fileFormat)) == 0) {
+    msg <- c("Error : there is no ", fileFormat, " file available ")
+    warning(msg, call. = FALSE)
+    return(data.table(File=character(), Experiement=character(), Value=c()))
+  }
+  
   
   # The first step is to clean the main df to avoid having to do this later
   ff <- fileFormat
@@ -124,7 +133,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
       design <- split(design, design$Experiment)
   }
   if (format == "wide") {
-    if (is.data.frame(design)) {
+    if (is.data.table(design)) {
       design <- tidyr::spread(design, key = Experiment, value = Value)
     } else {
       design <- lapply(design, tidyr::spread, key = Experiment, value = Value)

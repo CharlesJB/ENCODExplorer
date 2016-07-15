@@ -2,17 +2,18 @@
 % Please edit documentation in R/download.R
 \name{downloadEncode}
 \alias{downloadEncode}
-\title{downloadEncode is use to download  a serie of files or experiments 
+\title{downloadEncode is use to download  a serie of files or dataset 
 by their accession.}
 \usage{
-downloadEncode(file_acc = NULL, dt = NULL, format = "all", dir = ".",
+downloadEncode(file_acc = NULL, df = NULL, format = "all", dir = ".",
   force = TRUE)
 }
 \arguments{
 \item{file_acc}{A \code{character} of ENCODE file accession or 
-experiment accession.}
+experiment accession. Can also be a data.table coming from any ENCODExplorer
+research function.}
 
-\item{dt}{The reference \code{data.table} use to find the download. File 
+\item{df}{The reference \code{data.table} use to find the download. File 
 that are not available will be search directly throught the current
 ENCODE database.}
 
@@ -26,7 +27,7 @@ in the directory.
 Default : TRUE}
 }
 \description{
-downloadEncode is use to download  a serie of files or experiments 
+downloadEncode is use to download  a serie of files or dataset 
 by their accession.
 }
 \examples{

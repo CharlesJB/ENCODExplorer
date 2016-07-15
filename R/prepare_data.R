@@ -67,8 +67,7 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
 #' @param database_filename The name of the file to save the database into.
 #'
 #' @examples
-#'     database_filename <- system.file("extdata/tables",
-#'                                                                        package = "ENCODEdb")
+#'     database_filename <- system.file("extdata/tables",package = "ENCODExplorer")
 #'     \dontrun{
 #'         export_ENCODEdb_matrix(database_filename = database_filename)
 #'     }
@@ -153,6 +152,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   setcolorder(encode_df, colEncode)
   
 }
+
 
 step1 <- function(database_file){
   
