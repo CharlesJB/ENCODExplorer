@@ -14,7 +14,7 @@ test.argument_acc <- function() {
 test.argument_unvail_format <- function() {
   load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
   obs <- tryCatch(downloadEncode("ENCSR000DZS", df = brca, format = "fasta"),error=function(e) e, warning=conditionMessage)
-  exp <- "No fasta files within experiment ENCSR000DZS"
+  exp <- "Unavailable format fasta"
   RUnit::checkIdentical(obs,exp)
 }
 
