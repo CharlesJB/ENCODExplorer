@@ -29,7 +29,7 @@ server <- function(input, output) {
         output$designVis <- reactive({FALSE})
         viewDesign <<- FALSE
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
-        output$consoleSearch <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleSearch <- renderPrint(cat("Select row before using Download button"))
         multiple_Term <- FALSE
         
         if(input$typeInput == "2"){
@@ -53,6 +53,7 @@ server <- function(input, output) {
                                              className="dt-center")))
                 )
             }else{
+                output$consoleSearch <- renderPrint(cat("Error : No result found"))
                 output$searchFuzzy <- DT::renderDataTable(data.table())
             }
         }else{
@@ -74,7 +75,8 @@ server <- function(input, output) {
                             targets=1:ncol(resultFuzzy), className="dt-center")))
                 )
             }else{
-                output$searchFuzzy <- DT::renderDataTable(data.table())
+              output$consoleSearch <- renderPrint(cat("Error : No result found"))
+              output$searchFuzzy <- DT::renderDataTable(data.table())
             }
         
     }})
@@ -84,9 +86,9 @@ server <- function(input, output) {
     observeEvent(input$designFromSearch,{
         output$designVis <- reactive({TRUE})
         viewDesign <<- TRUE
-        output$consoleSearch <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleSearch <- renderPrint(cat("Select row before using Download button"))
         
-        IDs <- c(input$repFromSearch,input$ctrlFromSearch)
+        IDs <- c(as.numeric(input$repFromSearch),as.numeric(input$ctrlFromSearch))
         
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromSearch)]
@@ -100,6 +102,10 @@ server <- function(input, output) {
         dataType <- dataType[as.numeric(input$datatypeFromSearch)]
         
         if(nrow(resultFuzzy) == 0){
+            output$designFuzzy <- DT::renderDataTable(data.table(
+                File=character(),Experiment=character(),Value=numeric()))
+        }else if (nrow(dplyr::filter(resultFuzzy, file_format == fileType)) == 0){
+            output$consoleSearch <- renderPrint(cat("Error : could not find files for this format"))
             output$designFuzzy <- DT::renderDataTable(data.table(
                 File=character(),Experiment=character(),Value=numeric()))
         }else{
@@ -168,8 +174,7 @@ server <- function(input, output) {
         if(!viewDesign){
             selected_rows <- paste(input$searchFuzzy_rows_selected)
             selected_files <- resultFuzzy$file_accession[as.numeric(selected_rows)]
-            
-            downloadLog <- capture.output(downloadEncode(dt=encode_df,
+            downloadLog <- capture.output(downloadEncode(df=encode_df,
                                     file_acc=selected_files))
         }else{
             if(!input$splitFromSearch){
@@ -197,7 +202,7 @@ server <- function(input, output) {
             })
             
             if(length(selected_files) > 0){
-                downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                downloadLog <- capture.output(downloadEncode(df=encode_df,
                                           file_acc=unlist(selected_files)))
             }
         }
@@ -284,7 +289,7 @@ server <- function(input, output) {
     observeEvent(input$searchAdvanced,{
         output$designVis <- reactive({FALSE})
         outputOptions(output, "designVis", suspendWhenHidden=FALSE)
-        output$consoleQuery <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleQuery <- renderPrint("Select row before using Download button")
         
         
         fileStat <- c("released","revoked", "all")
@@ -338,7 +343,8 @@ server <- function(input, output) {
         resultQuery <<- resultQuery[,sapply(resultQuery, function(i){
             !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
         if(nrow(resultQuery) == 0){
-            output$resultQuery <- DT::renderDataTable(data.table())
+          output$consoleQuery <- renderPrint(cat("Error : No result found"))
+          output$resultQuery <- DT::renderDataTable(data.table())
         }else{
             output$resultQuery <- DT::renderDataTable(resultQuery, escape=F,
                 options=list(searching=F, fixedHeader=T, pageLength=25,
@@ -351,7 +357,7 @@ server <- function(input, output) {
     
     #Design request from advancedSearch
     observeEvent(input$designFromQuery,{
-        output$consoleQuery <- renderPrint("Click on rows to select files and than use the Download button")
+        output$consoleQuery <- renderPrint(cat("Select row before using Download button"))
         output$designVis <- reactive({TRUE})
         viewDesign <<- TRUE
         IDs<-c(as.numeric(input$repFromQuery), as.numeric(input$ctrlFromQuery))
@@ -367,8 +373,12 @@ server <- function(input, output) {
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromQuery)]
         
-        if(nrow(resultQuery) == 0){DT::renderDataTable(data.table())}
-        else{
+        if(nrow(resultQuery) == 0){DT::renderDataTable(data.table())
+        }else if (nrow(dplyr::filter(resultQuery, file_format == fileType)) == 0){
+          output$consoleQuery <- renderPrint(cat("Error : could not find files for this format"))
+          output$designQuery <- DT::renderDataTable(data.table(
+            File=character(),Experiment=character(),Value=numeric()))
+        }else{
             designQuery <<- createDesign(resultQuery,
                                        df,split=FALSE, fileFormat=fileType,
                                        dataset_type=dataType, format=formatType,
@@ -431,7 +441,7 @@ server <- function(input, output) {
             selected_rows <- paste(input$searchFuzzy_rows_selected)
             selected_files <- resultQuery$file_accession[as.numeric(selected_rows)]
         
-            downloadLog <- capture.output(downloadEncode(dt=encode_df, file_acc=
+            downloadLog <- capture.output(downloadEncode(df=encode_df, file_acc=
                            selected_files))
         }else{
             if(!designSplit){
@@ -443,14 +453,14 @@ server <- function(input, output) {
                 })
                 
                 if(length(selected_files) > 0){
-                    downloadLog <- capture.output(downloadEncode(dt=encode_df,
+                    downloadLog <- capture.output(downloadEncode(df=encode_df,
                                               file_acc=unlist(selected_files)))
                 }
             }
         }
         downloadLog <- gsub(x=downloadLog, pattern = "\\[\\d\\] ", replacement = "")
         downloadLog <- gsub(x=downloadLog, pattern='\"', replacement="")
-        output$consoleQuery <- renderPrint(downloadLog)
+        output$consoleQuery <- renderPrint(cat(downloadLog))
     })
     
     #Refresh the content of fileSizeQuery

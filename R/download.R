@@ -2,7 +2,7 @@
 #' by their accession. 
 #' @param file_acc A \code{character} of ENCODE file accession or 
 #' experiment accession.
-#' @param dt The reference \code{data.table} use to find the download. File 
+#' @param df The reference \code{data.table} use to find the download. File 
 #' that are not available will be search directly throught the current
 #' ENCODE database. 
 #' @param format The specific file format to download.
@@ -22,21 +22,21 @@
 #' 
 #' @export
 
-downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
+downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
                              force = TRUE) {
 
   stopifnot(is.character(file_acc))
   
   if(length(file_acc) == 0){return(NULL)}
-  if(is.null(dt)) {
+  if(is.null(df)) {
     load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
-    dt <- encode_df
+    df <- encode_df
   }
   
-  stopifnot(is.data.table(dt))
+  stopifnot(is.data.table(df))
   
   #Checking format argument
-  if (format!="all" & !(format %in% unique(encode_df$file_format))){
+  if (format!="all" & !(format %in% unique(df$file_format))){
     msg <- paste0("Unavailable format ", format)
     warning(msg, call. = FALSE)
     return(NULL)
@@ -44,8 +44,8 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
   
   #Step 1 : Handling available file accession and experience accession via encode_df
   
-  avail_file <- file_acc[file_acc %in% dt$file_accession]
-  avail_ds <- file_acc[file_acc %in% dt$accession]
+  avail_file <- file_acc[file_acc %in% df$file_accession]
+  avail_ds <- file_acc[file_acc %in% df$accession]
   unavail <- setdiff(file_acc, c(avail_file,avail_ds))
   
   encode_root = "https://www.encodeproject.org"
@@ -53,9 +53,9 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
   #Downloading available file from encode_df
   
   #Subsetting encode_df for given acc and format
-  file_dt <- filter(dt, file_accession %in% avail_file)
+  file_dt <- dplyr::filter(df, file_accession %in% avail_file)
   if(format != "all"){
-      file_wrong_format <- filter(file_dt, file_format != format)
+      file_wrong_format <- dplyr::filter(file_dt, file_format != format)
       file_dt <- setdiff(file_dt, file_wrong_format)
       if(nrow(file_wrong_format) > 0){
           msg <- paste0("Format ", format, " not available for files : ",
@@ -64,10 +64,10 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
       }
   }
   
-  exp_dt <- filter(dt, accession %in% avail_ds)
+  exp_dt <- dplyr::filter(df, accession %in% avail_ds)
   if(nrow(exp_dt)>0 & format != "all"){
       temp <- unique(exp_dt$accession)
-      exp_dt <- filter(exp_dt, file_format == format)
+      exp_dt <- dplyr::filter(exp_dt, file_format == format)
       
       if(length(temp) != length(unique(exp_dt$accession))){
         exp_wrong_format <- setdiff(temp, unique(exp_dt$accession))
@@ -101,7 +101,7 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
                   call. = FALSE)
           #Si on as une erreur de telechargement, on tente de supprimer le fichier ?
         }else{
-          print(paste0("Success downloading the file : ", fileName))
+          print(paste0("Success downloading file : ", fileName))
           downloaded <- c(downloaded, fileName)
         }
         
@@ -246,7 +246,7 @@ downloadEncode <- function (file_acc = NULL, dt = NULL, format ="all", dir= ".",
       }
     }
     if(length(downloaded) > 0){
-        print(paste0("files can be found at ", getwd()))
+        print(paste0("Files can be found at ", getwd()))
     }
   }else{
     msg <- paste0("Can't write in ", dir)

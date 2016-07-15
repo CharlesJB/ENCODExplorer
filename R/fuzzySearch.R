@@ -90,6 +90,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     result <- encode_df[toKeep,]
     if(nrow(result)==0){
       cat("No result found \n")
+      return(result)
     }else{
       cat(paste0("Results: ", length(unique(result$file_accession))," files, ",
                  length(unique(result$accession))," datasets", "\n"))

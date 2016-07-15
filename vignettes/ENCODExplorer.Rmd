@@ -210,13 +210,13 @@ To select a particular file format you can:
 ```{r query_results_5, collapse=TRUE, eval=FALSE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
                        file_format = "bed" , fixed = FALSE)
-downloadEncode(file_acc=query_results$file_accession, dt = encode_df)
+downloadEncode(file_acc=query_results$file_accession, df = encode_df)
 ```
 
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=FALSE}
-downloadEncode(file_acc = search_results$accession, dt=encode_df,
+downloadEncode(file_acc = search_results$accession, df=encode_df,
                 format = "bed")
 ```
 
@@ -240,7 +240,5 @@ convert_results <- searchToquery(searchResults = search_results)
 ```
 
 ### shinyEncode
-This function is the shinyApp of ENCODExplorer that implement the queryEncode 
-and the fuzzySearch function. The createDesign and downdloadEncode function can also be
-use on the search results.
-Files related with the shiny app can be found at ENCODExplorer/inst/shiny
+This function run the shinyApp of ENCODExplorer that implement the queryEncode 
+and the fuzzySearch function. The createDesign and downdloadEncode function can also be use on the search results.
