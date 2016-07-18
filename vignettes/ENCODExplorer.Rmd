@@ -41,7 +41,7 @@ This vignette will introduce all the main features of the ENCODExplorer package.
 ### Loading ENCODExplorer package
 
 ```{r libraryLoad, warning=FALSE}
-suppressMessages(library(ENCODExplorer))
+library(ENCODExplorer)
 ```
 
 ### Introduction
@@ -57,7 +57,7 @@ Most of the provided functions will load `encode_df` as default database. For
 faster processing, we recommend you to load `encode_df` and pass it as an argument.
 
 To load `encode_df` :
-```{r load_encodeDF,collapse=TRUE}
+```{r load_encodeDF, collapse=TRUE}
     data("encode_df", package = "ENCODExplorer")
 ```
 
@@ -112,8 +112,7 @@ query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
 If you follow the warning guidance and set the `fixed` option to `FALSE``:
 ```{r query_results_3, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
-                    biosample_name = "mcf7", file_format = "fastq",
-                     fixed = FALSE)
+                    biosample_name = "mcf7", file_format = "fastq", fixed = FALSE)
 ```
 
 These criteria correspond to the filters that you can find on ENCODE portal : 
@@ -136,8 +135,7 @@ fuzzy_results <- fuzzySearch(searchTerm = c("brca"), database = encode_df)
 Multiple terms can be search at the same time, this example will extract all the
 files that contain brca or ZNF24 within the target column.
 ```{r fuzzy_results_2, collapse=TRUE}
-fuzzy_results <- fuzzySearch(searchTerm = c("brca", "ZNF24"), database = encode_df,
-                             filterVector = c("target"), multipleTerm = TRUE)
+fuzzy_results <- fuzzySearch(searchTerm = c("brca", "ZNF24"), database = encode_df, filterVector = c("target"), multipleTerm = TRUE)
 ```
 
 #### Search
@@ -188,8 +186,7 @@ Moreover, if the accession is a dataset accession, the function will download ev
 Here is a small query:
 
 ```{r query_results_4, collapse=TRUE}
-query_results <- queryEncode(df=encode_df, assay = "switchgear",
-                             target ="elavl1", fixed = FALSE)
+query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1", fixed = FALSE)
 ```
 
 And its equivalent search:
@@ -211,8 +208,7 @@ downloadEncode(file_acc=query_results$file_accession, df = encode_df)
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=FALSE}
-downloadEncode(file_acc = search_results$accession, df=encode_df,
-                format = "bed")
+downloadEncode(file_acc = search_results$accession, df=encode_df, format = "bed")
 ```
 
 
@@ -238,6 +234,6 @@ convert_results <- searchToquery(searchResults = search_results)
 This function run the shinyApp of ENCODExplorer that implement `fuzzySearch` 
 and `queryEncode` research function. Create a design to organize data and download
 specific file with `downloadEncode` function. 
-The Search tab of shinyEncode uses `fuzzySearch` algorithm and the `Advanced Search` tab uses the `queryEncode` algorithm.
+The Search tab of shinyEncode apply the `fuzzySearch` function for a low specificity request and the `Advanced Search` tab apply the `queryEncode` function.
 
 ![Simple request using Search](img/shiny1.png)
