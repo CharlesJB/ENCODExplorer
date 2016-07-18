@@ -8,11 +8,9 @@
 #' even multiple searchTerm separete by a comma in a single string.
 #' @param ignore_case A \code{boolean} to enable the case sensitivity.
 #' 
-#' @examples 
-#'  \dontrun{
-#'    fuzzySearch(searchTerm=c("ELAVL1","atf7"),
-#'        database = encode_df, filterVector ="target", mutilpleTerm = TRUE)
-#'  } 
+#' @examples  
+#'    fuzz_ex <- fuzzySearch(searchTerm=c("ELAVL1","atf7"),
+#'    database=encode_df, filterVector ="target", multipleTerm = TRUE)
 #'
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.

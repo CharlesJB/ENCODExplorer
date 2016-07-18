@@ -26,5 +26,16 @@ NEW FEATURES
 
 BUG FIXES
 
-	o Solved various bug directly linked with the extraction of information from
-	  ENCODE database
+    o Solved various bug directly linked with the extraction of information from
+      ENCODE database
+
+CHANGES IN VERSION 1.5.0
+------------------------
+
+NEW FEATURES
+
+    o Added fuzzySearch function, a less specific version of queryEncode
+    o Added createDesign function to organize files extracted with queryEncode or fuzzySearch
+    o New version of downloadEncode
+    o Added the shinyApp of ENCODExplorer, see shinyEncode
+    o Added a few column to encode_df database

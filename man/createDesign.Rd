@@ -50,4 +50,9 @@ the parameter split is set to \code{TRUE}
 Create a design for the files associated with the result of a queryEncode,
 searchEncode or fuzzySearch research.
 }
+\examples{
+fuzzy_result <- fuzzySearch(searchTerm = "brca", df=encode_df, filterVector ="target")
+design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
+
+}
 

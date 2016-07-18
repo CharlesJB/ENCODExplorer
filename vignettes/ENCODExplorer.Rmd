@@ -172,8 +172,7 @@ On ENCODE portal :
 
 With our function :
 ```{r search_results, collapse=TRUE}
-search_results <- searchEncode(searchTerm = "a549 chip-seq homo sapiens",
-                         limit = "all")
+
 ```
 
 #### Download
@@ -242,3 +241,5 @@ convert_results <- searchToquery(searchResults = search_results)
 ### shinyEncode
 This function run the shinyApp of ENCODExplorer that implement the queryEncode 
 and the fuzzySearch function. The createDesign and downdloadEncode function can also be use on the search results.
+
+![Simple request using Search](img/shiny1.png)

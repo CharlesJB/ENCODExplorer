@@ -1,17 +1,17 @@
 
 #' Create a design for the files associated with the result of a queryEncode,
-#' searchEncode or fuzzySearch research.
+#'  fuzzySearch research or a \code{data.table} from createDesign.
 #' 
-#' @return is a \code{data.frame} with files for all the experiments or 
-#' a \code{list} of \code{data.frame} with all the file per experiment when
+#' @return is a \code{data.table} with files for all the experiments or 
+#' a \code{list} of \code{data.table} with all the file per experiment when
 #' the parameter split is set to \code{TRUE}
 #'
-#' @param input The \code{data.frame} created by a queryEncode or
-#' searchEncode research.
-#' @param df The \code{data.frame} used to extract the files link.
+#' @param input The \code{data.table} created by a queryEncode or
+#' searchEncode research, or a 
+#' @param df The \code{data.table} used to extract the files link.
 #' Default :\code{NULL}
-#' @param split Allow to the function to return a \code{list} of \code{data.frame}
-#' where each \code{data.frame} contain the files for a single experiment
+#' @param split Allow to the function to return a \code{list} of \code{data.table}
+#' where each \code{data.table} contain the files for a single experiment
 #' Default: \code{FALSE}.
 #' @param fileFormat A string that correspond to the type of the files 
 #' that need to be extract.
@@ -23,13 +23,16 @@
 #' will contain three columns (File, Experiment, Value). The 'wide' format
 #' organize the data as an array with the experiments as columns and files as rows.
 #' Default: long
-#' @param output_type The type of output of the function, can be \code{data.frame}
+#' @param output_type The type of output of the function, can be \code{data.table}
 #' or a \code{data.table}
-#' Default: \code{data.frame}
+#' Default: \code{data.table}
 #' @param ID A two element numeric vector, that first element is the value assign
 #' to replicate and the second is the value assign to control.
 #' Default: 1 and 2 
-#'     
+#' @examples
+#' fuzzy_result <- fuzzySearch(searchTerm = "brca", df=encode_df, filterVector ="target")
+#' design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
+#' 
 #' @import data.table
 #' @import stringr 
 #' @importFrom tidyr spread
@@ -105,7 +108,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
 
   # Create the ctrl part of the design
   get_ctrl_design <- function(dt) {
-      File <- clean_df[accession == dt$ctrl, href]
+      File <- clean_df[accession == dt$ctrl, basename(href)]
       if (length(File) > 0) {
           data.table(File = File, Experiment = dt$replicates,
                      Value = ID[2])
@@ -120,7 +123,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
 
   # Create the replicate part of the design
   design_replicates <- clean_df[accession %in% input$accession,
-                         .(File = href, Experiment = accession, Value = ID[1])]
+                         .(File = basename(href), Experiment = accession, Value = ID[1])]
 
   # Merge the two parts
   design <- rbind(design_replicates, design_ctrl)

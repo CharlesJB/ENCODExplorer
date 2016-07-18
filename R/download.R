@@ -13,8 +13,11 @@
 #' in the directory. 
 #' Default : TRUE
 #' 
+#' @return A \code{character} with the downloaded files
+#' 
 #' @examples 
-#'  \dontrun{downloadEncode(file_acc = "ENCFF567UCJ")}
+#'  fuzzy_result <- fuzzySearch("ENCSR396EAG", encode_df, filterVector = "accession")
+#'  \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 #' 
 #' @import data.table
 #' @import tools
@@ -25,14 +28,29 @@
 
 downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
                              force = TRUE) {
-  #Extraction the accession if the user pass a data.table as input
-  if(class(file_acc) == "data.table" | class(file_acc) == "data.frame"){
+  #Extract accession if the user pass a data.table as input
+  if(is.data.frame(file_acc)){
     if (!is.null(file_acc$file_accession)){
       file_acc <- as.character(file_acc$file_accession)
-    } else if (!is.null(file_acc$accession)) {
-      file_acc <- file_acc$accession
+    } else if (!is.null(file_acc$accession)) {  
+      file_acc <- as.character(file_acc$accession)
+    } else if (!is.null(file_acc$File)){ #input is a design
+      file_acc <- sapply(file_acc$File, function(i){
+        unlist(strsplit(i,"[.]"))[1]
+      })
     }
   }
+  #If the input is a list of design (split option set to TRUE)
+  if(class(file_acc) == "list"){
+    if(all(sapply(file_acc, is.data.table))){
+     file_acc <- rbindlist(file_acc)
+     file_acc <- sapply(file_acc$File, function(i){
+       unlist(strsplit(i,"[.]"))[1]
+     })
+    }
+  }
+  
+  
   stopifnot(is.character(file_acc))
   stopifnot(length(file_acc) > 0)
   
@@ -54,7 +72,7 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   
   avail_file <- file_acc[file_acc %in% df$file_accession]
   avail_ds <- file_acc[file_acc %in% df$accession]
-  unavail <- setdiff(file_acc, c(avail_file,avail_ds))
+  unavail <- dplyr::setdiff(file_acc, c(avail_file,avail_ds))
   
   encode_root = "https://www.encodeproject.org"
   
@@ -64,12 +82,12 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   file_dt <- dplyr::filter(df, file_accession %in% avail_file)
   if(format != "all"){
       file_wrong_format <- dplyr::filter(file_dt, file_format != format)
-      file_dt <- setdiff(file_dt, file_wrong_format)
-      if(nrow(file_wrong_format) > 0){
-          msg <- paste0("Format ", format, " not available for files : ",
-                    file_wrong_format$file_accession)
-          warning(msg, call. = FALSE)
-      }
+      file_dt <- dplyr::setdiff(file_dt, file_wrong_format)
+      # if(nrow(file_wrong_format) > 0){
+      #     msg <- paste0("Format ", format, " not available for files : ",
+      #               file_wrong_format$file_accession)
+      #     warning(msg, call. = FALSE)
+      # }
   }
   
   exp_dt <- dplyr::filter(df, accession %in% avail_ds)
@@ -78,9 +96,9 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
       exp_dt <- dplyr::filter(exp_dt, file_format == format)
       
       if(length(temp) != length(unique(exp_dt$accession))){
-        exp_wrong_format <- setdiff(temp, unique(exp_dt$accession))
-        msg <- paste0("No ", format, " files within experiment ", exp_wrong_format)
-        warning(msg, call. = FALSE)
+        exp_wrong_format <- dplyr::setdiff(temp, unique(exp_dt$accession))
+        # msg <- paste0("No ", format, " files within experiment ", exp_wrong_format)
+        # warning(msg, call. = FALSE)
       }
   }
   
@@ -255,6 +273,7 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
     }
     if(length(downloaded) > 0){
         print(paste0("Files can be found at ", getwd()))
+        return(invisible(downloaded))
     }
   }else{
     msg <- paste0("Can't write in ", dir)
