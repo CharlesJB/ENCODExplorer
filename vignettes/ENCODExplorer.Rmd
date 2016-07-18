@@ -167,22 +167,23 @@ With our function :
 #### createDesign
 This function organize the `data.table` created by fuzzySearch or queryEncode. It allow the user to access the file accession of the replicate and control files for multiple experiments.
 This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature (1:replicate / 2:control) of the file if the `format` parameter is set to `long`.
-By setting the `format` parameter to `wide`, each dataset will have his own column.
+By setting the `format` parameter to `wide`, each dataset will have his own column like the table just below.
+
 ![Wide design exemple](img/wideDesign.png)
 
-#### Download
+#### downloadEncode
 
 Allow the user to download a file or an entire dataset.
 Our `downloadEncode` function is a real time saving feature. To use it, you have to provide the file accession or the accession of the dataset (accession column in `encode_df` object).
-If the accession doesn't exist within the actual `encode_df` data.table, the function will search the accession directly in the ENCODE database.
+If the accession doesn't exist within the actual `encode_df` database, the function will search the accession directly in the ENCODE database.
 User may specify the path to the directory where you want to copy the downloaded files
 (default: `/tmp`).
 
 To ensure that the downloading have succeeded, we conduct a check md5 sum 
 comparison for each file.
 
-Moreover, if the accession is a a dataset accession, the function will download every files in this dataset. Download specific files by using the
-`format` option (which is set by defaul to `all`)
+Moreover, if the accession is a dataset accession, the function will download every files in this dataset. Download specific format by using the
+`format` option (which is set by defaul to `all`).
 
 Here is a small query:
 
@@ -216,7 +217,7 @@ downloadEncode(file_acc = search_results$accession, df=encode_df,
 
 
 #### Conversion
-The function `searchToquery` enables to convert a `searchEncode` output in a `queryEncode` output based on the found accession numbers. Thus the user can benefit from all the collected metadata.
+The function `searchToquery` enables to convert a `searchEncode` output in a `queryEncode` output based on the accession numbers. Thus the user can benefit from all the collected metadata and the `createDesign` function
 
 The structure of the result set is similar to the `encode_df` structure.
 
