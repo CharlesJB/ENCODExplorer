@@ -180,6 +180,7 @@ This function organize the `data.table` created by fuzzySearch or queryEncode. I
 This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature (1:replicate / 2:control) of the file if the `format` parameter is set to `long`.
 By setting the `format` parameter to `wide`, each dataset will have his own column.
 ![Wide design exemple](img/wideDesign.png)
+
 #### Download
 
 Allow the user to download a file or an entire dataset.
