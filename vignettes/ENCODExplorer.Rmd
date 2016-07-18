@@ -133,11 +133,11 @@ dismiss the dataset results because this information isn't available for that
 type of data.*
 
 #### fuzzySearch
-This function is a more friendly version of queryEncode that also perform a
+This function is a more friendly version of `queryEncode` that also perform a
 research on the `encode_df` object. The main difference is that the user doesn't
 have to know the specific colunm that contain the information. In fact, the term
 is research in every column of the data.table. Selecting specific column can be
-done by using the filterVector parameter.
+done by using the `filterVector` parameter.
 
 The following request will produce a data.table with every files that contain
 the term brca.
@@ -158,10 +158,10 @@ ENCODE web portal.
 
 The `searchEncode` function returns a data frame which corresponds to the result page
 provided by ENCODE portal. If a specific file or dataset isn't available with 
-fuzzySearch or queryEncode (i.e. within `encode_df`), access  to the latest data
+`fuzzySearch` or `queryEncode` (i.e. within `encode_df`), access  to the latest data
 of ENCODE database with the searchEncode function.
 searchResult may provide more result such as different and complementary dataset.
-Look for `searchToquery` to convert the result of a search to a data.table with 
+Look for `searchToquery` to convert the result of a search to a `data.table` with 
 the same design as `encode_df`.
 
 Here is the example of the following search : *"a549 chip-seq homo sapiens"*.
@@ -175,6 +175,11 @@ With our function :
 
 ```
 
+#### createDesign
+This function organize the `data.table` created by fuzzySearch or queryEncode. It allow the user to access the file accession of the replicate and control files for multiple experiments.
+This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature (1:replicate / 2:control) of the file if the `format` parameter is set to `long`.
+By setting the `format` parameter to `wide`, each dataset will have his own column.
+![Wide design exemple](img/wideDesign.png)
 #### Download
 
 Allow the user to download a file or an entire dataset.
@@ -238,8 +243,10 @@ search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 convert_results <- searchToquery(searchResults = search_results)
 ```
 
-### shinyEncode
-This function run the shinyApp of ENCODExplorer that implement the queryEncode 
-and the fuzzySearch function. The createDesign and downdloadEncode function can also be use on the search results.
+#### shinyEncode
+This function run the shinyApp of ENCODExplorer that implement `fuzzySearch` 
+and `queryEncode` research function. Create a design to organize data and download
+specific file with `downloadEncode` function. 
+The Search tab of shinyEncode uses `fuzzySearch` algorithm and the `Advanced Search` tab uses the `queryEncode` algorithm.
 
 ![Simple request using Search](img/shiny1.png)
