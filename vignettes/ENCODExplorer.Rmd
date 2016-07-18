@@ -77,16 +77,16 @@ a precise query defined according to the following criteria :
 |set_accession|The experiment or dataset accession|
 |assay|The assay type|
 |biosample_name|The biosample name|
-|dataset_access[There is a subtle difference between the parameters **set_accession** and
+|dataset_access|There is a subtle difference between the parameters **set_accession** and
 **dataset_accession**. In fact, some files can be part of experiment, dataset or
 both. When using **set_accession**, you will get all the files directly linked with
 this accession (experiment and/or dataset). While the usage of
 **dataset_accesstion** will get the files directly link to the requested
 dataset **AND** those which are part of an experiment and indirectly link to a
 dataset (reported as related_files in the dataset and related_dataset in
-experiment).] |The dataset accession|
+experiment).] |Dataset accession|
 |file_accession|The file accesion|
-|file_format[The current version of encode_df contains the following file format : 
+|file_format|The current version of encode_df contains the following file format : 
 *fastq*,*bed*,*bigBed*,*bam*,*tsv*,*bigWig*,*rcc*,*csfasta*,*idat*,*gtf*,*tar*,
 *CEL*,*csqual*,*sam*,*wig*,*gff*,*fasta*,*tagAlign*]|The file format|
 |lab|The laboratory|
@@ -172,7 +172,8 @@ On ENCODE portal :
 
 With our function :
 ```{r search_results, collapse=TRUE}
-
+  search_results <- searchEncode(searchTerm = "a549 chip-seq homo sapiens",
+                                 limit = "all")
 ```
 
 #### createDesign
