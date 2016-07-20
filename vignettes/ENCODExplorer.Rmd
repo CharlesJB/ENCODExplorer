@@ -58,7 +58,7 @@ faster processing, we recommend you to load `encode_df` and pass it as an argume
 
 To load `encode_df` :
 ```{r load_encodeDF, collapse=TRUE}
-    data("encode_df", package = "ENCODExplorer")
+    data(encode_df, package = "ENCODExplorer")
 ```
 
 
@@ -124,7 +124,7 @@ dismiss the dataset results because this information isn't available for that
 type of data.*
 
 #### fuzzySearch
-This function is a more friendly user version of `queryEncode` that also perform a search on the `encode_df` object. The main difference is that the user doesn't have to know the specific colunm that contain the information. In fact, the term is research in every column of the data.table. Selecting specific column can be done by using the `filterVector` parameter.
+This function is a more friendly user version of `queryEncode` that also perform a search on the `encode_df` object. The character vector or the list of character specified by the user will be search in every column of the database. Selecting specific column can be done by using the `filterVector` parameter.
 
 The following request will produce a data.table with every files that contain
 the term brca.
@@ -133,10 +133,15 @@ fuzzy_results <- fuzzySearch(searchTerm = c("brca"), database = encode_df)
 ```
 
 Multiple terms can be search at the same time, this example will extract all the
-files that contain brca or ZNF24 within the target column.
+files that contain brca or ZNF24 within the target column. 
 ```{r fuzzy_results_2, collapse=TRUE}
 fuzzy_results <- fuzzySearch(searchTerm = c("brca", "ZNF24"), database = encode_df, filterVector = c("target"), multipleTerm = TRUE)
 ```
+
+When searching for multiple terms, three type of input can be pass to the `searchTerm` parameter :
+- Single character with comma between the terms
+- Character vector
+- List of character
 
 #### Search
 This function simulates a key word search that you could perform through the
@@ -144,11 +149,9 @@ ENCODE web portal.
 
 The `searchEncode` function returns a data frame which corresponds to the result page
 provided by ENCODE portal. If a specific file or dataset isn't available with 
-`fuzzySearch` or `queryEncode` (i.e. within `encode_df`), access  to the latest data
-of ENCODE database with the searchEncode function.
-searchResult may provide more result such as different and complementary dataset.
-Look for `searchToquery` to convert the result of a search to a `data.table` with 
-the same design as `encode_df`.
+`fuzzySearch` or `queryEncode` (i.e. within `encode_df`), access  to the latest data of ENCODE database with the searchEncode function.
+
+Look for `searchToquery` to convert the result of a search to a `data.table` with the same design as `encode_df`.
 
 Here is the example of the following search : *"a549 chip-seq homo sapiens"*.
 
@@ -163,16 +166,18 @@ With our function :
 ```
 
 #### createDesign
-This function organize the `data.table` created by fuzzySearch or queryEncode. It allow the user to access the file accession of the replicate and control files for multiple experiments.
-This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature (1:replicate / 2:control) of the file if the `format` parameter is set to `long`.
+
+This function organize the `data.table` created by fuzzySearch, queryEncode or searchToquery. It allow the user to access the file accession of the replicate and control files for multiple experiments.
+This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature of the file (1:replicate / 2:control) when the `format` parameter is set to `long`.
 By setting the `format` parameter to `wide`, each dataset will have his own column like the table just below.
 
 ![Wide design exemple](img/wideDesign.png)
 
 #### downloadEncode
 
-Allow the user to download a file or an entire dataset.
-Our `downloadEncode` function is a real time saving feature. To use it, you have to provide the file accession or the accession of the dataset (accession column in `encode_df` object).
+Allow the user to download a file or an entire dataset. Downloading file can be done by passing a vector of file accession or accession of the dataset (accession column in `encode_df` object) to the `file_acc` parameter.
+This parameter can also be the `data.table` created by `queryEncode`, `fuzzySearch`, `searchToquery` or `createDesign`.
+
 If the accession doesn't exist within the actual `encode_df` database, the function will search the accession directly in the ENCODE database.
 User may specify the path to the directory where you want to copy the downloaded files
 (default: `/tmp`).
@@ -232,8 +237,7 @@ convert_results <- searchToquery(searchResults = search_results)
 
 #### shinyEncode
 This function run the shinyApp of ENCODExplorer that implement `fuzzySearch` 
-and `queryEncode` research function. Create a design to organize data and download
-specific file with `downloadEncode` function. 
+and `queryEncode` research function. It also allow to create a design to organize data and download specific file with `downloadEncode` function. 
 The Search tab of shinyEncode apply the `fuzzySearch` function for a low specificity request and the `Advanced Search` tab apply the `queryEncode` function.
 
 ![Simple request using Search](img/shiny1.png)
