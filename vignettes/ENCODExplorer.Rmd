@@ -207,8 +207,7 @@ To select a particular file format you can:
 1) add this filter to your query and then run the `downloadEncode` function
 
 ```{r query_results_5, collapse=TRUE, eval=FALSE}
-query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
-                       file_format = "bed" , fixed = FALSE)
+query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = FALSE)
 downloadEncode(query_results, df = encode_df)
 ```
 
@@ -236,6 +235,14 @@ search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 ```{r convert_results_1, collapse=TRUE}
 convert_results <- searchToquery(searchResults = search_results)
 ```
+
+#### load ENCODE database
+
+To build the `encode_df` `data.table` that regroup the ENCODE metadata, we extract the 76 tables provided on their database with `prepare_ENCODEdb` function. It will take between 30 to 50 minutes depending on your internet connection. This `list` is available in the `inst/extdata` folder.
+
+From this `list` we can regroup metadata in a single `data.table` with `export_ENCODEdb_matrix` function. 
+
+Locally updating ENCODExplorer database (`encode_df`) can be done with these two functions.
 
 #### shinyEncode
 This function run the shinyApp of ENCODExplorer that implement `fuzzySearch` 
