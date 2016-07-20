@@ -72,14 +72,14 @@ In the current release, `encode_df` contains 130540 entries for experiments and
 The `queryEncode` function allow the user to find the subset of files corresponding to
 a precise query defined according to the following criteria :
 
-|parameter| description|
+|Parameter| Description|
 |---------|-------------|
 |set_accession|The experiment or dataset accession|
 |assay|The assay type|
 |biosample_name|The biosample name|
-|dataset_accession|There is a subtle difference between the parameters **set_accession** and **dataset_accession**. In fact, some files can be part of experiment, dataset orboth. When using **set_accession**, you will get all the files directly linked withthis accession (experiment and/or dataset). While the usage of **dataset_accesstion** will get the files directly link to the requested dataset **AND** those which are part of an experiment and indirectly link to a dataset (reported as related files in the dataset and related_dataset in experiment).
+|dataset_accession|There is a subtle difference between the parameters **set_accession** and **dataset_accession**. In fact, some files can be part of experiment, dataset orboth. When using **set_accession**, you will get all the files directly linked withthis accession (experiment and/or dataset). While the usage of **dataset_accesstion** will get the files directly link to the requested dataset **AND** those which are part of an experiment and indirectly link to a dataset (reported as related files in the dataset and related_dataset in experiment).|
 |file_accession|The file accesion|
-|file_format|The current version of encode_df contains the following file format : *bam*, *bed*, *fastq*, *bigBed*, *bigWig*, *CEL*, *csfasta*, *csqual*, *fasta*, *gff*, *gtf*, *idat*, *rcc*, *sam*, *tagAlign*, *tar*, *tsv*, *vcf*, *wig*,
+|file_format|The current version of encode_df contains the following file format : *bam*, *bed*, *fastq*, *bigBed*, *bigWig*, *CEL*, *csfasta*, *csqual*, *fasta*, *gff*, *gtf*, *idat*, *rcc*, *sam*, *tagAlign*, *tar*, *tsv*, *vcf*, *wig*.|
 |lab|The laboratory|
 |organism|The donor organism|
 |target|The experimental target|
@@ -93,7 +93,7 @@ By default, the query use the exact string matching to perform the selection of
 the relevant entries. This behavior can be changed by setting the `fixed` option 
 to **FALSE**.
 
-The structure of the result set is similar to the `encode_df` structure.
+The structure of the result set is similar to the `encode_df` table.
 
 For example, to select all the fastq files produced on human
 cell MCF-7:
