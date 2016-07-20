@@ -167,15 +167,17 @@ With our function :
 
 #### createDesign
 
-This function organize the `data.table` created by fuzzySearch, queryEncode or searchToquery. It allow the user to access the file accession of the replicate and control files for multiple experiments.
-This function create a `data.table` with the file accession, the dataset accession and numeric value associate with the nature of the file (1:replicate / 2:control) when the `format` parameter is set to `long`.
+This function organize the `data.table` created by `fuzzySearch`, `queryEncode` or `searchToquer`. It allow the user to access the file accession of the replicate and control files for multiple experiments.
+
+It create a `data.table` with the file accessions, the dataset accessions and numeric value associate with the nature of the file (1:replicate / 2:control) when the `format` parameter is set to `long`.
+
 By setting the `format` parameter to `wide`, each dataset will have his own column like the table just below.
 
 ![Wide design exemple](img/wideDesign.png)
 
 #### downloadEncode
 
-Allow the user to download a file or an entire dataset. Downloading file can be done by passing a vector of file accession or accession of the dataset (accession column in `encode_df` object) to the `file_acc` parameter.
+Allow the user to download a file or an entire dataset. Downloading file can be done by providing a vector of file accessions or dataset accessions  (accession column in `encode_df`) to the `file_acc` parameter.
 This parameter can also be the `data.table` created by `queryEncode`, `fuzzySearch`, `searchToquery` or `createDesign`.
 
 If the accession doesn't exist within the actual `encode_df` database, the function will search the accession directly in the ENCODE database.
@@ -207,18 +209,18 @@ To select a particular file format you can:
 ```{r query_results_5, collapse=TRUE, eval=FALSE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1",
                        file_format = "bed" , fixed = FALSE)
-downloadEncode(file_acc=query_results$file_accession, df = encode_df)
+downloadEncode(query_results, df = encode_df)
 ```
 
 2) specify the format to the `downloadEncode` function
 
 ```{r collapse=TRUE, eval=FALSE}
-downloadEncode(file_acc = search_results$accession, df=encode_df, format = "bed")
+downloadEncode(search_results, df=encode_df, format = "bed")
 ```
 
 
 #### Conversion
-The function `searchToquery` enables to convert a `searchEncode` output in a `queryEncode` output based on the accession numbers. Thus the user can benefit from all the collected metadata and the `createDesign` function
+The function `searchToquery` enables to convert the result of `searchEncode` to a `queryEncode` output based on the accession numbers. Thus the user can benefit from all the collected metadata and the `createDesign` function.
 
 The structure of the result set is similar to the `encode_df` structure.
 
