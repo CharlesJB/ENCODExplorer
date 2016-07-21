@@ -99,7 +99,6 @@ cell MCF-7:
 ```{r query_results, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                       biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
-print(query_results)
 ```
 
 The same request with approximate spelling of the biosample name and `fixed` option
@@ -107,7 +106,6 @@ to `TRUE`, will give no results :
 ```{r query_results_2, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                        biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
-print(query_results)
 ```
 
 If you follow the warning guidance and set the `fixed` option to FALSE:
