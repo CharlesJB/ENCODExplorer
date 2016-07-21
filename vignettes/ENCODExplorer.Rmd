@@ -99,6 +99,7 @@ cell MCF-7:
 ```{r query_results, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                       biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
+knitr::kable(query_results)
 ```
 
 The same request with approximate spelling of the biosample name and `fixed` option
