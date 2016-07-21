@@ -82,8 +82,8 @@ a precise query defined according to the following criteria :
 |lab|The laboratory|
 |organism|The donor organism|
 |target|The experimental target|
-|treatment|The treatment|
-|project|The project|
+|treatment|The treatment related to the biosample|
+|project|The project name/id|
 |biosample_name|The biosample name|
 |biosample_type|The biosample type|
 
@@ -96,20 +96,20 @@ The structure of the result set is similar to the `encode_df` table.
 
 For example, to select all the fastq files produced on human
 cell MCF-7:
-```{r query_results, collapse=TRUE}
+```{r query_results, collapse=F}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                       biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
 
 The same request with approximate spelling of the biosample name and `fixed` option
 to `TRUE`, will give no results :
-```{r query_results_2, collapse=TRUE}
+```{r query_results_2, collapse=F}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                        biosample_name = "mcf7", file_format = "fastq", fixed = TRUE)
 ```
 
 If you follow the warning guidance and set the `fixed` option to FALSE:
-```{r query_results_3, collapse=TRUE}
+```{r query_results_3, collapse=F}
 query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
                     biosample_name = "mcf7", file_format = "fastq", fixed = FALSE)
 ```
