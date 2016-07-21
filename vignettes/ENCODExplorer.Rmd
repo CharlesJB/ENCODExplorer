@@ -96,9 +96,9 @@ The structure of the result set is similar to the `encode_df` table.
 
 For example, to select all the fastq files produced on human
 cell MCF-7:
-```{r query_results, collapse=TRUE}
-print(queryEncode(df=encode_df, organism = "Homo sapiens",
-                      biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE))
+```{r}
+query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
+                      biosample_name = "MCF-7", file_format = "fastq", fixed = TRUE)
 ```
 
 The same request with approximate spelling of the biosample name and `fixed` option
