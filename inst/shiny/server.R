@@ -177,7 +177,7 @@ server <- function(input, output) {
             downloadLog <- capture.output(downloadEncode(df=encode_df,
                                     file_acc=selected_files))
         }else{
-            if(!input$splitFromSearch){
+            if(!designSplit){
                 selected_rows <- paste(input$designFuzzy_rows_selected)
                 selected_files <- designFuzzy$File[as.numeric(selected_rows)]
                 
@@ -241,11 +241,13 @@ server <- function(input, output) {
     file_size_fuzzy <- function(rows=NULL,is_design=F){
         #Getting selected row and thier size
         selected_rows <- paste(rows)
-        if(!is_design){
+        if(!viewDesign){
             selected_size <- resultFuzzy$file_size[as.numeric(selected_rows)]
         }else{ #Coming from a design
             selected_files <- designFuzzy$File[as.numeric(selected_rows)]
-            selected_size <- dplyr::filter(encode_df, href %in% selected_files)
+            selected_files <- sapply(selected_files, function (i){
+                                      unlist(strsplit(i,"[.]"))[1]})
+            selected_size <- dplyr::filter(encode_df, file_accession %in% selected_files)
             selected_size <- selected_size$file_size
         }
 
@@ -365,15 +367,15 @@ server <- function(input, output) {
         formatType <- c("long","wide")
         formatType <- formatType[as.numeric(input$formatFromQuery)]
         
-        fileType <- c("bam", "fastq", "sam", "bed", "bigbed", "bigWig")
+        fileType <- c("bam", "fastq", "sam", "bed", "bigBed", "bigWig")
         fileType <- fileType[as.numeric(input$fileFromQuery)]
         
         dataType <- c("experiments", "ucsc-browser-composites", "annotations",
                       "matched-sets", "projects", "reference-epigenomes",
                       "references")
         dataType <- dataType[as.numeric(input$datatypeFromQuery)]
-        
-        if(nrow(resultQuery) == 0){DT::renderDataTable(data.table())
+        if(nrow(resultQuery) == 0){
+          DT::renderDataTable(data.table())
         }else if (nrow(dplyr::filter(resultQuery, file_format == fileType)) == 0){
           output$consoleQuery <- renderPrint(cat("Error : could not find files for this format"))
           output$designQuery <- DT::renderDataTable(data.table(
@@ -395,8 +397,8 @@ server <- function(input, output) {
                 )
             }else{ #Split
                 designSplit <<- TRUE
-                temp <- filter(resultQuery, file_format==fileType)
-                temp <- filter(temp, dataset_type == dataType)
+                temp <- dplyr::filter(resultQuery, file_format==fileType)
+                temp <- dplyr::filter(temp, dataset_type == dataType)
                 acc <- unique(temp$accession)
             
                 designQuery <<- createDesign(resultQuery, df,split=TRUE, format="long",
@@ -425,42 +427,55 @@ server <- function(input, output) {
                     my_i <- i
                     tablename <- paste(acc[my_i])
                     output[[tablename]] <- DT::renderDataTable(designQuery[[my_i]],
-                        options=list(searching=FALSE,
-                                            pageLength = 25, scrollX = TRUE))
-                })
+                        options=list(searching=FALSE,pageLength = 25,
+                                     scrollX = TRUE))})
             }
-            
         }
         }
-        
     })
     
     #Download request from queryEncode
     observeEvent(input$downloadFromQuery,{
         if(!viewDesign){
-            selected_rows <- paste(input$searchFuzzy_rows_selected)
+            selected_rows <- paste(input$resultQuery_rows_selected)
             selected_files <- resultQuery$file_accession[as.numeric(selected_rows)]
-        
-            downloadLog <- capture.output(downloadEncode(df=encode_df, file_acc=
-                           selected_files))
+            if(length(unlist(selected_files)) > 0){
+                downloadLog <- capture.output(downloadEncode(df=encode_df, file_acc=
+                           unlist(selected_files)))}
         }else{
             if(!designSplit){
                 selected_rows <- paste(input$designQuery_rows_selected)
                 selected_files <- designQuery$File[as.numeric(selected_rows)]
-                selected_files <- sapply(selected_files, function(i){
-                    temp <- tools::file_path_sans_ext(basename(i))
-                    paste(unlist(strsplit(temp,"[.]"))[1])
-                })
+            }else{
+              unsplitDesign <- rbindlist(designQuery)
+              acc <- unique(unsplitDesign$Experiment)
+              row_to_get <- vector("list", length(acc))
+              for(i in 1:length(acc)){
+                row_to_get[[i]] <- input[[local({
+                  my_i <- i
+                  tb <- paste(acc[my_i],"_rows_selected",sep="")
+                })]]
                 
-                if(length(selected_files) > 0){
+              }
+              selected_rows <- (unlist(row_to_get))
+              selected_files <- unsplitDesign$File[as.numeric(selected_rows)]  
+            }
+          
+            selected_files <- sapply(selected_files, function(i){
+              temp <- tools::file_path_sans_ext(basename(i))
+              paste(unlist(strsplit(temp,"[.]"))[1])
+            })
+            
+            if(length(selected_files) > 0){
                     downloadLog <- capture.output(downloadEncode(df=encode_df,
                                               file_acc=unlist(selected_files)))
-                }
             }
+            
         }
+
         downloadLog <- gsub(x=downloadLog, pattern = "\\[\\d\\] ", replacement = "")
         downloadLog <- gsub(x=downloadLog, pattern='\"', replacement="")
-        output$consoleQuery <- renderPrint(cat(downloadLog))
+        output$consoleQuery <- renderPrint(downloadLog)
     })
     
     #Refresh the content of fileSizeQuery
@@ -487,7 +502,9 @@ server <- function(input, output) {
         selected_size <- resultQuery$file_size[as.numeric(selected_rows)]
       }else{ #Coming from a design
         selected_files <- designQuery$File[as.numeric(selected_rows)]
-        selected_size <- dplyr::filter(encode_df, href %in% selected_files)
+        selected_files <- sapply(selected_files, function (i){
+          unlist(strsplit(i,"[.]"))[1]})
+        selected_size <- dplyr::filter(encode_df, file_accession %in% selected_files)
         selected_size <- selected_size$file_size
       }
       

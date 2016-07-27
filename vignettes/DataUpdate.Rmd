@@ -5,7 +5,7 @@
 
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
-Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Louis Gendron, Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -25,13 +25,13 @@ metadata associated with file, experiment and dataset.
 
 We first extract ENCODE schema from its public github repository. 
 Then we identify the main entities and their relationship with each other to 
-rebuild the ENCODE database into an SQLite database. 
+rebuild the ENCODE database into a data.table. 
 We also developped a function which can extract the essential metadata in a R 
 object to aid data exploration.
 We implemented time-saving features to select ENCODE files by querying their 
 metadata and download them.
 
-The SQLite database can be regenerated at will to query ENCODE database locally 
+The data.table can be regenerated at will to query ENCODE database locally 
 keep it up-to-date.
 
 This vignette will introduce the way to update ENCODE data.

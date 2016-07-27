@@ -26,12 +26,16 @@ Default : all}
 in the directory. 
 Default : TRUE}
 }
+\value{
+A \code{character} with the downloaded files
+}
 \description{
 downloadEncode is use to download  a serie of files or dataset 
 by their accession.
 }
 \examples{
- \dontrun{downloadEncode(file_acc = "ENCFF567UCJ")}
+ fuzzy_result <- fuzzySearch("ENCSR396EAG", encode_df, filterVector = "accession")
+ \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 
 }
 

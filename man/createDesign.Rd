@@ -3,21 +3,21 @@
 \name{createDesign}
 \alias{createDesign}
 \title{Create a design for the files associated with the result of a queryEncode,
-searchEncode or fuzzySearch research.}
+ fuzzySearch research or a \code{data.table} from createDesign.}
 \usage{
 createDesign(input = NULL, df = NULL, split = FALSE, fileFormat = "bam",
   dataset_type = "experiments", format = "long",
   output_type = "data.table", ID = c(1, 2))
 }
 \arguments{
-\item{input}{The \code{data.frame} created by a queryEncode or
-searchEncode research.}
+\item{input}{The \code{data.table} created by a queryEncode or
+searchEncode research, or a}
 
-\item{df}{The \code{data.frame} used to extract the files link.
+\item{df}{The \code{data.table} used to extract the files link.
 Default :\code{NULL}}
 
-\item{split}{Allow to the function to return a \code{list} of \code{data.frame}
-where each \code{data.frame} contain the files for a single experiment
+\item{split}{Allow to the function to return a \code{list} of \code{data.table}
+where each \code{data.table} contain the files for a single experiment
 Default: \code{FALSE}.}
 
 \item{fileFormat}{A string that correspond to the type of the files 
@@ -33,21 +33,26 @@ will contain three columns (File, Experiment, Value). The 'wide' format
 organize the data as an array with the experiments as columns and files as rows.
 Default: long}
 
-\item{output_type}{The type of output of the function, can be \code{data.frame}
+\item{output_type}{The type of output of the function, can be \code{data.table}
 or a \code{data.table}
-Default: \code{data.frame}}
+Default: \code{data.table}}
 
 \item{ID}{A two element numeric vector, that first element is the value assign
 to replicate and the second is the value assign to control.
 Default: 1 and 2}
 }
 \value{
-is a \code{data.frame} with files for all the experiments or 
-a \code{list} of \code{data.frame} with all the file per experiment when
+is a \code{data.table} with files for all the experiments or 
+a \code{list} of \code{data.table} with all the file per experiment when
 the parameter split is set to \code{TRUE}
 }
 \description{
 Create a design for the files associated with the result of a queryEncode,
-searchEncode or fuzzySearch research.
+ fuzzySearch research or a \code{data.table} from createDesign.
+}
+\examples{
+fuzzy_result <- fuzzySearch(searchTerm = "brca", df=encode_df, filterVector ="target")
+design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
+
 }
 

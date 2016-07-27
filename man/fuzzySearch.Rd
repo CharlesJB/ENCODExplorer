@@ -31,10 +31,9 @@ within the encode_df \code{data.table}. For faster processing, pass encode_df
 object as database parameter.
 }
 \examples{
- \dontrun{
-   fuzzySearch(searchTerm=c("ELAVL1","atf7"),
-       database = encode_df, filterVector ="target", mutilpleTerm = TRUE)
- } 
+ 
+   fuzz_ex <- fuzzySearch(searchTerm=c("ELAVL1","atf7"),
+   database=encode_df, filterVector ="target", multipleTerm = TRUE)
 
 }
 

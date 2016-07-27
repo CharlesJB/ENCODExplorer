@@ -128,7 +128,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   #Ordering the table by the accession column
   encode_df <- encode_df[order(accession),]
   
-  #reordering the table, we want to have the colunm below as the first colunm
+  #reordering the table, we want to have the column below as the first column
   #to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
                     "file_size","output_category", "output_type", "target", "investigated_as",
@@ -195,8 +195,7 @@ step1 <- function(database_file){
 }
 
 step2 <- function(files){
-  ### Step 2 : renommage
-  #### files
+  ### Step 2 : renaming
   names(files)[names(files) == 'status'] <- 'file_status'
   names(files)[names(files) == 'accession'] <- 'file_accession'
   names(files)[names(files) == 'award'] <- 'project'
@@ -288,7 +287,7 @@ step4 <- function(files, replicates, libraries, treatments, biosamples,
   files[files$replicate_list %in% replicates$id, technical_replicate_number := 
           replicates$technical_replicate_number[match_vector]]
   
-  # Updating treatment column with trreatment$treatment_term_name
+  # Updating treatment column with treatment$treatment_term_name
   # replicate_list->library->biosample->treatment
   
   # Updating treatment_col with replicate$library using the link :
