@@ -5,12 +5,12 @@
 \alias{encode_df}
 \title{Metadata from the ENCODE database in a R object.
 The tables were generated with the \code{prepare_ENCODEdb} function.}
-\format{A list of data frames}
+\format{A data table}
 \usage{
 data(encode_df)
 }
 \value{
-A list of data frames
+A data table
 }
 \description{
 Metadata from the ENCODE database in a R object.

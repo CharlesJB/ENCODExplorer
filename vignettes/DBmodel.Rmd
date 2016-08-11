@@ -5,7 +5,7 @@
 
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
-Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Louis Gendron Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -44,11 +44,11 @@ suppressMessages(library(ENCODExplorer))
 
 ### Data preparation
 
-To generate the SQL database from ENCODE: 
+To generate the list of data.table from ENCODE: 
 
 ```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename = "encode.sqlite"
+database_filename = "encode.dt"
 tables = prepare_ENCODEdb(database_filename)
 ```
 
@@ -155,4 +155,4 @@ Those relations are described in the following table:
 |worm_donor|worm_donor|outcrossed_strain|
 
 For example:
-[**file** ---> **replicate** ---> *replicate*] enables to write the following relation in a SQL query : **file**.*replicate* = **replicate**.*id*.
+[**file** ---> **replicate** ---> *replicate*] enables to write the following relation  : **file**.*replicate* = **replicate**.*id*.
