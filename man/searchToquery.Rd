@@ -4,7 +4,7 @@
 \alias{searchToquery}
 \title{Convert searchEncode output in queryEncode output.}
 \usage{
-searchToquery(df = NULL, searchResults, quiet = FALSE)
+searchToquery(df = NULL, searchResults, quiet = TRUE)
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE 
