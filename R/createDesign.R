@@ -55,7 +55,7 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   }
   
   if(is.null(df)){
-      load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+      data(encode_df, envir = environment())
       df <- encode_df
   }
   

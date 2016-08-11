@@ -46,7 +46,9 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
                         file_status = "released", status = "released", 
                         fixed = TRUE, quiet = FALSE) {
   
-  if(is.null(df)) {load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))}
+  if(is.null(df)) {
+      data(encode_df, envir = environment())
+  }
   
   if(is.null(set_accession) && is.null(assay) && is.null(biosample_name) && 
      is.null(dataset_accession) && is.null(file_accession) && 

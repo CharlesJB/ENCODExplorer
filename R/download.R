@@ -55,7 +55,7 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   stopifnot(length(file_acc) > 0)
   
   if(is.null(df)) {
-    load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+    data(encode_df, envir = environment())
     df <- encode_df
   }
   

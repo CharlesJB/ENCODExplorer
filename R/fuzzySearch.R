@@ -42,7 +42,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     
     #Loading the default data.tables from ENCODExplorer package
     if(is.null(database)){
-        load(file=system.file("../data/encode_df.rda", package="ENCODExplorer"))
+	data(encode_df, envir = environment())
     }else if(is.data.table(database)){
         encode_df <- database
     }else{
