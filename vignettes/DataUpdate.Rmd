@@ -5,7 +5,7 @@
 
 ENCODExplorer: A compilation of metadata from ENCODE
 ====================================================================
-Audrey Lemacon, Charles Joly Beauparlant and Arnaud Droit.
+Audrey Lemacon, Louis Gendron, Charles Joly Beauparlant and Arnaud Droit.
 
 This package and the underlying ENCODExplorer code are distributed under 
 the Artistic license 2.0. You are free to use and redistribute this software. 
@@ -25,13 +25,13 @@ metadata associated with file, experiment and dataset.
 
 We first extract ENCODE schema from its public github repository. 
 Then we identify the main entities and their relationship with each other to 
-rebuild the ENCODE database into an SQLite database. 
+rebuild the ENCODE database into a data.table. 
 We also developped a function which can extract the essential metadata in a R 
 object to aid data exploration.
 We implemented time-saving features to select ENCODE files by querying their 
 metadata and download them.
 
-The SQLite database can be regenerated at will to query ENCODE database locally 
+The data.table can be regenerated at will to query ENCODE database locally 
 keep it up-to-date.
 
 This vignette will introduce the way to update ENCODE data.
@@ -46,34 +46,30 @@ suppressMessages(library(ENCODExplorer))
 
 If you want regenerate ENCODExplorer data, you can use the update function.
 When you use `overwrite = TRUE`, it will overwrite the default package data, 
-otherwise it will return the list `encode_df` and the dataframe `accession_df`.
+otherwise it will return the datatable `encode_df` .
 
 ```{r, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename <- "new.encode.sqlite"
-new_data <- update_ENCODExplorer(database_filename, overwrite = FALSE)
+database_filename <- "new.encode.rda"
+new_data <- export_ENCODEdb_matrix(database_filename, overwrite = FALSE)
 ```
 
 If you want to update the data manually or partially, you have to process the 
 following steps:
 
-* generate the SQL database from ENCODE: 
+* generate a list of data tables from ENCODE: 
 
 ```{r tables, eval=FALSE}
 # the path (relative or absolute) to the future database
-database_filename = "new.encode.sqlite"
+database_filename = "new.encode.rda"
 tables = prepare_ENCODEdb(database_filename)
 ```
 
-* generate the metadata encode_df from the SQL database:
+* generate the metadata encode_df from a list of data.table:
 ```{r new_encode_df, eval = FALSE}
-new_encode_df <- export_ENCODEdb_matrix(database_filename)
+new_encode_df <- export_ENCODEdb_matrix(tables)
 ```
 
-* generate the metadata accession_df from the SQL database:
-```{r new_accession_df, eval = FALSE}
-new_accession_df <- export_ENCODEdb_accession(new_encode_df, database_filename)
-```
 
 The whole process will take several minutes (30 to 60 minutes depending on your
 work environment)
@@ -87,11 +83,11 @@ in the `queryEncode` and `downloadEncode` function by setting the *df* option of
 functions.
 
 ```{r queryEncode, eval=FALSE}
-query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed_broadPeak" , fixed = F)
-downloadEncode(df = new_encode_df, resultSet = query_results, resultOrigin = "queryEncode")
+query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = F)
+downloadEncode(df = new_encode_df, file_acc = query_results$file_accession)
 ```
 
 Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.
 
-You can also use the SQL database for own purpose. The imputed database 
+You can also use the list of data.table database for own purpose. The imputed database 
 model is available in the [dedicated vignette](DBmodel.html)

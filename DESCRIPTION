@@ -2,7 +2,7 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 1.5.2
+Version: 1.5.5
 Date: 2015-02-25
 Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
     Audrey Lemacon <lemacon.audrey@ulaval.ca>, Louis Gendron
@@ -28,10 +28,13 @@ Depends:
 Imports:
     tools,
     jsonlite,
-    RSQLite,
     parallel,
     RCurl,
-    tidyr
+    tidyr,
+    data.table,
+    dplyr,
+    stringr,
+    stringi
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,
