@@ -30,7 +30,7 @@
 #' to replicate and the second is the value assign to control.
 #' Default: 1 and 2 
 #' @examples
-#' fuzzy_result <- fuzzySearch(searchTerm = "brca", df=encode_df, filterVector ="target")
+#' fuzzy_result <- fuzzySearch(searchTerm = "brca", database=encode_df, filterVector ="target")
 #' design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
 #' 
 #' @import data.table

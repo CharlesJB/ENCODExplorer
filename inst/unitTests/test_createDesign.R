@@ -10,18 +10,13 @@ test.design_long <- function(){
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca,encode_df)
     RUnit::checkIdentical(dim(obs),c(6L,3L))
-    
-    RUnit::checkIdentical(obs[1], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+    RUnit::checkIdentical(obs[1], data.table(File="ENCFF000XAH.bam",
                                       Experiment="ENCSR000EDB", Value=1))
-    RUnit::checkIdentical(obs[2], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+    RUnit::checkIdentical(obs[2], data.table(File="ENCFF000XAI.bam",
                                       Experiment="ENCSR000EDB", Value=1))
-    RUnit::checkIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
-                                      Experiment="ENCSR000EDB", Value=2))
-    RUnit::checkIdentical(obs[4], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[4], data.table(File="ENCFF000XPH.bam",
                                       Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[5], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
-                                      Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[6], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+    RUnit::checkIdentical(obs[6], data.table(File="ENCFF000XSJ.bam",
                                       Experiment="ENCSR000EDY", Value=2))
 }
 
@@ -30,17 +25,17 @@ test.design_wide <- function(){
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide")
     RUnit::checkIdentical(dim(obs),c(6L,3L))
-    RUnit::checkIdentical(obs[1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+    RUnit::checkIdentical(obs[1], data.table(File="ENCFF000XAH.bam",
                                       ENCSR000EDB=1, ENCSR000EDY=as.numeric(NA)))
-    RUnit::checkIdentical(obs[2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+    RUnit::checkIdentical(obs[2], data.table(File="ENCFF000XAI.bam",
                                       ENCSR000EDB=1, ENCSR000EDY=as.numeric(NA)))
-    RUnit::checkIdentical(obs[3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+    RUnit::checkIdentical(obs[3], data.table(File="ENCFF000XFO.bam",
                                       ENCSR000EDB=2, ENCSR000EDY=as.numeric(NA)))
-    RUnit::checkIdentical(obs[4], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+    RUnit::checkIdentical(obs[4], data.table(File="ENCFF000XPF.bam",
                                       ENCSR000EDB=as.numeric(NA),ENCSR000EDY=1))
-    RUnit::checkIdentical(obs[5], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[5], data.table(File="ENCFF000XPH.bam",
                                       ENCSR000EDB=as.numeric(NA), ENCSR000EDY=1))
-    RUnit::checkIdentical(obs[6], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+    RUnit::checkIdentical(obs[6], data.table(File="ENCFF000XSJ.bam",
                                       ENCSR000EDB=as.numeric(NA), ENCSR000EDY=2))
 }
 
@@ -49,17 +44,17 @@ test.design_split_long <- function(){
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, split=T)
     RUnit::checkIdentical(length(obs), 2L)
-    RUnit::checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+    RUnit::checkIdentical(obs[[1]][1], data.table(File="ENCFF000XAH.bam",
                                            Experiment="ENCSR000EDB", Value=1))
-    RUnit::checkIdentical(obs[[1]][2], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+    RUnit::checkIdentical(obs[[1]][2], data.table(File="ENCFF000XAI.bam",
                                            Experiment="ENCSR000EDB", Value=1))
-    RUnit::checkIdentical(obs[[1]][3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+    RUnit::checkIdentical(obs[[1]][3], data.table(File="ENCFF000XFO.bam",
                                            Experiment="ENCSR000EDB", Value=2))
-    RUnit::checkIdentical(obs[[2]][1], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[[2]][1], data.table(File="ENCFF000XPH.bam",
                                            Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[[2]][2], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+    RUnit::checkIdentical(obs[[2]][2], data.table(File="ENCFF000XPF.bam",
                                           Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[[2]][3], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+    RUnit::checkIdentical(obs[[2]][3], data.table(File="ENCFF000XSJ.bam",
                                            Experiment="ENCSR000EDY", Value=2))
 }
 
@@ -68,17 +63,17 @@ test.design_split_wide <- function(){
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide", split=T)
     RUnit::checkIdentical(length(obs), 2L)
-    RUnit::checkIdentical(obs[[1]][1], data.table(File="/files/ENCFF000XAH/@@download/ENCFF000XAH.bam",
+    RUnit::checkIdentical(obs[[1]][1], data.table(File="ENCFF000XAH.bam",
                                            ENCSR000EDB=1))
-    RUnit::checkIdentical(obs[[1]][2], data.table(File="/files/ENCFF000XAI/@@download/ENCFF000XAI.bam",
+    RUnit::checkIdentical(obs[[1]][2], data.table(File="ENCFF000XAI.bam",
                                            ENCSR000EDB=1))
-    RUnit::checkIdentical(obs[[1]][3], data.table(File="/files/ENCFF000XFO/@@download/ENCFF000XFO.bam",
+    RUnit::checkIdentical(obs[[1]][3], data.table(File="ENCFF000XFO.bam",
                                            ENCSR000EDB=2))
-    RUnit::checkIdentical(obs[[2]][1], data.table(File="/files/ENCFF000XPF/@@download/ENCFF000XPF.bam",
+    RUnit::checkIdentical(obs[[2]][1], data.table(File="ENCFF000XPF.bam",
                                            ENCSR000EDY=1))
-    RUnit::checkIdentical(obs[[2]][2], data.table(File="/files/ENCFF000XPH/@@download/ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[[2]][2], data.table(File="ENCFF000XPH.bam",
                                            ENCSR000EDY=1))
-    RUnit::checkIdentical(obs[[2]][3], data.table(File="/files/ENCFF000XSJ/@@download/ENCFF000XSJ.bam",
+    RUnit::checkIdentical(obs[[2]][3], data.table(File="ENCFF000XSJ.bam",
                                            ENCSR000EDY=2))
 }
 

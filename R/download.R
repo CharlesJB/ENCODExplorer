@@ -83,11 +83,11 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   if(format != "all"){
       file_wrong_format <- dplyr::filter(file_dt, file_format != format)
       file_dt <- dplyr::setdiff(file_dt, file_wrong_format)
-      # if(nrow(file_wrong_format) > 0){
-      #     msg <- paste0("Format ", format, " not available for files : ",
-      #               file_wrong_format$file_accession)
-      #     warning(msg, call. = FALSE)
-      # }
+      if(nrow(file_wrong_format) > 0){
+          msg <- paste0("Format ", format, " not available for files : ",
+                    file_wrong_format$file_accession)
+          warning(msg, call. = FALSE)
+      }
   }
   
   exp_dt <- dplyr::filter(df, accession %in% avail_ds)
@@ -97,8 +97,8 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
       
       if(length(temp) != length(unique(exp_dt$accession))){
         exp_wrong_format <- dplyr::setdiff(temp, unique(exp_dt$accession))
-        # msg <- paste0("No ", format, " files within experiment ", exp_wrong_format)
-        # warning(msg, call. = FALSE)
+        msg <- paste0("No ", format, " files within experiment ", exp_wrong_format)
+        warning(msg, call. = FALSE)
       }
   }
   
