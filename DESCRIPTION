@@ -2,13 +2,8 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 1.5.5
+Version: 1.5.6
 Date: 2015-02-25
-Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
-    Audrey Lemacon <lemacon.audrey@ulaval.ca>, Louis Gendron
-    <louisg.212@gmail.com> Astrid-Louise Deschenes,
-    <astrid-louise.deschenes@crchudequebec.ulaval.ca> and Arnaud Droit
-    <arnaud.droit@crchudequebec.ulaval.ca >
 Author@R: c(person("Charles","Joly Beauparlant", email = "charles.joly-
     beauparlant@crchul.ulaval.ca", role = "aut,cre"), person("Audrey","Lemacon",
     email = "lemacon.audrey@ulaval.ca", role = "aut"), person("Arnaud","Droit",
@@ -16,7 +11,6 @@ Author@R: c(person("Charles","Joly Beauparlant", email = "charles.joly-
     person("Louis", "Gendron", email = "louisg.212@gmail.com", role = "ctb"),
     person("Astrid-Louise","Deschenes",
     email = "astrid-louise.deschenes@crchudequebec.ulaval.ca", role = "ctb"))
-Maintainer: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>
 Description: This package allows user to quickly access ENCODE project files
     metadata and give access to helper functions to query the ENCODE rest api,
     download ENCODE datasets and save the database in SQLite format.
