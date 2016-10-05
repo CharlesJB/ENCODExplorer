@@ -9,22 +9,22 @@ test.design_long <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca,encode_df)
-    RUnit::checkIdentical(dim(obs),c(6L,3L))
+    RUnit::checkIdentical(dim(obs),c(10L,3L))
     RUnit::checkIdentical(obs[1], data.table(File="ENCFF000XAH.bam",
                                       Experiment="ENCSR000EDB", Value=1))
     RUnit::checkIdentical(obs[2], data.table(File="ENCFF000XAI.bam",
                                       Experiment="ENCSR000EDB", Value=1))
-    RUnit::checkIdentical(obs[4], data.table(File="ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[4], data.table(File="ENCFF565WKC.bam",
+                                      Experiment="ENCSR000EDB", Value=2))
+    RUnit::checkIdentical(obs[6], data.table(File="ENCFF000XPF.bam",
                                       Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[6], data.table(File="ENCFF000XSJ.bam",
-                                      Experiment="ENCSR000EDY", Value=2))
 }
 
 test.design_wide <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
     obs <- createDesign(brca, encode_df, format="wide")
-    RUnit::checkIdentical(dim(obs),c(6L,3L))
+    RUnit::checkIdentical(dim(obs),c(10L,3L))
     RUnit::checkIdentical(obs[1], data.table(File="ENCFF000XAH.bam",
                                       ENCSR000EDB=1, ENCSR000EDY=as.numeric(NA)))
     RUnit::checkIdentical(obs[2], data.table(File="ENCFF000XAI.bam",
@@ -50,11 +50,11 @@ test.design_split_long <- function(){
                                            Experiment="ENCSR000EDB", Value=1))
     RUnit::checkIdentical(obs[[1]][3], data.table(File="ENCFF000XFO.bam",
                                            Experiment="ENCSR000EDB", Value=2))
-    RUnit::checkIdentical(obs[[2]][1], data.table(File="ENCFF000XPH.bam",
+    RUnit::checkIdentical(obs[[2]][1], data.table(File="ENCFF000XPF.bam",
                                            Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[[2]][2], data.table(File="ENCFF000XPF.bam",
+    RUnit::checkIdentical(obs[[2]][2], data.table(File="ENCFF000XPH.bam",
                                           Experiment="ENCSR000EDY", Value=1))
-    RUnit::checkIdentical(obs[[2]][3], data.table(File="ENCFF000XSJ.bam",
+    RUnit::checkIdentical(obs[[2]][3], data.table(File="ENCFF050KJB.bam",
                                            Experiment="ENCSR000EDY", Value=2))
 }
 
