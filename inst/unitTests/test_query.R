@@ -30,15 +30,15 @@ test.combined_query <- function() {
             msg = "this combined query should return a results set containing the id ENCFF000VPN")
 }
 
-test.query_4_dataset <- function() {
-  data("encode_df")
-  res_dataset_only = queryEncode(df=encode_df, set_accession = "ENCSR180GCH")
-  checkEquals(sum(grepl("experiments", x=res_dataset_only$dataset_type)), 0,
-              msg = "this query shouldn't return any experiment results" )
-
-  checkEquals(sum(!grepl("experiments", x=res_dataset_only$dataset_type)), 2,
-              msg = "this query should return this precise result")
-}
+#test.query_4_dataset <- function() {
+  #data("encode_df")
+  #res_dataset_only = queryEncode(df=encode_df, set_accession = "ENCSR180GCH")
+  #checkEquals(sum(grepl("experiments", x=res_dataset_only$dataset_type)), 0,
+              #msg = "this query shouldn't return any experiment results" )
+#
+  #checkEquals(sum(!grepl("experiments", x=res_dataset_only$dataset_type)), 2,
+              #msg = "this query should return this precise result")
+#}
 
 test.query_revoked_file <- function() {
   data("encode_df")

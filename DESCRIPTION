@@ -2,7 +2,7 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 1.5.6
+Version: 1.99.0
 Date: 2015-02-25
 Author@R: c(person("Charles","Joly Beauparlant", email = "charles.joly-
     beauparlant@crchul.ulaval.ca", role = "aut,cre"), person("Audrey","Lemacon",
