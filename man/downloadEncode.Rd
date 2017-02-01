@@ -2,19 +2,19 @@
 % Please edit documentation in R/download.R
 \name{downloadEncode}
 \alias{downloadEncode}
-\title{downloadEncode is use to download  a serie of files or dataset 
-by their accession.}
+\title{downloadEncode is used to download a serie of files or datasets 
+using their accession.}
 \usage{
 downloadEncode(file_acc = NULL, df = NULL, format = "all", dir = ".",
   force = TRUE)
 }
 \arguments{
-\item{file_acc}{A \code{character} of ENCODE file accession or 
-experiment accession. Can also be a data.table coming from any ENCODExplorer
-research function.}
+\item{file_acc}{A \code{character} of ENCODE file or 
+experiment accessions. Can also be a data.table coming from any ENCODExplorer
+search function.}
 
-\item{df}{The reference \code{data.table} use to find the download. File 
-that are not available will be search directly throught the current
+\item{df}{The reference \code{data.table} used to find the download. Files 
+that are not available will be searched directly through the current
 ENCODE database.}
 
 \item{format}{The specific file format to download.
@@ -22,7 +22,7 @@ Default : all}
 
 \item{dir}{The directory to locate the downloaded files}
 
-\item{force}{\code{boolean} the allow to download a file when it already exist
+\item{force}{\code{boolean} to allow downloading a file even if it already exists
 in the directory. 
 Default : TRUE}
 }
@@ -30,8 +30,8 @@ Default : TRUE}
 A \code{character} with the downloaded files
 }
 \description{
-downloadEncode is use to download  a serie of files or dataset 
-by their accession.
+downloadEncode is used to download a serie of files or datasets 
+using their accession.
 }
 \examples{
  fuzzy_result <- fuzzySearch("ENCSR396EAG", encode_df, filterVector = "accession")
