@@ -20,7 +20,7 @@ download_single_file <- function(file_url, file_md5, dir=".", experiment_name=NU
   href <- as.character(file_url)
   
   # Calculate the md5 of the file if it already exists.
-  md5sum_file <- tools::md5sum(paste(dir, fileName, sep="/"))
+  md5sum_file <- tools::md5sum(fileName)
   md5sum_encode <- as.character(file_md5)
   
   # If the file does not exist, md5 hashes do not match or force=TRUE, download the file.
