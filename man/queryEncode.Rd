@@ -9,7 +9,7 @@ queryEncode(df = NULL, set_accession = NULL, assay = NULL,
   file_format = NULL, lab = NULL, organism = NULL, target = NULL,
   treatment = NULL, project = NULL, biosample_type = NULL,
   file_status = "released", status = "released", fixed = TRUE,
-  quiet = FALSE)
+  quiet = FALSE, fuzzy = FALSE)
 }
 \arguments{
 \item{df}{\code{data.frame} containing ENCODE 
