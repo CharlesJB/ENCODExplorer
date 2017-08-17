@@ -26,7 +26,7 @@ test.combined_query <- function() {
   data("encode_df")
   res_combo = queryEncode(df=encode_df, biosample_name = "A549", assay = "chipseq",
                           file_format = "bigwig", fixed = T, quiet=T, fuzzy=T)
-  checkTrue("ENCFF000VPN" %in% as.character(res_combo$file_accession),
+  checkTrue("ENCFF403ARJ" %in% as.character(res_combo$file_accession),
             msg = "this combined query should return a results set containing the id ENCFF000VPN")
 }
 
