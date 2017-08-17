@@ -121,14 +121,14 @@ You can also perform matching through regular expressions by setting fixed to `F
 
 ```{r query_results_4, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, assay = ".*RNA-seq",
-                    biosample_name = "HeLa-S3" fixed = FALSE)
+                    biosample_name = "HeLa-S3", fixed = FALSE)
 table(query_results$assay)
 ```
 
 Finally, the `queryEncodeGeneric` function can be used to perform searches on 
 columns which are not part of the queryEncode interface but are present within
 the encode_df data.table:
-```{r query_results_4, collapse=TRUE}
+```{r query_results_5, collapse=TRUE}
 query_results <- queryEncodeGeneric(biosample_name="HeLa-S3", assay="RNA-seq",
                                     submitted_by="Diane Trout", fuzzy=TRUE)
 table(query_results$submitted_by)
@@ -223,13 +223,13 @@ downloading of a specific format.
 
 Here is a small example query:
 
-```{r query_results_4, collapse=TRUE}
+```{r query_results_6, collapse=TRUE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1", fixed = FALSE)
 ```
 
 And its equivalent search:
 
-```{r search_results_2, collapse=TRUE}
+```{r search_results_1, collapse=TRUE}
 search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 ```
 
@@ -237,7 +237,7 @@ To select a particular file format you can:
 
 1)  add filters to your query and then run the `downloadEncode` function.
 
-```{r query_results_5, collapse=TRUE, eval=FALSE}
+```{r query_results_7, collapse=TRUE, eval=FALSE}
 query_results <- queryEncode(df=encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = FALSE)
 downloadEncode(query_results, df = encode_df)
 ```
@@ -261,7 +261,7 @@ Let's try it with the previous example :
 
 1) search 
 
-```{r search_results_3, collapse=TRUE}
+```{r search_results_2, collapse=TRUE}
 search_results <- searchEncode(searchTerm = "switchgear elavl1", limit = "all")
 ```
 
