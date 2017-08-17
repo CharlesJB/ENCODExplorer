@@ -31,4 +31,3 @@ This function simulates a basic query on ENCODE website
 \examples{
        searchEncode("ChIP-Seq+H3K4me1")
 }
-

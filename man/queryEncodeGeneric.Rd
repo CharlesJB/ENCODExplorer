@@ -61,4 +61,3 @@ options cannot be combined.
     queryEncodeGeneric(assay="RNA-Seq", fuzzy=TRUE)
     }
 }
-

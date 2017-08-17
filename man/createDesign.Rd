@@ -55,4 +55,3 @@ fuzzy_result <- fuzzySearch(searchTerm = "brca", database=encode_df, filterVecto
 design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
 
 }
-

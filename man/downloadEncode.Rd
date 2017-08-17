@@ -38,4 +38,3 @@ using their accession.
  \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 
 }
-

@@ -32,4 +32,3 @@ search_res <- searchEncode(searchTerm = "switchgear elavl1", limit = "1")
 res <- searchToquery(searchResults = search_res, quiet = TRUE)
 
 }
-

@@ -28,6 +28,7 @@
 #' @param    fixed logical. If TRUE, pattern is a string to be matched as it is.
 #' @param    quiet logical enables to switch off the result summary information 
 #' when setting at TRUE.
+#' @param    fuzzy Search for substring or alternate hyphenations. Default: TRUE
 #'
 #' @return a \code{data.frame}s containing data about ENCODE 
 #' experiments and datasets
@@ -182,8 +183,8 @@ queryEncodeGeneric <- function(df = NULL, fixed = TRUE, quiet = FALSE,
   return(query_results)
 }
 
-#' Search the encode_df for a single term within a single field and returns
-#' the indices of the subset of elements which are a match.
+# Search the encode_df for a single term within a single field and returns
+# the indices of the subset of elements which are a match.
 queryOneTerm <- function(df, field_name, individual_term, fixed, fuzzy) {
   results = FALSE
   if(fixed) {
@@ -201,9 +202,9 @@ queryOneTerm <- function(df, field_name, individual_term, fixed, fuzzy) {
   return(results)
 }
 
-#' Search the encode_df for one or more terms within a single field and returns
-#' the indices of the subset of elements which are a match to any one of the
-#' terms, or NULL if the field is not a valid column of the passed-in data-frame.
+# Search the encode_df for one or more terms within a single field and returns
+# the indices of the subset of elements which are a match to any one of the
+# terms, or NULL if the field is not a valid column of the passed-in data-frame.
 queryOneField <- function(df, field_name, query_term, fixed, fuzzy) {
   # Make sure the given column exists.
   if(!(field_name %in% names(df))) {

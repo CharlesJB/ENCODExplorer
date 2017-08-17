@@ -23,4 +23,3 @@ of numeric or a list of one the previous type.
 This function will either remove columns that are not relevant and convert
 columns to a vector or data.frame.
 }
-

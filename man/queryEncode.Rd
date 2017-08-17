@@ -48,6 +48,8 @@ experiment and dataset metadata}
 
 \item{quiet}{logical enables to switch off the result summary information 
 when setting at TRUE.}
+
+\item{fuzzy}{Search for substring or alternate hyphenations. Default: TRUE}
 }
 \value{
 a \code{data.frame}s containing data about ENCODE 
@@ -68,4 +70,3 @@ be modified by setting the \code{fixed} argument at \code{TRUE}
     queryEncode(biosample_name = "A549", file_format = "bam")
     }
 }
-

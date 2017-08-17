@@ -36,4 +36,3 @@ object as database parameter.
    database=encode_df, filterVector ="target", multipleTerm = TRUE)
 
 }
-
