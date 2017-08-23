@@ -148,8 +148,7 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   stopifnot(length(file_acc) > 0)
   
   if(is.null(df)) {
-    data(encode_df, envir = environment())
-    df <- encode_df
+    df <- ENCODExplorer::encode_df
   }
   
   stopifnot(is.data.table(df))
