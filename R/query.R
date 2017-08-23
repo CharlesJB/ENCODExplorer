@@ -127,8 +127,7 @@ queryEncodeGeneric <- function(df = NULL, fixed = TRUE, quiet = FALSE,
   # If no data.frame is provided, use the default one.
   if(is.null(df)) {
     # Load encode_df
-    data(encode_df, envir = environment())
-    df = encode_df
+    df = ENCODExplorer::encode_df
   }
   
   # Gather all search parameters, which are all arguments not explicitly in
@@ -262,7 +261,9 @@ query_transform <- function(my.term) {
 #' @export
 searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
   
-  if(is.null(df)) {data(encode_df, envir = environment())} else {encode_df = df}
+  if(is.null(df)) {
+    df = ENCODExplorer::encode_df
+  }
   
   res = data.frame()
   
@@ -277,7 +278,7 @@ searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
       
       accession <- accessions[i]
       
-      r <- queryEncode(df = encode_df, set_accession = accession, fixed = TRUE, 
+      r <- queryEncode(df = df, set_accession = accession, fixed = TRUE, 
                        quiet = quiet)
       if(!is.null(r)){
         res <- rbind(res,r)
