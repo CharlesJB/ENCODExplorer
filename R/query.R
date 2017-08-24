@@ -186,16 +186,23 @@ queryEncodeGeneric <- function(df = NULL, fixed = TRUE, quiet = FALSE,
 # the indices of the subset of elements which are a match.
 queryOneTerm <- function(df, field_name, individual_term, fixed, fuzzy) {
   results = FALSE
-  if(fixed) {
-    if(fuzzy) {
-      results = grepl(x = df[[field_name]], pattern = query_transform(individual_term), 
-                        ignore.case=TRUE, perl=TRUE)              
-    } else {
-      results = df[[field_name]] == individual_term
-    }
+  
+  # Special case for NA terms, where the equality operator will not work.
+  # This is useful for selecting untreated samples, for example.
+  if(is.na(individual_term)) {
+    results = is.na(df[[field_name]])
   } else {
-    results = grepl(x = df[[field_name]], pattern = individual_term, 
-                      ignore.case=TRUE, perl=TRUE)
+    if(fixed) {
+      if(fuzzy) {
+        results = grepl(x = df[[field_name]], pattern = query_transform(individual_term), 
+                          ignore.case=TRUE, perl=TRUE)              
+      } else {
+        results = df[[field_name]] == individual_term
+      }
+    } else {
+      results = grepl(x = df[[field_name]], pattern = individual_term, 
+                        ignore.case=TRUE, perl=TRUE)
+    }
   }
   
   return(results)
@@ -210,14 +217,20 @@ queryOneField <- function(df, field_name, query_term, fixed, fuzzy) {
     warning(paste(field_name, " is not a column of the passed data-frame. It will be ignored."))
     return(NULL)
   } else {
-    # Make sure the given term are strings.
-    if(!is.character(query_term)) {
-      stop(paste0(query_term, " is not a character object."))
+    # Make sure the passed in terms are a one-dimensional object, and not a list
+    # or data-frame.
+    if(!is.vector(query_term)) {
+      stop(paste0(field_name, " must be a single value or a vector of values.\n"))
     }
     
     # Loop over all terms within the field.
     selected_indices = FALSE
     for(individual_term in query_term) {
+      # Make sure the given term is a string or NA.
+      if(!is.character(individual_term) && !is.na(individual_term)) {
+        stop(paste0(query_term, " must be a character object or NA.\n"))
+      }
+
       selected_indices = selected_indices | queryOneTerm(df, field_name, individual_term, fixed, fuzzy)
     }
     return(selected_indices)
