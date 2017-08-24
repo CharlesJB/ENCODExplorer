@@ -78,3 +78,25 @@ test.query_regex <- function() {
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
             msg = "this regex query should return all assays which have RNA-seq as a substring")
 }
+
+test.query_na <- function() {
+  data("encode_df")
+
+  # Run a query twice: once with all treatment values, and once only with NA treatment.
+  res_null = queryEncodeGeneric(assay="ChIP-seq", biosample_name="A549", 
+                                file_format="bed", status="released", assembly="GRCh38",
+                                target="NR3C1")
+  res_na = queryEncodeGeneric(assay="ChIP-seq", biosample_name="A549", 
+                              file_format="bed", status="released", assembly="GRCh38",
+                              target="NR3C1", treatment=NA)
+
+  # Make sure all treatments are present when treatment was NULL,
+  # and that only NA treatments are present when it is explicitly requested.
+  dex_in_null = "dexamethasone" %in% res_null$treatment
+  na_in_null = NA %in% res_null$treatment
+  dex_in_na = "dexamethasone" %in% res_na$treatment
+  na_in_na = NA %in% res_null$treatment
+                              
+  checkTrue(dex_in_null && na_in_null && !dex_in_na && na_in_na,
+            msg = "setting treatment = NA should only return results where treatment is NA.")
+}
