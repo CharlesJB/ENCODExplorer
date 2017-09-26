@@ -26,3 +26,4 @@ Extract essential informations from a list of data.table in a \code{list} of
         export_ENCODEdb_matrix(database_filename = database_filename)
     }
 }
+

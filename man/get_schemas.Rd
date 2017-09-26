@@ -19,3 +19,4 @@ The data is extracted using the github api:
 
 The data is then downloaded using the \code{jsonlite} package.
 }
+

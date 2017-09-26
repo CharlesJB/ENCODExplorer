@@ -9,7 +9,7 @@ queryEncode(df = NULL, set_accession = NULL, assay = NULL,
   file_format = NULL, lab = NULL, organism = NULL, target = NULL,
   treatment = NULL, project = NULL, biosample_type = NULL,
   file_status = "released", status = "released", fixed = TRUE,
-  quiet = FALSE, fuzzy = FALSE)
+  quiet = FALSE)
 }
 \arguments{
 \item{df}{\code{data.frame} containing ENCODE 
@@ -48,8 +48,6 @@ experiment and dataset metadata}
 
 \item{quiet}{logical enables to switch off the result summary information 
 when setting at TRUE.}
-
-\item{fuzzy}{Search for substring or alternate hyphenations. Default: TRUE}
 }
 \value{
 a \code{data.frame}s containing data about ENCODE 
@@ -70,3 +68,4 @@ be modified by setting the \code{fixed} argument at \code{TRUE}
     queryEncode(biosample_name = "A549", file_format = "bam")
     }
 }
+

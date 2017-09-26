@@ -1,5 +1,4 @@
 #' download_single_file Downloads a single file and checks if md5 checksums match.
-#'
 #' @param file_url A \code{character} giving the URL of the file to be downloaded.
 #' @param file_md5 A \code{character} giving the expected md5 checksum hash of the
 #'   file to be downloaded.
@@ -21,7 +20,7 @@ download_single_file <- function(file_url, file_md5, dir=".", experiment_name=NU
   href <- as.character(file_url)
   
   # Calculate the md5 of the file if it already exists.
-  md5sum_file <- tools::md5sum(fileName)
+  md5sum_file <- tools::md5sum(paste(dir, fileName, sep="/"))
   md5sum_encode <- as.character(file_md5)
   
   # If the file does not exist, md5 hashes do not match or force=TRUE, download the file.
@@ -93,7 +92,6 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 
 #' downloadEncode is used to download a serie of files or datasets 
 #' using their accession. 
-#'
 #' @param file_acc A \code{character} of ENCODE file or 
 #' experiment accessions. Can also be a data.table coming from any ENCODExplorer
 #' search function.
@@ -148,7 +146,8 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   stopifnot(length(file_acc) > 0)
   
   if(is.null(df)) {
-    df <- ENCODExplorer::encode_df
+    data(encode_df, envir = environment())
+    df <- encode_df
   }
   
   stopifnot(is.data.table(df))
