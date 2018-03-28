@@ -52,7 +52,7 @@ test.query_revoked_file <- function() {
 test.query_two_terms <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
-  assay2 = "polyA mRNA RNA-seq"
+  assay2 = "polyA RNA-seq"
   res_two_terms = queryEncode(assay = c(assay1, assay2), biosample_name = "HeLa-S3", fixed = T)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
@@ -62,7 +62,7 @@ test.query_two_terms <- function() {
 test.query_fuzzy_prefix <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
-  assay2 = "polyA mRNA RNA-seq"
+  assay2 = "polyA RNA-seq"
   res_fuzzy = queryEncode(assay = "RNA-seq", biosample_name = "HeLa-S3", fixed = T, fuzzy = T)
 
   checkTrue(assay1 %in% res_fuzzy$assay && assay2 %in% res_fuzzy$assay,
@@ -72,7 +72,7 @@ test.query_fuzzy_prefix <- function() {
 test.query_regex <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
-  assay2 = "polyA mRNA RNA-seq"
+  assay2 = "polyA RNA-seq"
   res_two_terms = queryEncode(assay = ".*RNA-seq", biosample_name = "HeLa-S3", fixed = F)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
