@@ -218,19 +218,15 @@ queryOneField <- function(df, field_name, query_term, fixed, fuzzy) {
     return(NULL)
   } else {
     # Make sure the passed in terms are a one-dimensional object, and not a list
-    # or data-frame.
-    if(!is.vector(query_term)) {
-      stop(paste0(field_name, " must be a single value or a vector of values.\n"))
+    # or data-frame. Also make sure it is of an appropriate type.
+    if(!is.numeric(query_term) && !is.logical(query_term) && !is.character(query_term) && !is.factor(query_term) && !is.na(query_term)) {
+      stop(paste0(field_name, " must be of type numeric, logical, character or NA. ",
+                  "Both single values and a vector of values are supported.\n"))
     }
     
     # Loop over all terms within the field.
     selected_indices = FALSE
     for(individual_term in query_term) {
-      # Make sure the given term is a string or NA.
-      if(!is.character(individual_term) && !is.na(individual_term)) {
-        stop(paste0(query_term, " must be a character object or NA.\n"))
-      }
-
       selected_indices = selected_indices | queryOneTerm(df, field_name, individual_term, fixed, fuzzy)
     }
     return(selected_indices)
