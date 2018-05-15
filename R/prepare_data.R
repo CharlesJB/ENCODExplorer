@@ -19,16 +19,18 @@
 #' @import jsonlite
 #' @import data.table
 #' @export
-prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
+prepare_ENCODEdb <- function(database_filename = "tables.RDA",
                              types = get_encode_types(), overwrite = FALSE) {
-  
   if(file.exists(database_filename) && !overwrite) {
-    warning(paste0("The file ", database_filename, " already exists. Please delete it before re-run the data preparation"))
+    warning(paste0("The file ", database_filename, " already exists and will not be overwritten.\n",
+                   "Please delete or set overwrite = TRUE before re-running the data preparation"))
     NULL
   } else {
     # Extract the tables from the ENCODE rest api
     extract_type <- function(type) {
+      cat("Extracting table ", type, "\n")
       table <- extract_table(type)
+      cat("Cleaning table ", type, "\n")
       table_clean <- clean_table(table)
     }
     # List of data.frame
@@ -46,9 +48,9 @@ prepare_ENCODEdb <- function(database_filename = "inst/extdata/tables.RDA",
     }
     else
     {
-      warning(paste0("Some goes wrong during the data preparation. 
-                        Please erase the database ",database_filename," and re-run the whole process.
-                        If the problem persists, please contact us"))
+      warning(paste0("Something went wrong during data preparation. ",
+                     "Please erase the database ", database_filename, " and re-run the whole process.",
+                     "If the problem persists, please contact us"))
       NULL
     }
     

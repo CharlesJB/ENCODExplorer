@@ -21,22 +21,22 @@ However, data retrieval and downloading can be really time-consuming using
 the current web portal. 
 
 This package has been designed to facilitate data access by compiling the 
-metadata associated with file, experiment and dataset. 
+metadata associated with files, experiments and datasets. 
 
-We first extract ENCODE schema from its public github repository. 
-Then we identify the main entities and their relationship with each other to 
+We first extract the ENCODE schema from its public github repository. 
+We then identify the main entities and their relationships with each other to 
 rebuild the ENCODE database into a data.table. 
-We also developped a function which can extract the essential metadata in a R 
-object to aid data exploration.
+We also developped a function which can extract the essential metadata into 
+an R object to aid data exploration.
 We implemented time-saving features to select ENCODE files by querying their 
 metadata and download them.
 
-The data.table can be regenerated at will to query ENCODE database locally 
-keep it up-to-date.
+The data.table can be regenerated at will to query an up-to-date ENCODE
+database locally.
 
-This vignette will introduce the way to update ENCODE data.
+This vignette will introduce how to update the local copy of the ENCODE data.
 
-### Loading ENCODExplorer package
+### Loading the ENCODExplorer package
 
 ```{r libraryLoad}
 suppressMessages(library(ENCODExplorer))
@@ -44,50 +44,65 @@ suppressMessages(library(ENCODExplorer))
 
 ### Data update
 
-If you want regenerate ENCODExplorer data, you can use the update function.
-When you use `overwrite = TRUE`, it will overwrite the default package data, 
-otherwise it will return the datatable `encode_df` .
+Updating ENCODExplorer's local cache of ENCODE metadata relies on two functions 
+from the ENCODExplorer package: 
+* **prepare_ENCODEdb**, which fectches all raw metadata from ENCODE's website
+using its REST API, and 
+* **export_ENCODEdb_matrix**, which converts that metadata into an easy to 
+parse data.table used by ENCODExplorer's query functions.
 
-```{r, eval=FALSE}
-# the path (relative or absolute) to the future database
-database_filename <- "new.encode.rda"
-new_data <- export_ENCODEdb_matrix(database_filename, overwrite = FALSE)
-```
-
-If you want to update the data manually or partially, you have to process the 
-following steps:
-
-* generate a list of data tables from ENCODE: 
+Thus, the first step to updating the local cache of ENCODE data is to call
+**prepare_ENCODEdb**. By default, the results are stored in the current work 
+directory to a file called "tables.RDA". Since fetching ENCODE metadata 
+is a lengthy process, it is advisable to fetch this data only once, then to rely
+on the cached data:
 
 ```{r tables, eval=FALSE}
-# the path (relative or absolute) to the future database
+# The path (relative or absolute) to the future database
 database_filename = "new.encode.rda"
 tables = prepare_ENCODEdb(database_filename)
 ```
 
-* generate the metadata encode_df from a list of data.table:
-```{r new_encode_df, eval = FALSE}
-new_encode_df <- export_ENCODEdb_matrix(tables)
+Once the data has been fetched, it can be converted into a data.table equivalent 
+to the default encode_df using **export_ENCODEdb_matrix**:
+
+```{r, eval=FALSE}
+# The path (relative or absolute) to the database downloaded using
+# prepare_ENCODEdb.
+database_filename <- "new.encode.rda"
+new_encode_df <- export_ENCODEdb_matrix(database_filename)
 ```
 
+The whole process will take several minutes, and will often need up to an hour
+to complete.
 
-The whole process will take several minutes (30 to 60 minutes depending on your
-work environment)
+### Using the updated data
 
-### Updated data usage
-
-If you have chosen not to overwrite the default data, you can use your newly 
-created data.
-Once the `new_encode_df` is generated, you can use it to replace the default one 
-in the `queryEncode` and `downloadEncode` function by setting the *df* option of those 
-functions.
+You can use your new metadata by passing it to the queryEncode and downloadEncode 
+functions using their *df* parameter:
 
 ```{r queryEncode, eval=FALSE}
-query_results <- queryEncode(df = new_encode_df, assay = "switchgear", target ="elavl1", file_format = "bed" , fixed = F)
+query_results <- queryEncode(df = new_encode_df, assay = "switchgear",
+                             target ="elavl1", file_format = "bed" , fixed = F)
 downloadEncode(df = new_encode_df, file_acc = query_results$file_accession)
 ```
 
-Be sure to use the same referencial *df* for both **queryEncode** and **downloadEncode**.
+Be sure to use the same *df* data.table for both **queryEncode** and **downloadEncode**.
 
-You can also use the list of data.table database for own purpose. The imputed database 
-model is available in the [dedicated vignette](DBmodel.html)
+You can also use the generated data.table database for your own purposes. The
+imputed database model is available in the [dedicated vignette](DBmodel.html)
+
+### Updating the default package data
+
+If you want to update ENCODExplorer's default ENCODE metadata so that you won't
+have to call export_ENCODEdb_matrix with every new R session, you can replace
+the tables.RDA file which came with ENCODExplorer. This can only be done if you
+have write permissions for ENCODExplorer's install directory:
+
+```{r replaceTables, eval=FALSE}
+package_table = system.file("extdata", "tables.RDA", package="ENCODExplorer")
+prepare_ENCODEdb(database_filename=package_table, overwrite=TRUE)
+```
+
+After this operation, ENCODExplorer will use the updated data whenever it
+loads encode_df.
