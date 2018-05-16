@@ -73,8 +73,8 @@ database_filename <- "new.encode.rda"
 new_encode_df <- export_ENCODEdb_matrix(database_filename)
 ```
 
-The whole process will take several minutes, and will often need up to an hour
-to complete.
+The whole process is time-consuming and memory intensive, and took two hours 
+and at least 5Gb of RAM to complete on a modern PC.
 
 ### Using the updated data
 
@@ -91,18 +91,3 @@ Be sure to use the same *df* data.table for both **queryEncode** and **downloadE
 
 You can also use the generated data.table database for your own purposes. The
 imputed database model is available in the [dedicated vignette](DBmodel.html)
-
-### Updating the default package data
-
-If you want to update ENCODExplorer's default ENCODE metadata so that you won't
-have to call export_ENCODEdb_matrix with every new R session, you can replace
-the tables.RDA file which came with ENCODExplorer. This can only be done if you
-have write permissions for ENCODExplorer's install directory:
-
-```{r replaceTables, eval=FALSE}
-package_table = system.file("extdata", "tables.RDA", package="ENCODExplorer")
-prepare_ENCODEdb(database_filename=package_table, overwrite=TRUE)
-```
-
-After this operation, ENCODExplorer will use the updated data whenever it
-loads encode_df.
