@@ -47,7 +47,7 @@ library(ENCODExplorer)
 
 ### Introduction
 
-AS of now, there are 7 dataset types in ENCODE : annotation, experiment, 
+As of now, there are 7 dataset types in ENCODE : annotation, experiment, 
 matched-set, project, reference, reference-epigenome and ucsc-browser-composite.
 This package comes with an up-to-date  `data.table` containing the essential parts
 of ENCODE files metadata: `encode_df`. This database contains all files for all dataset types.

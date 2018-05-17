@@ -251,7 +251,7 @@ update_antibody <- function(files, antibody_lot, antibody_charac) {
 update_treatment <- function(files, treatments, libraries, biosamples) {
   # Infer the treatment id from replicate -> library -> biosample chain.
   files$biosample_id = pull_column(files, libraries, "replicate_library", "id", "biosample")
-  files$treatment_id = pull_column(files, biosamples, "treatment_id", "id", "treatments")
+  files$treatment_id = pull_column(files, biosamples, "biosample_id", "id", "treatments")
   
   # Infer term from id when available.Replace id with term
   files$treatment = files$treatment_id
