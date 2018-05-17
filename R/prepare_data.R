@@ -78,52 +78,39 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   # Step 2 : renaming specific column.
   encode_df <- rename_file_columns(encode_df)
-
+  encode_df <- split_dataset_column(files = encode_df)
+  
   # Step 3 : updating project, paired-with, platform and lab column.
   encode_df <- update_project_platform_lab(files = encode_df, awards = db$award, 
                                            labs = db$lab, platforms = db$platform)
 
-  # Step 4 : Updating replicate_list and treatment column.
-  encode_df <- update_replicate_treatment(files = encode_df,
-                                          replicates = db$replicate, 
-                                          libraries = db$library, 
-                                          treatments = db$treatment,
-                                          biosamples = db$biosample,
-                                          antibody_lot = db$antibody_lot,
-                                          antibody_charac = db$antibody_characterization)
-  
-  encode_df <- split_dataset_column(files = encode_df)
-  
-  # Step 6 to step 9: Creating new columns
-  exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
-                 "biosample_name"="biosample_term_name", "controls"="possible_controls")
-  encode_df = pull_columns_append(encode_df, db$experiment, "accession", "accession", exp_colmap)
-  
-  # Step 7
-  encode_df$organism <- pull_column(encode_df, db$target, "target", "id", "organism")
-  
-  # Step 8
-  encode_df$investigated_as = pull_column(encode_df, db$target, "target", "id", "investigated_as")                 
-  encode_df$target = pull_column_merge(encode_df, db$target, "target", "id", "label", "target")
+  # Step 4 : Merge sample information from other tables.
+  encode_df <- update_replicate(files = encode_df, replicates = db$replicate)
+  encode_df <- update_antibody(files = encode_df, antibody_lot = db$antibody_lot,
+                               antibody_charac = db$antibody_characterization)
+  encode_df <- update_treatment(files = encode_df, treatments = db$treatment,
+                               libraries = db$library, biosamples = db$biosample)
+  encode_df = update_experiment(files=encode_df, experiments=db$experiment)
+  encode_df = update_target(files=encode_df, targets=db$target, organisms=db$organism)
+                 
 
-  # Step 9
-  encode_df$organism <- pull_column_merge(encode_df, db$organism, "organism", "id", "scientific_name", "organism")
-  
-  # Step 10 : Adjusting file_size
-  encode_df <- file_size_conversion(encode_df)
-  encode_df$file_size <- as.character(encode_df$file_size)
-  
-  # Step 11
+  # Fetch some additional miscellaneous columns.                 
+  encode_df$nucleic_acid_term = pull_column(encode_df, db$library, "replicate_library", "id", "nucleic_acid_term_name")
   encode_df$submitted_by <- pull_column_merge(encode_df, db$user, "submitted_by", "id", "title", "submitted_by")
-  
-  # Creating and updating new columns for dataset
   encode_df$status <- pull_column_merge(encode_df, db$dataset, "accession", "accession", "status", "status")
+  encode_df <- file_size_conversion(encode_df)
   
-  #Ordering the table by the accession column
+  # Remove remaining ID prefixes
+  files$replicate_library <- remove_id_prefix(files$replicate_library)                               
+  encode_df$controls <- remove_id_prefix(encode_df$controls)
+  encode_df$controlled_by <- remove_id_prefix(encode_df$controlled_by)
+  encode_df$replicate_list <- remove_id_prefix(encode_df$replicate_list)
+  
+  # Ordering the table by the accession column
   encode_df <- encode_df[order(accession),]
   
-  #reordering the table, we want to have the column below as the first column
-  #to be display fellowed by the rest the remaining column available.
+  # Reordering the table, we want to have the column below as the first column
+  # to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
                     "file_size", "output_category", "output_type", "target", "investigated_as",
                     "nucleic_acid_term", "assay", "treatment", "treatment_amount",
@@ -135,47 +122,10 @@ export_ENCODEdb_matrix <- function(database_filename) {
                     "lab","run_type", "read_length", "paired_end",
                     "paired_with", "platform", "notes", "href", "biological_replicates",
                     "biological_replicate_number","technical_replicate_number","replicate_list")
-  encode_df$controls <- remove_id_prefix(encode_df$controls)
-  encode_df$controlled_by <- remove_id_prefix(encode_df$controlled_by)
-  encode_df$replicate_list <- remove_id_prefix(encode_df$replicate_list)
-  
-  colEncode <- colnames(encode_df)
-  colEncode <- colEncode[!(colEncode %in% colNamesList)]
-  colEncode <- c(colNamesList,colEncode)
+
+  missing_columns = setdiff(colnames(encode_df), colNamesList)
+  colEncode <- c(colNamesList, missing_columns)
   data.table::setcolorder(encode_df, colEncode)
-  
-}
-
-### Step 2 : renaming
-rename_file_columns <- function(files){
-  names(files)[names(files) == 'status'] <- 'file_status'
-  names(files)[names(files) == 'accession'] <- 'file_accession'
-  names(files)[names(files) == 'award'] <- 'project'
-  names(files)[names(files) == 'replicate'] <- 'replicate_list'
-  
-  return(files)
-}
-
-pull_column_no_prefix <- function(table1, table2, id1, id2, pull_value, prefix_value) {
-    pulled_val = pull_column(table1, table2, id1, id2, pull_value)
-    no_prefix = remove_id_prefix(table1[[prefix_value]])
-    return(ifelse(is.na(pulled_val), no_prefix, pulled_val))
-}
-
-update_project_platform_lab <- function(files, awards, labs, platforms){
-  # Updating files$project with awards$project
-  files$project = pull_column_no_prefix(files, awards, "project", "id", "project", "project")
-  
-  # Updating files$paired_with
-  files$paired_with <- remove_id_prefix(files$paired_with)
-  
-  # Updating files$platform with platform$title
-  files$platform = pull_column_no_prefix(files, platforms, "platform", "id", "title", "platform")
-  
-  # Updating files$lab with labs$title
-  files$lab = pull_column_no_prefix(files, labs, "lab", "id", "title", "lab")
-
-  return(files)
 }
 
 # Matches the entries of table1 to table2, using id1 and id2, then returns
@@ -191,12 +141,6 @@ pull_column_merge <- function(table1, table2, id1, id2, pulled_column, updated_v
   retval = pull_column(table1, table2, id1, id2, pulled_column)
   retval = ifelse(is.na(match(table1[[id1]], table2[[id2]])), table1[[updated_value]], retval)
   return(retval)
-}
-
-# Remove the type prefix from ENCODE URL-like identifiers.
-# Example: /files/ENC09345TXW/ becomes ENC09345TXW.
-remove_id_prefix <- function(ids) {
-    return(gsub("/.*/(.*)/", "\\1", ids))
 }
 
 # Matches the entries of table1 to table2, using id1 and id2,
@@ -225,21 +169,80 @@ pull_columns_append <- function(table1, table2, id1, id2, value_pairs) {
     return(cbind(table1, pulled_columns))
 }
 
-update_replicate_treatment <- function(files, replicates, libraries, treatments, biosamples,
-                                       antibody_lot, antibody_charac){
- 
+# Remove the type prefix from ENCODE URL-like identifiers.
+# Example: /files/ENC09345TXW/ becomes ENC09345TXW.
+remove_id_prefix <- function(ids) {
+    return(gsub("/.*/(.*)/", "\\1", ids))
+}
+
+# Pulls a column. If no match is found, remove the ENCODE id type prefix
+# from the previous value.
+pull_column_no_prefix <- function(table1, table2, id1, id2, pull_value, prefix_value) {
+    pulled_val = pull_column(table1, table2, id1, id2, pull_value)
+    no_prefix = remove_id_prefix(table1[[prefix_value]])
+    return(ifelse(is.na(pulled_val), no_prefix, pulled_val))
+}
+
+### Step 2 : renaming
+rename_file_columns <- function(files){
+  names(files)[names(files) == 'status'] <- 'file_status'
+  names(files)[names(files) == 'accession'] <- 'file_accession'
+  names(files)[names(files) == 'award'] <- 'project'
+  names(files)[names(files) == 'replicate'] <- 'replicate_list'
+  
+  return(files)
+}
+
+
+
+update_project_platform_lab <- function(files, awards, labs, platforms){
+  # Updating files$project with awards$project
+  files$project = pull_column_no_prefix(files, awards, "project", "id", "project", "project")
+  
+  # Updating files$paired_with
+  files$paired_with <- remove_id_prefix(files$paired_with)
+  
+  # Updating files$platform with platform$title
+  files$platform = pull_column_no_prefix(files, platforms, "platform", "id", "title", "platform")
+  
+  # Updating files$lab with labs$title
+  files$lab = pull_column_no_prefix(files, labs, "lab", "id", "title", "lab")
+
+  return(files)
+}
+
+update_experiment <- function(files, experiments) {
+  exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
+                 "biosample_name"="biosample_term_name", "controls"="possible_controls")
+  files = pull_columns_append(files, experiments, "accession", "accession", exp_colmap)
+  
+  return(files)
+}
+
+update_replicate <- function(files, replicates) {
   # Updating biological_replicate_list with replicates$biological_replicate_number
   replicate_col_map = c("biological_replicate_number", "replicate_library"="library",
                         "replicate_antibody"="antibody","technical_replicate_number")
   files = pull_columns_append(files, replicates, "replicate_list", "id", replicate_col_map)
   
+  return(files)
+}
+
+update_antibody <- function(files, antibody_lot, antibody_carac) {
   # Creating antibody target
   antibody_col_map = c("antibody_target"="targets", "antibody_characterization"="characterizations")
   files = pull_columns_append(files, antibody_lot, "replicate_antibody", "id", antibody_col_map)
   
   files$antibody_caption = pull_column(files, antibody_charac, "antibody_characterization", "id", "caption")
   files$antibody_characterization = pull_column_merge(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
+
+  files$replicate_antibody <- remove_id_prefix(files$replicate_antibody)
+  files$antibody_target <- remove_id_prefix(files$antibody_target)  
   
+  return(files)  
+}
+
+update_treatment <- function(files, treatments, libraries, biosamples) {
   files$treatment = files$replicate_library
   files$treatment = pull_column_merge(files, libraries, "treatment", "id", "biosample", "treatment")
   files$treatment = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
@@ -248,17 +251,21 @@ update_replicate_treatment <- function(files, replicates, libraries, treatments,
   files$treatment_id = files$replicate_library
   files$treatment_id = pull_column(files, libraries, "treatment", "id", "biosample")
   files$treatment_id = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
-
+  
   treatment_col_map = c("treatment_amount"="amount", "treatment_amount_unit"="amount_units", 
                         "treatment_duration"="duration", "treatment_duration_unit"="duration_units")
   files = pull_columns_append(files, treatments, "treatment_id", "id", treatment_col_map)
+
+  return(files)
+}
+
+update_target <- function(files, targets, organisms) {
+  files$organism <- pull_column(files, targets, "target", "id", "organism")
   
-  files$nucleic_acid_term = pull_column(files, libraries, "replicate_library", "id", "nucleic_acid_term_name")
-  
-  # Remove ID prefixes
-  files$replicate_library <- remove_id_prefix(files$replicate_library)
-  files$replicate_antibody <- remove_id_prefix(files$replicate_antibody)
-  files$antibody_target <- remove_id_prefix(files$antibody_target)
+  files$investigated_as = pull_column(files, targets, "target", "id", "investigated_as")                 
+  files$target = pull_column_merge(files, targets, "target", "id", "label", "target")
+
+  files$organism <- pull_column_merge(files, organisms, "organism", "id", "scientific_name", "organism")  
   
   return(files)
 }
@@ -292,5 +299,6 @@ file_size_conversion <- function(encode_exp) {
             }
         }
     })
+    encode_exp$file_size = as.character(encode_exp$file_size)
     encode_exp
 }
