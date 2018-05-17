@@ -76,15 +76,13 @@ export_ENCODEdb_matrix <- function(database_filename) {
   db = database_filename
   encode_df = db$file
   
-  # Step 2 : renaming specific column.
+  # Renaming certain column.
   encode_df <- rename_file_columns(encode_df)
   encode_df <- split_dataset_column(files = encode_df)
   
-  # Step 3 : updating project, paired-with, platform and lab column.
+  # Merge sample information from other tables.
   encode_df <- update_project_platform_lab(files = encode_df, awards = db$award, 
                                            labs = db$lab, platforms = db$platform)
-
-  # Step 4 : Merge sample information from other tables.
   encode_df <- update_replicate(files = encode_df, replicates = db$replicate)
   encode_df <- update_antibody(files = encode_df, antibody_lot = db$antibody_lot,
                                antibody_charac = db$antibody_characterization)
@@ -101,7 +99,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df <- file_size_conversion(encode_df)
   
   # Remove remaining ID prefixes
-  files$replicate_library <- remove_id_prefix(files$replicate_library)                               
+  encode_df$replicate_library <- remove_id_prefix(encode_df$replicate_library)                               
   encode_df$controls <- remove_id_prefix(encode_df$controls)
   encode_df$controlled_by <- remove_id_prefix(encode_df$controlled_by)
   encode_df$replicate_list <- remove_id_prefix(encode_df$replicate_list)
@@ -183,7 +181,7 @@ pull_column_no_prefix <- function(table1, table2, id1, id2, pull_value, prefix_v
     return(ifelse(is.na(pulled_val), no_prefix, pulled_val))
 }
 
-### Step 2 : renaming
+# Rename certain columns from the files table.
 rename_file_columns <- function(files){
   names(files)[names(files) == 'status'] <- 'file_status'
   names(files)[names(files) == 'accession'] <- 'file_accession'
@@ -193,8 +191,8 @@ rename_file_columns <- function(files){
   return(files)
 }
 
-
-
+# Fetch information from the ENCODE award, lab and platform tables
+# and merge them into encode_df (ENCODE's file table)
 update_project_platform_lab <- function(files, awards, labs, platforms){
   # Updating files$project with awards$project
   files$project = pull_column_no_prefix(files, awards, "project", "id", "project", "project")
@@ -211,6 +209,8 @@ update_project_platform_lab <- function(files, awards, labs, platforms){
   return(files)
 }
 
+# Fetches columns from ENCODE experiment table and merges them
+# with encode_df (ENCODE's file table).
 update_experiment <- function(files, experiments) {
   exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
                  "biosample_name"="biosample_term_name", "controls"="possible_controls")
@@ -219,6 +219,8 @@ update_experiment <- function(files, experiments) {
   return(files)
 }
 
+# Fetches columns from ENCODE replicate table and merges them
+# with encode_df (ENCODE's file table).
 update_replicate <- function(files, replicates) {
   # Updating biological_replicate_list with replicates$biological_replicate_number
   replicate_col_map = c("biological_replicate_number", "replicate_library"="library",
@@ -228,7 +230,9 @@ update_replicate <- function(files, replicates) {
   return(files)
 }
 
-update_antibody <- function(files, antibody_lot, antibody_carac) {
+# Fetches columns from ENCODE antibody_lot and antibody_characterization tables
+# and merge them with encode_df (ENCODE's file table).
+update_antibody <- function(files, antibody_lot, antibody_charac) {
   # Creating antibody target
   antibody_col_map = c("antibody_target"="targets", "antibody_characterization"="characterizations")
   files = pull_columns_append(files, antibody_lot, "replicate_antibody", "id", antibody_col_map)
@@ -242,6 +246,8 @@ update_antibody <- function(files, antibody_lot, antibody_carac) {
   return(files)  
 }
 
+# Fetches columns from ENCODE treatment table and merge them with 
+# encode_df (ENCODE's file table).
 update_treatment <- function(files, treatments, libraries, biosamples) {
   files$treatment = files$replicate_library
   files$treatment = pull_column_merge(files, libraries, "treatment", "id", "biosample", "treatment")
@@ -259,6 +265,8 @@ update_treatment <- function(files, treatments, libraries, biosamples) {
   return(files)
 }
 
+# Fetches columns from ENCODE target and organism tables and merge them with 
+# encode_df (ENCODE's file table).
 update_target <- function(files, targets, organisms) {
   files$organism <- pull_column(files, targets, "target", "id", "organism")
   
@@ -270,6 +278,7 @@ update_target <- function(files, targets, organisms) {
   return(files)
 }
 
+# Split the dataset column into its type and accession components.
 split_dataset_column <- function(files){
   # Step 5 : Splitting dataset column into two column
   dataset_types <- gsub(x = files$dataset, pattern = "/(.*)/.*/", 
@@ -283,6 +292,7 @@ split_dataset_column <- function(files){
   return(files)
 }
 
+# Converts file sizes from raw numbers to human readable format.
 file_size_conversion <- function(encode_exp) {
     # Converting the file size from byte to the Kb, Mb or Gb
     encode_exp$file_size <- sapply(encode_exp$file_size, function(size){
