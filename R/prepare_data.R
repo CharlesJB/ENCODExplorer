@@ -80,9 +80,6 @@ export_ENCODEdb_matrix <- function(database_filename) {
   db = database_filename
   encode_df = db$file
   
-  # Step 1 : fetch all needed data.
-  #Tables <- fetch_tables(database_file = database_filename)
-
   # Step 2 : renaming specific column.
   encode_df <- rename_file_columns(encode_df)
 
@@ -163,25 +160,24 @@ rename_file_columns <- function(files){
   return(files)
 }
 
+pull_column_no_prefix <- function(table1, table2, id1, id2, pull_value, prefix_value) {
+    pulled_val = pull_column(table1, table2, id1, id2, pull_value)
+    no_prefix = remove_id_prefix(table1[[prefix_value]])
+    return(ifelse(is.na(pulled_val), no_prefix, pulled_val))
+}
+
 update_project_platform_lab <- function(files, awards, labs, platforms){
   # Updating files$project with awards$project
-  project = pull_column(files, awards, "project", "id", "project")
-  no_prefix = remove_id_prefix(files$project)
-  files$project = ifelse(is.na(project), no_prefix, project)
+  files$project = pull_column_no_prefix(files, awards, "project", "id", "project", "project")
   
   # Updating files$paired_with
-  files$paired_with <- gsub(x = files$paired_with, pattern = "/files/(.*)/", 
-                            replacement = '\\1')
+  files$paired_with <- remove_id_prefix(files$paired_with)
   
   # Updating files$platform with platform$title
-  platform = pull_column(files, platforms, "platform", "id", "title")
-  no_prefix = remove_id_prefix(files$platform)
-  files$platform = ifelse(is.na(platform), no_prefix, platform)
+  files$platform = pull_column_no_prefix(files, platforms, "platform", "id", "title", "platform")
   
   # Updating files$lab with labs$title
-  lab = pull_column(files, labs, "lab", "id", "title")
-  no_prefix = remove_id_prefix(files$lab)
-  files$lab = ifelse(is.na(lab), no_prefix, lab)
+  files$lab = pull_column_no_prefix(files, labs, "lab", "id", "title", "lab")
 
   return(files)
 }
@@ -289,5 +285,4 @@ file_size_conversion <- function(encode_exp) {
         }
     })
     encode_exp
-    
 }
