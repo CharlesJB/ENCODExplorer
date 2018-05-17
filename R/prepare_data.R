@@ -113,7 +113,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
                     "file_size", "output_category", "output_type", "target", "investigated_as",
                     "nucleic_acid_term", "assay", "treatment", "treatment_amount",
                     "treatment_amount_unit", "treatment_duration", "treatment_duration_unit",
-                    "biosample_type", "biosample_name", 
+                    "biosample_id", "biosample_type", "biosample_name", 
                     "replicate_library", "replicate_antibody", "antibody_target",
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
@@ -249,14 +249,13 @@ update_antibody <- function(files, antibody_lot, antibody_charac) {
 # Fetches columns from ENCODE treatment table and merge them with 
 # encode_df (ENCODE's file table).
 update_treatment <- function(files, treatments, libraries, biosamples) {
-  files$treatment = files$replicate_library
-  files$treatment = pull_column_merge(files, libraries, "treatment", "id", "biosample", "treatment")
-  files$treatment = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
-  files$treatment = pull_column_merge(files, treatments, "treatment", "id", "treatment_term_name", "treatment")
+  # Infer the treatment id from replicate -> library -> biosample chain.
+  files$biosample_id = pull_column(files, libraries, "replicate_library", "id", "biosample")
+  files$treatment_id = pull_column(files, biosamples, "treatment_id", "id", "treatments")
   
-  files$treatment_id = files$replicate_library
-  files$treatment_id = pull_column(files, libraries, "treatment", "id", "biosample")
-  files$treatment_id = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
+  # Infer term from id when available.Replace id with term
+  files$treatment = files$treatment_id
+  files$treatment = pull_column_merge(files, treatments, "treatment_id", "id", "treatment_term_name", "treatment")
   
   treatment_col_map = c("treatment_amount"="amount", "treatment_amount_unit"="amount_units", 
                         "treatment_duration"="duration", "treatment_duration_unit"="duration_units")
