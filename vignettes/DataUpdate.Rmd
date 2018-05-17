@@ -52,8 +52,8 @@ using its REST API, and
 parse data.table used by ENCODExplorer's query functions.
 
 Thus, the first step to updating the local cache of ENCODE data is to call
-**prepare_ENCODEdb**. By default, the results are stored in the current work 
-directory to a file called "tables.RDA". Since fetching ENCODE metadata 
+**prepare_ENCODEdb**. By default, the results are cached in the current work 
+directory in a file called "tables.RDA". Since fetching ENCODE metadata 
 is a lengthy process, it is advisable to fetch this data only once, then to rely
 on the cached data:
 
@@ -62,6 +62,12 @@ on the cached data:
 database_filename = "new.encode.rda"
 tables = prepare_ENCODEdb(database_filename)
 ```
+
+The resulting object is a list of data.table objects representing ENCODE
+metadata. The meaning of the included columns is documented in ENCODE's
+table schemas(https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas),
+and the interaction between those tables interact together can be [visualized
+in svg format](https://www.encodeproject.org/profiles/graph.svg).
 
 Once the data has been fetched, it can be converted into a data.table equivalent 
 to the default encode_df using **export_ENCODEdb_matrix**:
