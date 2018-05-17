@@ -190,18 +190,10 @@ pull_column <- function(files, table2, file_id, table_id, table_value) {
   return(table2[[table_value]][match(files[[file_id]], table2[[table_id]])])
 }
 
-pull_column_c <- function(files, table2, file_id, table_id, table_value) {
-  return(as.character(pull_column(files, table2, file_id, table_id, table_value)))
-}
-
 pull_column_update <- function(files, table2, file_id, table_id, table_value, file_value) {
   retval = pull_column(files, table2, file_id, table_id, table_value)
   retval = ifelse(is.na(match(files[[file_id]], table2[[table_id]])), files[[file_value]], retval)
   return(retval)
-}
-
-pull_column_update_c <- function(files, table2, file_id, table_id, table_value, file_value) {
-  return(as.character(pull_column_update(files, table2, file_id, table_id, table_value, file_value)))  
 }
 
 remove_id_prefix <- function(ids) {
@@ -241,8 +233,8 @@ update_replicate_treatment <- function(files, replicates, libraries, treatments,
   antibody_col_map = c("antibody_target"="targets", "antibody_characterization"="characterizations")
   files = pull_columns_append(files, antibody_lot, "replicate_antibody", "id", antibody_col_map)
   
-  files$antibody_caption = pull_column_c(files, antibody_charac, "antibody_characterization", "id", "caption")
-  files$antibody_characterization = pull_column_update_c(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
+  files$antibody_caption = pull_column(files, antibody_charac, "antibody_characterization", "id", "caption")
+  files$antibody_characterization = pull_column_update(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
   
   files$treatment = files$replicate_library
   files$treatment = pull_column_update(files, libraries, "treatment", "id", "biosample", "treatment")
