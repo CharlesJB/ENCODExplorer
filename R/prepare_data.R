@@ -101,33 +101,29 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df <- Tables$files
   
   # Step 6 to step 9: Creating new columns
-  encode_df$target <-   file_match(encode_df, Tables$experiments, "accession", "accession", "target")
-  encode_df$date_released <- file_match(encode_df, Tables$experiments, "accession", "accession", "date_released")
-  encode_df$status <- file_match(encode_df, Tables$experiments, "accession", "accession", "status")
-  encode_df$assay <- file_match(encode_df, Tables$experiments, "accession", "accession", "assay_title")
-  encode_df$biosample_type <- file_match(encode_df, Tables$experiments, "accession", "accession", "biosample_type")
-  encode_df$biosample_name <- file_match(encode_df, Tables$experiments, "accession", "accession", "biosample_term_name")
-  encode_df$controls <- file_match(encode_df, Tables$experiments, "accession", "accession", "possible_controls")
+  exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
+                 "biosample_name"="biosample_term_name", "controls"="possible_controls")
+  encode_df = pull_columns_append(encode_df, Tables$experiments, "accession", "accession", exp_colmap)
   
   # Step 7
-  encode_df$organism <- file_match(encode_df, Tables$targets, "target", "id", "organism")
+  encode_df$organism <- pull_column(encode_df, Tables$targets, "target", "id", "organism")
   
   # Step 8
-  encode_df$investigated_as = file_match(encode_df, Tables$targets, "target", "id", "investigated_as")                 
-  encode_df$target = file_match_update(encode_df, Tables$targets, "target", "id", "label", "target")
+  encode_df$investigated_as = pull_column(encode_df, Tables$targets, "target", "id", "investigated_as")                 
+  encode_df$target = pull_column_update(encode_df, Tables$targets, "target", "id", "label", "target")
 
   # Step 9
-  encode_df$organism <- file_match_update(encode_df, Tables$organisms, "organism", "id", "scientific_name", "organism")
+  encode_df$organism <- pull_column_update(encode_df, Tables$organisms, "organism", "id", "scientific_name", "organism")
   
   # Step 10 : Adjusting file_size
   encode_df <- file_size_conversion(encode_df)
   encode_df$file_size <- as.character(encode_df$file_size)
   
   # Step 11
-  encode_df$submitted_by <- file_match_update(encode_df, Tables$users, "submitted_by", "id", "title", "submitted_by")
+  encode_df$submitted_by <- pull_column_update(encode_df, Tables$users, "submitted_by", "id", "title", "submitted_by")
   
   # Creating and updating new columns for dataset
-  encode_df$status <- file_match_update(encode_df, Tables$datasets, "accession", "accession", "status", "status")
+  encode_df$status <- pull_column_update(encode_df, Tables$datasets, "accession", "accession", "status", "status")
   
   remove(Tables)
   #Ordering the table by the accession column
@@ -137,7 +133,9 @@ export_ENCODEdb_matrix <- function(database_filename) {
   #to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
                     "file_size","output_category", "output_type", "target", "investigated_as",
-                    "nucleic_acid_term", "assay", "treatment", "biosample_type","biosample_name", 
+                    "nucleic_acid_term", "assay", "treatment", "treatment_amount",
+                    "treatment_amount_unit", "treatment_duration", "treatment_duration_unit",
+                    "biosample_type","biosample_name", 
                     "replicate_library","replicate_antibody", "antibody_target",
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
@@ -188,7 +186,7 @@ rename_file_columns <- function(files){
 
 update_project_platform_lab <- function(files, awards, labs, platforms){
   # Updating files$project with awards$project
-  project = file_match(files, awards, "project", "id", "project")
+  project = pull_column(files, awards, "project", "id", "project")
   no_prefix = remove_id_prefix(files$project)
   files$project = ifelse(is.na(project), no_prefix, project)
   
@@ -197,62 +195,90 @@ update_project_platform_lab <- function(files, awards, labs, platforms){
                             replacement = '\\1')
   
   # Updating files$platform with platform$title
-  platform = file_match(files, platforms, "platform", "id", "title")
+  platform = pull_column(files, platforms, "platform", "id", "title")
   no_prefix = remove_id_prefix(files$platform)
   files$platform = ifelse(is.na(platform), no_prefix, platform)
   
   # Updating files$lab with labs$title
-  lab = file_match(files, labs, "lab", "id", "title")
+  lab = pull_column(files, labs, "lab", "id", "title")
   no_prefix = remove_id_prefix(files$lab)
   files$lab = ifelse(is.na(lab), no_prefix, lab)
 
   return(files)
 }
 
-file_match <- function(files, table2, file_id, table_id, table_value) {
+pull_column <- function(files, table2, file_id, table_id, table_value) {
   return(table2[[table_value]][match(files[[file_id]], table2[[table_id]])])
 }
 
-file_match_c <- function(files, table2, file_id, table_id, table_value) {
-  return(as.character(file_match(files, table2, file_id, table_id, table_value)))
+pull_column_c <- function(files, table2, file_id, table_id, table_value) {
+  return(as.character(pull_column(files, table2, file_id, table_id, table_value)))
 }
 
-file_match_update <- function(files, table2, file_id, table_id, table_value, file_value) {
-  retval = file_match(files, table2, file_id, table_id, table_value)
+pull_column_update <- function(files, table2, file_id, table_id, table_value, file_value) {
+  retval = pull_column(files, table2, file_id, table_id, table_value)
   retval = ifelse(is.na(match(files[[file_id]], table2[[table_id]])), files[[file_value]], retval)
   return(retval)
 }
 
-file_match_update_c <- function(files, table2, file_id, table_id, table_value, file_value) {
-  return(as.character(file_match_update(files, table2, file_id, table_id, table_value, file_value)))  
+pull_column_update_c <- function(files, table2, file_id, table_id, table_value, file_value) {
+  return(as.character(pull_column_update(files, table2, file_id, table_id, table_value, file_value)))  
 }
 
 remove_id_prefix <- function(ids) {
     return(gsub("/.*/(.*)/", "\\1", ids))
 }
 
+pull_columns <- function(table1, table2, id1, id2, value_pairs) {
+    retval <- NULL
+    for(i in 1:length(value_pairs)) {
+        value_name = value_pairs[i]
+        out_name = ifelse(is.null(names(value_pairs)), value_name, names(value_pairs)[i])
+        out_name = ifelse(out_name=="", value_name, out_name)
+        if(is.null(retval)) {
+            retval = data.table::data.table(pull_column(table1, table2, id1, id2, value_name))
+            colnames(retval) = out_name
+        } else {
+            retval[[out_name]] = pull_column(table1, table2, id1, id2, value_name)
+        }
+    }
+    return(retval)
+}
+
+pull_columns_append <- function(table1, table2, id1, id2, value_pairs) {
+    pulled_columns = pull_columns(table1, table2, id1, id2, value_pairs)
+    return(cbind(table1, pulled_columns))
+}
+
 update_replicate_treatment <- function(files, replicates, libraries, treatments, biosamples,
                                        antibody_lot, antibody_charac){
  
   # Updating biological_replicate_list with replicates$biological_replicate_number
-  files$biological_replicate_number = file_match_c(files, replicates, "replicate_list", "id", "biological_replicate_number")
-  files$replicate_library = file_match_c(files, replicates, "replicate_list", "id", "library")
-  files$replicate_antibody = file_match_c(files, replicates, "replicate_list", "id", "antibody")
-  files$technical_replicate_number = file_match(files, replicates, "replicate_list", "id", "technical_replicate_number")
+  replicate_col_map = c("biological_replicate_number", "replicate_library"="library",
+                        "replicate_antibody"="antibody","technical_replicate_number")
+  files = pull_columns_append(files, replicates, "replicate_list", "id", replicate_col_map)
   
   # Creating antibody target
-  files$antibody_target = file_match_c(files, antibody_lot, "replicate_antibody", "id", "targets")
-  files$antibody_characterization = file_match_c(files, antibody_lot, "replicate_antibody", "id", "characterizations")
-
-  files$antibody_caption = file_match_c(files, antibody_charac, "antibody_characterization", "id", "caption")
-  files$antibody_characterization = file_match_update_c(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
+  antibody_col_map = c("antibody_target"="targets", "antibody_characterization"="characterizations")
+  files = pull_columns_append(files, antibody_lot, "replicate_antibody", "id", antibody_col_map)
+  
+  files$antibody_caption = pull_column_c(files, antibody_charac, "antibody_characterization", "id", "caption")
+  files$antibody_characterization = pull_column_update_c(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
   
   files$treatment = files$replicate_library
-  files$treatment = file_match_update(files, libraries, "treatment", "id", "biosample", "treatment")
-  files$treatment = file_match_update(files, biosamples, "treatment", "id", "treatments", "treatment")
-  files$treatment = file_match_update(files, treatments, "treatment", "id", "treatment_term_name", "treatment")
+  files$treatment = pull_column_update(files, libraries, "treatment", "id", "biosample", "treatment")
+  files$treatment = pull_column_update(files, biosamples, "treatment", "id", "treatments", "treatment")
+  files$treatment = pull_column_update(files, treatments, "treatment", "id", "treatment_term_name", "treatment")
   
-  files$nucleic_acid_term = file_match(files, libraries, "replicate_library", "id", "nucleic_acid_term_name")
+  files$treatment_id = files$replicate_library
+  files$treatment_id = pull_column(files, libraries, "treatment", "id", "biosample")
+  files$treatment_id = pull_column_update(files, biosamples, "treatment", "id", "treatments", "treatment")
+
+  treatment_col_map = c("treatment_amount"="amount", "treatment_amount_unit"="amount_units", 
+                        "treatment_duration"="duration", "treatment_duration_unit"="duration_units")
+  files = pull_columns_append(files, treatments, "treatment_id", "id", treatment_col_map)
+  
+  files$nucleic_acid_term = pull_column(files, libraries, "replicate_library", "id", "nucleic_acid_term_name")
   
   # Remove ID prefixes
   files$replicate_library <- remove_id_prefix(files$replicate_library)
