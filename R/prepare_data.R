@@ -77,55 +77,55 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
 #' 
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
+  db = database_filename
+  encode_df = db$file
+  
   # Step 1 : fetch all needed data.
-  Tables <- fetch_tables(database_file = database_filename)
+  #Tables <- fetch_tables(database_file = database_filename)
 
   # Step 2 : renaming specific column.
-  Tables$files <- rename_file_columns(files = Tables$files)
+  encode_df <- rename_file_columns(encode_df)
 
   # Step 3 : updating project, paired-with, platform and lab column.
-  Tables$files <- update_project_platform_lab(files = Tables$files, awards = Tables$awards, 
-                                              labs = Tables$labs, platforms = Tables$platforms)
+  encode_df <- update_project_platform_lab(files = encode_df, awards = db$award, 
+                                           labs = db$lab, platforms = db$platform)
 
   # Step 4 : Updating replicate_list and treatment column.
-  Tables$files <- update_replicate_treatment(files = Tables$files,
-                                             replicates = Tables$replicates, 
-                                             libraries = Tables$libraries, 
-                                             treatments = Tables$treatments,
-                                             biosamples = Tables$biosamples,
-                                             antibody_lot = Tables$antibody,
-                                             antibody_charac = Tables$antibody_charac)
+  encode_df <- update_replicate_treatment(files = encode_df,
+                                          replicates = db$replicate, 
+                                          libraries = db$library, 
+                                          treatments = db$treatment,
+                                          biosamples = db$biosample,
+                                          antibody_lot = db$antibody_lot,
+                                          antibody_charac = db$antibody_characterization)
   
-  Tables$files <- split_dataset_column(files = Tables$files)
-  
-  encode_df <- Tables$files
+  encode_df <- split_dataset_column(files = encode_df)
   
   # Step 6 to step 9: Creating new columns
   exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
                  "biosample_name"="biosample_term_name", "controls"="possible_controls")
-  encode_df = pull_columns_append(encode_df, Tables$experiments, "accession", "accession", exp_colmap)
+  encode_df = pull_columns_append(encode_df, db$experiment, "accession", "accession", exp_colmap)
   
   # Step 7
-  encode_df$organism <- pull_column(encode_df, Tables$targets, "target", "id", "organism")
+  encode_df$organism <- pull_column(encode_df, db$target, "target", "id", "organism")
   
   # Step 8
-  encode_df$investigated_as = pull_column(encode_df, Tables$targets, "target", "id", "investigated_as")                 
-  encode_df$target = pull_column_update(encode_df, Tables$targets, "target", "id", "label", "target")
+  encode_df$investigated_as = pull_column(encode_df, db$target, "target", "id", "investigated_as")                 
+  encode_df$target = pull_column_update(encode_df, db$target, "target", "id", "label", "target")
 
   # Step 9
-  encode_df$organism <- pull_column_update(encode_df, Tables$organisms, "organism", "id", "scientific_name", "organism")
+  encode_df$organism <- pull_column_update(encode_df, db$organism, "organism", "id", "scientific_name", "organism")
   
   # Step 10 : Adjusting file_size
   encode_df <- file_size_conversion(encode_df)
   encode_df$file_size <- as.character(encode_df$file_size)
   
   # Step 11
-  encode_df$submitted_by <- pull_column_update(encode_df, Tables$users, "submitted_by", "id", "title", "submitted_by")
+  encode_df$submitted_by <- pull_column_update(encode_df, db$user, "submitted_by", "id", "title", "submitted_by")
   
   # Creating and updating new columns for dataset
-  encode_df$status <- pull_column_update(encode_df, Tables$datasets, "accession", "accession", "status", "status")
+  encode_df$status <- pull_column_update(encode_df, db$dataset, "accession", "accession", "status", "status")
   
-  remove(Tables)
   #Ordering the table by the accession column
   encode_df <- encode_df[order(accession),]
   
@@ -153,27 +153,6 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
 }
 
-### Step 1 : fetch all needed data
-fetch_tables <- function(database_file){
-  return(list(
-    files = database_file$file,
-    experiments = database_file$experiment,
-    datasets = database_file$dataset,
-    matched_sets = database_file$matched_set,
-    labs = database_file$lab,
-    awards = database_file$award,
-    targets = database_file$target,
-    biosamples = database_file$biosample,
-    libraries = database_file$library,
-    organisms = database_file$organism,
-    treatments = database_file$treatment,
-    replicates = database_file$replicate,
-    platforms = database_file$platform,
-    users = database_file$user,
-    antibody = database_file$antibody_lot,
-    antibody_charac = database_file$antibody_characterization
-  ))
-}
 ### Step 2 : renaming
 rename_file_columns <- function(files){
   names(files)[names(files) == 'status'] <- 'file_status'
