@@ -1,13 +1,12 @@
 
 #' Create the list of data.table for the tables in ENCODE
 #' 
-#' @return is a \code{list} with selected tables from ENCODE that were used to
-#' create the list of \code{data.table} .
+#' @return is a \code{list} with selected tables from ENCODE.
 #'
 #' @param database_filename The name of the file to save the database into.
-#' @param types The names of the tables to extract from ENCODE rest api.
-#' @param overwrite Should tables already present in database be overwrited
-#' Default: \code{FALSE}.
+#' @param types The names of the tables to extract using the ENCODE rest api.
+#' @param overwrite If database_filename already exists, should it be overwritten?
+#'   Default: \code{FALSE}.
 #' 
 #' @examples
 #' prepare_ENCODEdb(database_filename = "tables.RDA", types = "platform")
@@ -23,7 +22,7 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
                              types = get_encode_types(), overwrite = FALSE) {
   if(file.exists(database_filename) && !overwrite) {
     warning(paste0("The file ", database_filename, " already exists and will not be overwritten.\n",
-                   "Please delete or set overwrite = TRUE before re-running the data preparation"))
+                   "Please delete it or set overwrite = TRUE before re-running the data preparation"))
     NULL
   } else {
     # Extract the tables from the ENCODE rest api
@@ -57,21 +56,18 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
   }
 }
 
-#' Extract essential informations from a list of data.table in a \code{list} of 
-#' \code{data.table}s
-#' 
+#' Extract file metadata from the full set of ENCODE metadata tables.
 #'
-#' @return a \code{list} containing two elements. The first one 'experiment' is 
-#' a \code{data.table} containing essential informations for each file part of    
-#' an experiment ; the second one 'dataset' is a \code{data.table} containing 
-#' essential informations for each file part of a dataset.
+#' @return a \code{data.table} containing relevant metadata for all
+#'   ENCODE files.
 #'
-#' @param database_filename The name of the file to save the database into.
+#' @param database_filename A list of ENCODE metadata tables as loaded by
+#'   prepare_ENCODEdb.
 #'
 #' @examples
-#'     database_filename <- system.file("extdata/tables",package = "ENCODExplorer")
 #'     \dontrun{
-#'         export_ENCODEdb_matrix(database_filename = database_filename)
+#'         tables = prepare_ENCODEdb()
+#'         export_ENCODEdb_matrix(database_filename = tables)
 #'     }
 #' @import parallel
 #' 
@@ -108,20 +104,20 @@ export_ENCODEdb_matrix <- function(database_filename) {
   
   # Step 8
   encode_df$investigated_as = pull_column(encode_df, db$target, "target", "id", "investigated_as")                 
-  encode_df$target = pull_column_update(encode_df, db$target, "target", "id", "label", "target")
+  encode_df$target = pull_column_merge(encode_df, db$target, "target", "id", "label", "target")
 
   # Step 9
-  encode_df$organism <- pull_column_update(encode_df, db$organism, "organism", "id", "scientific_name", "organism")
+  encode_df$organism <- pull_column_merge(encode_df, db$organism, "organism", "id", "scientific_name", "organism")
   
   # Step 10 : Adjusting file_size
   encode_df <- file_size_conversion(encode_df)
   encode_df$file_size <- as.character(encode_df$file_size)
   
   # Step 11
-  encode_df$submitted_by <- pull_column_update(encode_df, db$user, "submitted_by", "id", "title", "submitted_by")
+  encode_df$submitted_by <- pull_column_merge(encode_df, db$user, "submitted_by", "id", "title", "submitted_by")
   
   # Creating and updating new columns for dataset
-  encode_df$status <- pull_column_update(encode_df, db$dataset, "accession", "accession", "status", "status")
+  encode_df$status <- pull_column_merge(encode_df, db$dataset, "accession", "accession", "status", "status")
   
   #Ordering the table by the accession column
   encode_df <- encode_df[order(accession),]
@@ -129,15 +125,15 @@ export_ENCODEdb_matrix <- function(database_filename) {
   #reordering the table, we want to have the column below as the first column
   #to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
-                    "file_size","output_category", "output_type", "target", "investigated_as",
+                    "file_size", "output_category", "output_type", "target", "investigated_as",
                     "nucleic_acid_term", "assay", "treatment", "treatment_amount",
                     "treatment_amount_unit", "treatment_duration", "treatment_duration_unit",
-                    "biosample_type","biosample_name", 
-                    "replicate_library","replicate_antibody", "antibody_target",
+                    "biosample_type", "biosample_name", 
+                    "replicate_library", "replicate_antibody", "antibody_target",
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
                     "lab","run_type", "read_length", "paired_end",
-                    "paired_with", "platform", "notes","href", "biological_replicates",
+                    "paired_with", "platform", "notes", "href", "biological_replicates",
                     "biological_replicate_number","technical_replicate_number","replicate_list")
   encode_df$controls <- remove_id_prefix(encode_df$controls)
   encode_df$controlled_by <- remove_id_prefix(encode_df$controlled_by)
@@ -182,20 +178,31 @@ update_project_platform_lab <- function(files, awards, labs, platforms){
   return(files)
 }
 
-pull_column <- function(files, table2, file_id, table_id, table_value) {
-  return(table2[[table_value]][match(files[[file_id]], table2[[table_id]])])
+# Matches the entries of table1 to table2, using id1 and id2, then returns
+# the values from pulled_column in table2.
+pull_column <- function(table1, table2, id1, id2, pulled_column) {
+  return(table2[[pulled_column]][match(table1[[id1]], table2[[id2]])])
 }
 
-pull_column_update <- function(files, table2, file_id, table_id, table_value, file_value) {
-  retval = pull_column(files, table2, file_id, table_id, table_value)
-  retval = ifelse(is.na(match(files[[file_id]], table2[[table_id]])), files[[file_value]], retval)
+# Matches the entries of table1 to table2, using id1 and id2, then returns
+# a merged vector containing the values from pulled_column in table2 when
+# a match exists, or table1$updated_value if it does not.
+pull_column_merge <- function(table1, table2, id1, id2, pulled_column, updated_value) {
+  retval = pull_column(table1, table2, id1, id2, pulled_column)
+  retval = ifelse(is.na(match(table1[[id1]], table2[[id2]])), table1[[updated_value]], retval)
   return(retval)
 }
 
+# Remove the type prefix from ENCODE URL-like identifiers.
+# Example: /files/ENC09345TXW/ becomes ENC09345TXW.
 remove_id_prefix <- function(ids) {
     return(gsub("/.*/(.*)/", "\\1", ids))
 }
 
+# Matches the entries of table1 to table2, using id1 and id2,
+# then creates a new data.table from the column pairings described in
+# value_pairs. Ex: c("antibody_target"="target") will create a column
+# named "antibody_target" from table2$target. (Similar to dplyr::*_join)
 pull_columns <- function(table1, table2, id1, id2, value_pairs) {
     retval <- NULL
     for(i in 1:length(value_pairs)) {
@@ -212,6 +219,7 @@ pull_columns <- function(table1, table2, id1, id2, value_pairs) {
     return(retval)
 }
 
+# Calls pull_columns, and append the results to table1.
 pull_columns_append <- function(table1, table2, id1, id2, value_pairs) {
     pulled_columns = pull_columns(table1, table2, id1, id2, value_pairs)
     return(cbind(table1, pulled_columns))
@@ -230,16 +238,16 @@ update_replicate_treatment <- function(files, replicates, libraries, treatments,
   files = pull_columns_append(files, antibody_lot, "replicate_antibody", "id", antibody_col_map)
   
   files$antibody_caption = pull_column(files, antibody_charac, "antibody_characterization", "id", "caption")
-  files$antibody_characterization = pull_column_update(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
+  files$antibody_characterization = pull_column_merge(files, antibody_charac, "antibody_characterization", "id", "characterization_method", "antibody_characterization")
   
   files$treatment = files$replicate_library
-  files$treatment = pull_column_update(files, libraries, "treatment", "id", "biosample", "treatment")
-  files$treatment = pull_column_update(files, biosamples, "treatment", "id", "treatments", "treatment")
-  files$treatment = pull_column_update(files, treatments, "treatment", "id", "treatment_term_name", "treatment")
+  files$treatment = pull_column_merge(files, libraries, "treatment", "id", "biosample", "treatment")
+  files$treatment = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
+  files$treatment = pull_column_merge(files, treatments, "treatment", "id", "treatment_term_name", "treatment")
   
   files$treatment_id = files$replicate_library
   files$treatment_id = pull_column(files, libraries, "treatment", "id", "biosample")
-  files$treatment_id = pull_column_update(files, biosamples, "treatment", "id", "treatments", "treatment")
+  files$treatment_id = pull_column_merge(files, biosamples, "treatment", "id", "treatments", "treatment")
 
   treatment_col_map = c("treatment_amount"="amount", "treatment_amount_unit"="amount_units", 
                         "treatment_duration"="duration", "treatment_duration_unit"="duration_units")
