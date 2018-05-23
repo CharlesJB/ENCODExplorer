@@ -87,7 +87,8 @@ export_ENCODEdb_matrix <- function(database_filename) {
   encode_df <- update_antibody(files = encode_df, antibody_lot = db$antibody_lot,
                                antibody_charac = db$antibody_characterization)
   encode_df <- update_treatment(files = encode_df, treatments = db$treatment,
-                               libraries = db$library, biosamples = db$biosample)
+                               libraries = db$library, biosamples = db$biosample,
+                               replicates = db$replicate, datasets=db$dataset)
   encode_df = update_experiment(files=encode_df, experiments=db$experiment)
   encode_df = update_target(files=encode_df, targets=db$target, organisms=db$organism)
                  
@@ -111,9 +112,11 @@ export_ENCODEdb_matrix <- function(database_filename) {
   # to be display fellowed by the rest the remaining column available.
   colNamesList <- c("accession", "file_accession", "file_type", "file_format",
                     "file_size", "output_category", "output_type", "target", "investigated_as",
-                    "nucleic_acid_term", "assay", "treatment", "treatment_amount",
+                    "nucleic_acid_term", "assay", "treatment_id", "treatment", "treatment_amount",
                     "treatment_amount_unit", "treatment_duration", "treatment_duration_unit",
+                    "treatment_temperature", "treatment_temperature_unit", "treatment_notes",
                     "biosample_id", "biosample_type", "biosample_name", 
+                    "dataset_biosample_summary", "dataset_description",
                     "replicate_library", "replicate_antibody", "antibody_target",
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
@@ -126,10 +129,14 @@ export_ENCODEdb_matrix <- function(database_filename) {
   data.table::setcolorder(encode_df, colEncode)
 }
 
+pull_column_id <- function(ids, table2, id2, pulled_column) {
+    return(table2[[pulled_column]][match(ids, table2[[id2]])])
+}
+
 # Matches the entries of table1 to table2, using id1 and id2, then returns
 # the values from pulled_column in table2.
 pull_column <- function(table1, table2, id1, id2, pulled_column) {
-  return(table2[[pulled_column]][match(table1[[id1]], table2[[id2]])])
+  return(pull_column_id(table1[[id1]], table2, id2, pulled_column))
 }
 
 # Matches the entries of table1 to table2, using id1 and id2, then returns
@@ -213,7 +220,8 @@ update_project_platform_lab <- function(files, awards, labs, platforms){
 # with encode_df (ENCODE's file table).
 update_experiment <- function(files, experiments) {
   exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
-                 "biosample_name"="biosample_term_name", "controls"="possible_controls")
+                 "biosample_name"="biosample_term_name", "controls"="possible_controls",
+                 "dataset_description"="description", "dataset_biosample_summary"="biosample_summary")
   files = pull_columns_append(files, experiments, "accession", "accession", exp_colmap)
   
   return(files)
@@ -248,17 +256,42 @@ update_antibody <- function(files, antibody_lot, antibody_charac) {
 
 # Fetches columns from ENCODE treatment table and merge them with 
 # encode_df (ENCODE's file table).
-update_treatment <- function(files, treatments, libraries, biosamples) {
-  # Infer the treatment id from replicate -> library -> biosample chain.
+update_treatment <- function(files, treatments, libraries, biosamples, replicates, datasets) {
+  # Infer the biosample id from replicate -> library -> biosample chain.
   files$biosample_id = pull_column(files, libraries, "replicate_library", "id", "biosample")
+  
+  # Sometimes the replicate id is unavailable. The biosample can still sometime be inferred
+  # through the dataset -> replicate -> library -> biosample chain.
+  replicate_lists = pull_column(files, datasets, "accession", "accession", "replicates")
+  
+  # A dataset has multiple replicates, and we don't know which one maps to our file.
+  # But all replicates should come from the same biosample, so we'll pick the first one
+  # on the list.
+  first_replicates = unlist(lapply(strsplit(replicate_lists, ";"), function(x) {trimws(x[1])}))
+  
+  # From the first replicate, we derive the biosample id.
+  library_ids = pull_column_id(first_replicates, replicates, "id", "library")
+  biosample_ids = pull_column_id(library_ids, libraries, "id", "biosample")
+  
+  # Now merge those biosample ids with those already known.
+  files$biosample_id = ifelse(is.na(files$biosample_id), biosample_ids, files$biosample_id)
+  
+  # Now that we have the biosample, we might as well grab the organism.
+  files$organism = pull_column(files, biosamples, "biosample_id", "id", "organism")
+  
+  # From the biosample id, infer the treatment id.
   files$treatment_id = pull_column(files, biosamples, "biosample_id", "id", "treatments")
   
-  # Infer term from id when available.Replace id with term
+  # Infer term from id when available. Replace id with term.
   files$treatment = files$treatment_id
   files$treatment = pull_column_merge(files, treatments, "treatment_id", "id", "treatment_term_name", "treatment")
   
+
+  
   treatment_col_map = c("treatment_amount"="amount", "treatment_amount_unit"="amount_units", 
-                        "treatment_duration"="duration", "treatment_duration_unit"="duration_units")
+                        "treatment_duration"="duration", "treatment_duration_unit"="duration_units",
+                        "treatment_temperature"="temperature", "treatment_temperature_unit"="temperature_units",
+                        "treatment_notes"="notes")
   files = pull_columns_append(files, treatments, "treatment_id", "id", treatment_col_map)
 
   return(files)
@@ -267,7 +300,7 @@ update_treatment <- function(files, treatments, libraries, biosamples) {
 # Fetches columns from ENCODE target and organism tables and merge them with 
 # encode_df (ENCODE's file table).
 update_target <- function(files, targets, organisms) {
-  files$organism <- pull_column(files, targets, "target", "id", "organism")
+  files$organism <- pull_column_merge(files, targets, "target", "id", "organism", "organism")
   
   files$investigated_as = pull_column(files, targets, "target", "id", "investigated_as")                 
   files$target = pull_column_merge(files, targets, "target", "id", "label", "target")
