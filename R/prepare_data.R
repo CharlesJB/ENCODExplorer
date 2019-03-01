@@ -72,7 +72,7 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
 #' @import parallel
 #' 
 #' @export
-export_ENCODEdb_matrix <- function(database_filename) {
+export_ENCODEdb_matrix_lite <- function(database_filename) {
   db = database_filename
   encode_df = db$file
   
@@ -121,12 +121,36 @@ export_ENCODEdb_matrix <- function(database_filename) {
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
                     "lab","run_type", "read_length", "paired_end",
-                    "paired_with", "platform", "notes", "href", "biological_replicates",
+                    "paired_with", "platform", "href", "biological_replicates",
                     "biological_replicate_number","technical_replicate_number","replicate_list")
 
   missing_columns = setdiff(colnames(encode_df), colNamesList)
-  colEncode <- c(colNamesList, missing_columns)
-  data.table::setcolorder(encode_df, colEncode)
+  
+  encode_df_lite = encode_df[,colNamesList, with=FALSE]
+  encode_df_ext = encode_df[,missing_columns, with=FALSE]
+
+  return(list(encode_df=encode_df_lite, encode_df_ext=encode_df_ext))
+}
+
+#' Extract file metadata from the full set of ENCODE metadata tables.
+#'
+#' @return a \code{data.table} containing relevant metadata for all
+#'   ENCODE files.
+#'
+#' @param database_filename A list of ENCODE metadata tables as loaded by
+#'   prepare_ENCODEdb.
+#'
+#' @examples
+#'     \dontrun{
+#'         tables = prepare_ENCODEdb()
+#'         export_ENCODEdb_matrix(database_filename = tables)
+#'     }
+#' @import parallel
+#' 
+#' @export
+export_ENCODEdb_matrix <- function(database_filename) {
+    split_df = export_ENCODEdb_matrix_lite()
+    return(cbind(split_df[["encode_df"]], split_df[["encode_df_ext"]]))
 }
 
 pull_column_id <- function(ids, table2, id2, pulled_column) {
