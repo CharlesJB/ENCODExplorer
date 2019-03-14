@@ -29,6 +29,9 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
     extract_type <- function(type) {
       cat("Extracting table", type, "\n")
       table <- extract_table(type)
+      if(ncol(table) == 0) {
+        return(NULL)
+      }
       cat("Cleaning table", type, "\n")
       table_clean <- clean_table(table)
     }
