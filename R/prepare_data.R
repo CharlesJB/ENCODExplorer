@@ -93,6 +93,7 @@ export_ENCODEdb_matrix <- function(database_filename) {
                                libraries = db$library, biosamples = db$biosample,
                                replicates = db$replicate, datasets=db$dataset)
   encode_df = update_experiment(files=encode_df, experiments=db$experiment)
+  encode_df = update_biosample_types(files=encode_df, biosample_types=db$biosample_type)
   encode_df = update_target(files=encode_df, targets=db$target, organisms=db$organism)
                  
 
@@ -222,10 +223,19 @@ update_project_platform_lab <- function(files, awards, labs, platforms){
 # Fetches columns from ENCODE experiment table and merges them
 # with encode_df (ENCODE's file table).
 update_experiment <- function(files, experiments) {
-  exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_type",
-                 "biosample_name"="biosample_term_name", "controls"="possible_controls",
-                 "dataset_description"="description", "dataset_biosample_summary"="biosample_summary")
+  exp_colmap = c("target", "date_released", "status", "assay"="assay_title", "biosample_ontology",
+                 "controls"="possible_controls", "dataset_biosample_summary"="biosample_summary",
+                 "dataset_description"="description")
   files = pull_columns_append(files, experiments, "accession", "accession", exp_colmap)
+  
+  return(files)
+}
+
+# Fetches columns from ENCODE biosamples table and merges them
+# with encode_df (ENCODE's file table).
+update_biosample_types <- function(files, biosample_types) {
+  bio_colmap = c("biosample_type"="classification", "biosample_name"="term_name")
+  files = pull_columns_append(files, biosample_types, "biosample_ontology", "id", bio_colmap)
   
   return(files)
 }
