@@ -153,7 +153,7 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
 #' 
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
-    split_df = export_ENCODEdb_matrix_lite()
+    split_df = export_ENCODEdb_matrix_lite(database_filename)
     return(cbind(split_df[["encode_df"]], split_df[["encode_df_ext"]]))
 }
 
