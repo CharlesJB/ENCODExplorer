@@ -98,13 +98,13 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
                  
 
   # Fetch some additional miscellaneous columns.                 
-  encode_df$nucleic_acid_term = pull_column(encode_df, db$library, "replicate_library", "id", "nucleic_acid_term_name")
+  encode_df$nucleic_acid_term = pull_column(encode_df, db$library, "replicate_libraries", "id", "nucleic_acid_term_name")
   encode_df$submitted_by <- pull_column_merge(encode_df, db$user, "submitted_by", "id", "title", "submitted_by")
   encode_df$status <- pull_column_merge(encode_df, db$dataset, "accession", "accession", "status", "status")
   encode_df <- file_size_conversion(encode_df)
   
   # Remove remaining ID prefixes
-  encode_df$replicate_library <- remove_id_prefix(encode_df$replicate_library)                               
+  encode_df$replicate_libraries <- remove_id_prefix(encode_df$replicate_libraries)                               
   encode_df$controls <- remove_id_prefix(encode_df$controls)
   encode_df$controlled_by <- remove_id_prefix(encode_df$controlled_by)
   encode_df$replicate_list <- remove_id_prefix(encode_df$replicate_list)
@@ -121,7 +121,7 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
                     "treatment_temperature", "treatment_temperature_unit", "treatment_notes",
                     "biosample_id", "biosample_type", "biosample_name", 
                     "dataset_biosample_summary", "dataset_description",
-                    "replicate_library", "replicate_antibody", "antibody_target",
+                    "replicate_libraries", "replicate_antibody", "antibody_target",
                     "antibody_characterization", "antibody_caption", 
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
                     "lab","run_type", "read_length", "paired_end",
@@ -268,7 +268,7 @@ update_biosample_types <- function(files, biosample_types) {
 # with encode_df (ENCODE's file table).
 update_replicate <- function(files, replicates) {
   # Updating biological_replicate_list with replicates$biological_replicate_number
-  replicate_col_map = c("biological_replicate_number", "replicate_library"="library",
+  replicate_col_map = c("biological_replicate_number",
                         "replicate_antibody"="antibody","technical_replicate_number")
   files = pull_columns_append(files, replicates, "replicate_list", "id", replicate_col_map)
   
@@ -295,7 +295,7 @@ update_antibody <- function(files, antibody_lot, antibody_charac) {
 # encode_df (ENCODE's file table).
 update_treatment <- function(files, treatments, libraries, biosamples, replicates, datasets) {
   # Infer the biosample id from replicate -> library -> biosample chain.
-  files$biosample_id = pull_column(files, libraries, "replicate_library", "id", "biosample")
+  files$biosample_id = pull_column(files, libraries, "replicate_libraries", "id", "biosample")
   
   # Sometimes the replicate id is unavailable. The biosample can still sometime be inferred
   # through the dataset -> replicate -> library -> biosample chain.
