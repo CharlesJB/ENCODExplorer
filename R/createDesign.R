@@ -14,7 +14,7 @@
 #' where each \code{data.table} contain the files for a single experiment
 #' Default: \code{FALSE}.
 #' @param fileFormat A string that correspond to the type of the files 
-#' that need to be extract.
+#' that need to be extracted.
 #' Default: bam
 #' @param dataset_type A string that correspong to the type of dataset that
 #' will be extrated.
@@ -45,7 +45,10 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
   stopifnot(output_type %in% c("data.frame", "data.table"))
-  stopifnot(length(ID) == 2)
+  
+  if(length(ID) != 2) {
+      stop("ID must be of length 2.", call.=FALSE)
+  }
   stopifnot(format %in% c("wide", "long"))
   
   design <- data.table()
@@ -55,12 +58,17 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   }
   
   if(is.null(df)){
-      data(encode_df, envir = environment())
-      df <- encode_df
+      df <- ENCODExplorer::encode_df
   }
   
   stopifnot(dataset_type %in% df$dataset_type)
-  stopifnot(fileFormat %in%  unique(df$file_format))
+  if(!(dataset_type %in% df$dataset_type)) {
+      stop("dataset_type must be a value present within df$dataset_type.", call.=FALSE)
+  }
+  
+  if(!(fileFormat %in%  unique(df$file_format))) {
+      stop("fileFormat must be a value present within df$file_format.", call.=FALSE)
+  }
   
   #Filtering character type of ID
   if(is.character(ID)){

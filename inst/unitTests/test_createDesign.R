@@ -43,7 +43,7 @@ test.design_ID <- function() {
     
     obs <- tryCatch(createDesign(brca, encode_df, ID=c(1)),error=function(e) e, warning=conditionMessage)
     obs <- as.character(obs)
-    exp <- "Error: length(ID) == 2 is not TRUE\n"
+    exp <- "Error: ID must be of length 2.\n"
     RUnit::checkIdentical(as.character(obs),exp)
 }
 
@@ -53,11 +53,11 @@ test.design_format <- function() {
     #Testing file_type 
     obs <- tryCatch(createDesign(brca, encode_df,fileFormat="banana"),error=function(e) e, warning=conditionMessage)
     obs <- as.character(obs)
-    exp <- "Error: fileFormat %in% unique(df$file_format) is not TRUE\n"
+    exp <- "Error: fileFormat must be a value present within df$file_format.\n"
     RUnit::checkIdentical(as.character(obs),exp)
     #Testing dataset_type
     obs <- tryCatch(createDesign(brca, encode_df,dataset_type="banana"),error=function(e) e, warning=conditionMessage)
     obs <- as.character(obs)
-    exp <- "Error: dataset_type %in% df$dataset_type is not TRUE\n"
+    exp <- "Error: dataset_type must be a value present within df$dataset_type.\n"
     RUnit::checkIdentical(as.character(obs),exp)
 }

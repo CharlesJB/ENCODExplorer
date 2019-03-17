@@ -42,12 +42,10 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     
     #Loading the default data.tables from ENCODExplorer package
     if(is.null(database)){
-	data(encode_df, envir = environment())
-    }else if(is.data.table(database)){
-        encode_df <- database
-    }else{
+        database <- ENCODExplorer::encode_df
+    } else if(!is.data.table(database)) {
         cat("Invalid database input : database entry must be a data.table \n")
-        return(NA)
+        return(NA)    }else{
     }
     
     # All the possible filter
@@ -75,9 +73,9 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     }
     
     #Making a subset of encode_df
-    df <- encode_df
+    df <- database
     if (filter) {
-        df <- encode_df[,filterVector, with = FALSE]
+        df <- database[,filterVector, with = FALSE]
     }
     #fun_detect return a row of 0 and 1 depending on a match with searchTerm
     fun_detect <- function(x) {
@@ -85,7 +83,7 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     }
     res <- df[,lapply(.SD, fun_detect)]
     toKeep <- as.logical(rowSums(res, na.rm = TRUE))
-    result <- encode_df[toKeep,]
+    result <- database[toKeep,]
     if(nrow(result)==0){
       cat("No result found \n")
       return(result)
