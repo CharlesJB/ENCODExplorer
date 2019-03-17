@@ -114,7 +114,7 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
   
   # Reordering the table, we want to have the column below as the first column
   # to be display fellowed by the rest the remaining column available.
-  colNamesList <- c("accession", "file_accession", "file_type", "file_format",
+  main_columns <- c("accession", "file_accession", "file_type", "file_format",
                     "file_size", "output_category", "output_type", "target", "investigated_as",
                     "nucleic_acid_term", "assay", "treatment_id", "treatment", "treatment_amount",
                     "treatment_amount_unit", "treatment_duration", "treatment_duration_unit",
@@ -126,14 +126,34 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
                     "organism", "dataset_type", "assembly","status", 'controls', "controlled_by",
                     "lab","run_type", "read_length", "paired_end",
                     "paired_with", "platform", "href", "biological_replicates",
-                    "biological_replicate_number","technical_replicate_number","replicate_list")
+                    "biological_replicate_number","technical_replicate_number","replicate_list",
+                    "technical_replicates", "project", "dataset", "dbxrefs", "superseded_by",
+                    "file_status", "submitted_by", "library", "derived_from",
+                    "file_format_type", "file_format_specifications", "genome_annotation",
+                    "external_accession", "date_released", "biosample_ontology")
 
-  missing_columns = setdiff(colnames(encode_df), colNamesList)
+  ext_col_1 <- c("notes", "cloud_metadata.url", "s3_uri")
+  ext_col_2 <- c("date_created", "uuid", "md5sum", "cloud_metadata.md5sum_base64", "quality_metrics", "content_md5sum")
+  all_explicit_columns = c(main_columns, ext_col_1, ext_col_2)
+  other_columns = setdiff(colnames(encode_df), all_explicit_columns)
   
-  encode_df_lite = encode_df[,colNamesList, with=FALSE]
-  encode_df_ext = encode_df[,missing_columns, with=FALSE]
+  # Protect against columns that might no longer part of the ENCODE metadata.
+  
+  missing_columns = setdiff(all_explicit_columns, colnames(encode_df))
+  if(length(missing_columns) != 0) {
+      message("Some expected columns are no longer present within ENCODE metadata.")
+      message("Missing columns: ", paste(missing_columns, collapse=", "))
+  }
+  
+  encode_df_lite = encode_df[,intersect(main_columns, colnames(encode_df)), with=FALSE]
+  encode_df_ext_1 = encode_df[,intersect(ext_col_1, colnames(encode_df)), with=FALSE]
+  encode_df_ext_2 = encode_df[,intersect(ext_col_2, colnames(encode_df)), with=FALSE]
+  encode_df_ext_3 = encode_df[,other_columns, with=FALSE]
 
-  return(list(encode_df=encode_df_lite, encode_df_ext=encode_df_ext))
+  return(list(encode_df=encode_df_lite, 
+              encode_df_ext_1=encode_df_ext_1, 
+              encode_df_ext_2=encode_df_ext_2, 
+              encode_df_ext_3=encode_df_ext_3))
 }
 
 #' Extract file metadata from the full set of ENCODE metadata tables.
@@ -154,7 +174,23 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
 #' @export
 export_ENCODEdb_matrix <- function(database_filename) {
     split_df = export_ENCODEdb_matrix_lite(database_filename)
-    return(cbind(split_df[["encode_df"]], split_df[["encode_df_ext"]]))
+    return(cbind(split_df[["encode_df"]], 
+                 split_df[["encode_df_ext_1"]],
+                 split_df[["encode_df_ext_2"]],
+                 split_df[["encode_df_ext_3"]]))
+}
+
+#' Concatenates all available file metadata into a single data table.
+#'
+#' @return a \code{data.table} containing relevant metadata for all
+#'   ENCODE files.
+#'
+#' @export
+load_full_ENCODEdb_matrix <- function() {
+    return(cbind(ENCODExplorer::encode_df, 
+                 ENCODExplorer::encode_df_ext_1,
+                 ENCODExplorer::encode_df_ext_2,
+                 ENCODExplorer::encode_df_ext_3))
 }
 
 pull_column_id <- function(ids, table2, id2, pulled_column) {
