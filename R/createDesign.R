@@ -61,7 +61,6 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
       df <- ENCODExplorer::encode_df
   }
   
-  stopifnot(dataset_type %in% df$dataset_type)
   if(!(dataset_type %in% df$dataset_type)) {
       stop("dataset_type must be a value present within df$dataset_type.", call.=FALSE)
   }
