@@ -25,7 +25,8 @@ test.query_with_target <- function() {
 test.combined_query <- function() {
   data("encode_df")
   res_combo = queryEncode(df=encode_df, biosample_name = "A549", assay = "chipseq",
-                          file_format = "bigwig", fixed = T, quiet=T, fuzzy=T)
+                          file_format = "bigwig", fixed = T, quiet=T, fuzzy=T,
+                          file_status="all", status="all")
   checkTrue("ENCFF366WNG" %in% as.character(res_combo$file_accession),
             msg = "this combined query should return a results set containing the id ENCFF366WNG")
 }
