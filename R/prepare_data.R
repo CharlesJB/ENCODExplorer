@@ -180,6 +180,8 @@ export_ENCODEdb_matrix <- function(database_filename) {
                  split_df[["encode_df_ext_3"]]))
 }
 
+
+full_db_cache_env=new.env()
 #' Concatenates all available file metadata into a single data table.
 #'
 #' @return a \code{data.table} containing relevant metadata for all
@@ -187,10 +189,16 @@ export_ENCODEdb_matrix <- function(database_filename) {
 #'
 #' @export
 load_full_ENCODEdb_matrix <- function() {
-    return(cbind(ENCODExplorer::encode_df, 
+    if(!exists("full_db_cache", envir=full_db_cache_env)) {
+        full_db = cbind(ENCODExplorer::encode_df, 
                  ENCODExplorer::encode_df_ext_1,
                  ENCODExplorer::encode_df_ext_2,
-                 ENCODExplorer::encode_df_ext_3))
+                 ENCODExplorer::encode_df_ext_3)
+                 
+        assign("full_db_cache", full_db, envir=full_db_cache_env)  
+    }
+    
+    return(get("full_db_cache", envir=full_db_cache_env))
 }
 
 pull_column_id <- function(ids, table2, id2, pulled_column) {
