@@ -9,7 +9,7 @@
 #' @param input The \code{data.table} created by a queryEncode or
 #' searchEncode research, or a 
 #' @param df The \code{data.table} used to extract the files link.
-#' Default :\code{NULL}
+#' Default :\code{ENCODExplorer::encode_df}
 #' @param split Allow to the function to return a \code{list} of \code{data.table}
 #' where each \code{data.table} contain the files for a single experiment
 #' Default: \code{FALSE}.

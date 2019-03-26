@@ -4,20 +4,19 @@
 \alias{prepare_ENCODEdb}
 \title{Create the list of data.table for the tables in ENCODE}
 \usage{
-prepare_ENCODEdb(database_filename = "inst/extdata/tables.RDA",
+prepare_ENCODEdb(database_filename = "tables.RDA",
   types = get_encode_types(), overwrite = FALSE)
 }
 \arguments{
 \item{database_filename}{The name of the file to save the database into.}
 
-\item{types}{The names of the tables to extract from ENCODE rest api.}
+\item{types}{The names of the tables to extract using the ENCODE rest api.}
 
-\item{overwrite}{Should tables already present in database be overwrited
+\item{overwrite}{If database_filename already exists, should it be overwritten?
 Default: \code{FALSE}.}
 }
 \value{
-is a \code{list} with selected tables from ENCODE that were used to
-create the list of \code{data.table} .
+is a \code{list} with selected tables from ENCODE.
 }
 \description{
 Create the list of data.table for the tables in ENCODE
@@ -30,4 +29,3 @@ file.remove("platform.RDA")
     }
     
 }
-

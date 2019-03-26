@@ -4,8 +4,8 @@
 \alias{queryEncodeGeneric}
 \title{Produce a subset of data following predefined criteria.}
 \usage{
-queryEncodeGeneric(df = NULL, fixed = TRUE, quiet = FALSE,
-  fuzzy = FALSE, ...)
+queryEncodeGeneric(df = ENCODExplorer::encode_df, fixed = TRUE,
+  quiet = FALSE, fuzzy = FALSE, ...)
 }
 \arguments{
 \item{df}{\code{data.frame} containing ENCODE 

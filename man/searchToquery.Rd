@@ -4,7 +4,8 @@
 \alias{searchToquery}
 \title{Convert searchEncode output in queryEncode output.}
 \usage{
-searchToquery(df = NULL, searchResults, quiet = TRUE)
+searchToquery(df = ENCODExplorer::encode_df, searchResults,
+  quiet = TRUE)
 }
 \arguments{
 \item{df}{\code{list} of two \code{data.frame} containing ENCODE 
@@ -32,4 +33,3 @@ search_res <- searchEncode(searchTerm = "switchgear elavl1", limit = "1")
 res <- searchToquery(searchResults = search_res, quiet = TRUE)
 
 }
-

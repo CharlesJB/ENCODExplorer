@@ -5,8 +5,8 @@
 \title{downloadEncode is used to download a serie of files or datasets 
 using their accession.}
 \usage{
-downloadEncode(file_acc = NULL, df = NULL, format = "all", dir = ".",
-  force = TRUE)
+downloadEncode(file_acc = NULL, df = ENCODExplorer::encode_df,
+  format = "all", dir = ".", force = TRUE)
 }
 \arguments{
 \item{file_acc}{A \code{character} of ENCODE file or 
@@ -38,4 +38,3 @@ using their accession.
  \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 
 }
-

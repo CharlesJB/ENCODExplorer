@@ -4,12 +4,12 @@
 \alias{queryEncode}
 \title{Produce a subset of data following predefined criteria}
 \usage{
-queryEncode(df = NULL, set_accession = NULL, assay = NULL,
-  biosample_name = NULL, dataset_accession = NULL, file_accession = NULL,
-  file_format = NULL, lab = NULL, organism = NULL, target = NULL,
-  treatment = NULL, project = NULL, biosample_type = NULL,
-  file_status = "released", status = "released", fixed = TRUE,
-  quiet = FALSE, fuzzy = FALSE)
+queryEncode(df = ENCODExplorer::encode_df, set_accession = NULL,
+  assay = NULL, biosample_name = NULL, dataset_accession = NULL,
+  file_accession = NULL, file_format = NULL, lab = NULL,
+  organism = NULL, target = NULL, treatment = NULL, project = NULL,
+  biosample_type = NULL, file_status = "released",
+  status = "released", fixed = TRUE, quiet = FALSE, fuzzy = FALSE)
 }
 \arguments{
 \item{df}{\code{data.frame} containing ENCODE 
@@ -70,4 +70,3 @@ be modified by setting the \code{fixed} argument at \code{TRUE}
     queryEncode(biosample_name = "A549", file_format = "bam")
     }
 }
-

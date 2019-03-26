@@ -6,8 +6,8 @@
 within the encode_df \code{data.table}. For faster processing, pass encode_df
 object as database parameter.}
 \usage{
-fuzzySearch(searchTerm = NULL, database = NULL, filterVector = NULL,
-  multipleTerm = FALSE, ignore_case = TRUE)
+fuzzySearch(searchTerm = NULL, database = ENCODExplorer::encode_df,
+  filterVector = NULL, multipleTerm = FALSE, ignore_case = TRUE)
 }
 \arguments{
 \item{searchTerm}{The keyword or a \code{list} of keyword to search.}
@@ -36,4 +36,3 @@ object as database parameter.
    database=encode_df, filterVector ="target", multipleTerm = TRUE)
 
 }
-
