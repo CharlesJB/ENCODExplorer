@@ -188,7 +188,7 @@ full_db_cache_env=new.env()
 #'   ENCODE files.
 #'
 #' @export
-load_full_ENCODEdb_matrix <- function() {
+get_encode_df_full <- function() {
     if(!exists("full_db_cache", envir=full_db_cache_env)) {
         full_db = cbind(ENCODExplorer::encode_df, 
                  ENCODExplorer::encode_df_ext_1,
@@ -199,6 +199,16 @@ load_full_ENCODEdb_matrix <- function() {
     }
     
     return(get("full_db_cache", envir=full_db_cache_env))
+}
+
+#' Returns a "light" version of ENCODE file metadata.
+#'
+#' @return a \code{data.table} containing the most relevant 
+#'   metadata for all ENCODE files.
+#'
+#' @export
+get_encode_df <- function() {
+    return(ENCODExplorer::encode_df)
 }
 
 pull_column_id <- function(ids, table2, id2, pulled_column) {
