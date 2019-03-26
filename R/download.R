@@ -117,7 +117,7 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 #' @importFrom dplyr setdiff
 #' 
 #' @export
-downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
+downloadEncode <- function (file_acc = NULL, df = ENCODExplorer::encode_df, format ="all", dir= ".",
                              force = TRUE) {
   #Extract accession if the user pass a data.table as input
   if(is.data.frame(file_acc)){
@@ -144,11 +144,6 @@ downloadEncode <- function (file_acc = NULL, df = NULL, format ="all", dir= ".",
   
   stopifnot(is.character(file_acc))
   stopifnot(length(file_acc) > 0)
-  
-  if(is.null(df)) {
-    df <- ENCODExplorer::encode_df
-  }
-  
   stopifnot(is.data.table(df))
   
   #Checking format argument

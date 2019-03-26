@@ -40,7 +40,7 @@
 #' @importFrom dplyr setdiff
 #' 
 #' @export
-createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
+createDesign <- function (input=NULL, df=ENCODExplorer::encode_df, split=FALSE, fileFormat="bam",
                           dataset_type="experiments", format="long",
                           output_type="data.table", ID=c(1,2)){
   stopifnot(class(input) %in% c("data.table", "data.frame"))
@@ -55,10 +55,6 @@ createDesign <- function (input=NULL, df=NULL, split=FALSE, fileFormat="bam",
   
   if(is.data.frame(input)){
       input <- as.data.table(input)
-  }
-  
-  if(is.null(df)){
-      df <- ENCODExplorer::encode_df
   }
   
   if(!(dataset_type %in% df$dataset_type)) {

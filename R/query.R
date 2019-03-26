@@ -39,7 +39,7 @@
 #'     }
 #' @import data.table
 #' @export
-queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL, 
+queryEncode <- function(df = ENCODExplorer::encode_df, set_accession = NULL, assay = NULL, 
                         biosample_name = NULL, dataset_accession = NULL, 
                         file_accession = NULL, file_format = NULL, 
                         lab = NULL, organism = NULL, target = NULL, 
@@ -114,7 +114,7 @@ queryEncode <- function(df = NULL, set_accession = NULL, assay = NULL,
 #'     }
 #' @import data.table
 #' @export
-queryEncodeGeneric <- function(df = NULL, fixed = TRUE, quiet = FALSE, 
+queryEncodeGeneric <- function(df = ENCODExplorer::encode_df, fixed = TRUE, quiet = FALSE, 
                                fuzzy=FALSE, ...) {
   
   # Make sure that parameters are valid. Fuzzy searches are only possible
@@ -268,12 +268,7 @@ query_transform <- function(my.term) {
 #' res <- searchToquery(searchResults = search_res, quiet = TRUE)
 #' 
 #' @export
-searchToquery <- function(df = NULL, searchResults, quiet = TRUE){
-  
-  if(is.null(df)) {
-    df = ENCODExplorer::encode_df
-  }
-  
+searchToquery <- function(df = ENCODExplorer::encode_df, searchResults, quiet = TRUE){
   res = data.frame()
   
   if(nrow(searchResults) > 0){

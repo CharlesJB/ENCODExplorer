@@ -20,7 +20,7 @@
 #' @importFrom dplyr filter
 #' @export
 
-fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
+fuzzySearch <- function(searchTerm=NULL, database=ENCODExplorer::encode_df,filterVector=NULL,
                         multipleTerm=FALSE, ignore_case=TRUE){
     #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){
@@ -41,11 +41,9 @@ fuzzySearch <- function(searchTerm=NULL, database=NULL,filterVector=NULL,
     
     
     #Loading the default data.tables from ENCODExplorer package
-    if(is.null(database)){
-        database <- ENCODExplorer::encode_df
-    } else if(!is.data.table(database)) {
+    if(!is.data.table(database)) {
         cat("Invalid database input : database entry must be a data.table \n")
-        return(NA)    }else{
+        return(NA)    
     }
     
     # All the possible filter
