@@ -16,4 +16,3 @@ a \code{data.frame} corresponding to the table asked. If no match is
 \description{
 Extract a data.frame corresponding to a table in ENCODE database
 }
-

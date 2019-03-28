@@ -22,14 +22,14 @@ test.design_wide <- function(){
 test.design_split_long <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
-    obs <- createDesign(brca, encode_df, split=T)
+    obs <- createDesign(brca, encode_df, split=TRUE)
     RUnit::checkIdentical(length(obs), 2L)
 }
 
 test.design_split_wide <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))
-    obs <- createDesign(brca, encode_df, format="wide", split=T)
+    obs <- createDesign(brca, encode_df, format="wide", split=TRUE)
     RUnit::checkIdentical(length(obs), 2L)
 }
 

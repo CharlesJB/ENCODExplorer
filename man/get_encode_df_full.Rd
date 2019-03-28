@@ -13,3 +13,6 @@ a \code{data.table} containing relevant metadata for all
 \description{
 Concatenates all available file metadata into a single data table.
 }
+\examples{
+    my_full_encode_df = get_encode_df_full()
+}

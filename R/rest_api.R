@@ -5,7 +5,7 @@
 #' @return a \code{data.frame} corresponding to the table asked. If no match is
 #'         found, returns an empty \code{data.frame}
 #'         
-#' @import jsonlite
+#' @importFrom jsonlite fromJSON
 #' @import RCurl
 extract_table <- function(type) {
   filters = "&limit=all"
@@ -264,9 +264,9 @@ clean_column <- function(column_name, table) {
   type <- c("character", "data.frame", "logical",
             "numeric", "integer", "NULL")
   stopifnot(class(column) %in% type)
-  if(class(column) == "data.frame"){
+  if(is(column, "data.frame")) {
       stopifnot(nrow(column) == nrow(table))
-  }else if((class(column) %in% type) & !(class(column) == "NULL")){
+  }else if((class(column) %in% type) & !(is.null(column))){
       stopifnot(length(column) == nrow(table))
   }
 
@@ -323,12 +323,10 @@ clean_table <- function(table) {
 #'
 #' @examples
 #'        searchEncode("ChIP-Seq+H3K4me1")
-#' @import jsonlite
+#' @importFrom jsonlite fromJSON
 #' @export
 #' 
 #' 
-
-
 searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   searchTerm = gsub(x = searchTerm, pattern = " ",replacement = "+")
   r = data.frame()
@@ -362,8 +360,9 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
 #' The data is then downloaded using the \code{jsonlite} package.
 #'
 #' @return a \code{list} of schemas.
-#' 
-#' @import jsonlite
+#' @examples
+#'   get_schemas()
+#' @importFrom jsonlite fromJSON
 get_schemas <- function() {
   # 1. Extract the description of the schemas
   types <- get_encode_types()
@@ -396,6 +395,8 @@ get_schemas <- function() {
 #' @return a vector of \code{character} with the names of the known tables in
 #'         the ENCODE database.
 #'
+#' @examples
+#'    get_encode_types()
 #' @import tools
 get_encode_types <- function() {
   encode_api_url <- "https://api.github.com/repos"

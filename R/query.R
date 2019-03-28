@@ -34,9 +34,7 @@
 #' experiments and datasets
 #'
 #' @examples
-#'     \dontrun{
 #'     queryEncode(biosample_name = "A549", file_format = "bam")
-#'     }
 #' @import data.table
 #' @export
 queryEncode <- function(df = ENCODExplorer::encode_df, set_accession = NULL, assay = NULL, 
@@ -101,17 +99,15 @@ queryEncode <- function(df = ENCODExplorer::encode_df, set_accession = NULL, ass
 #' experiments and datasets
 #'
 #' @examples
-#'     \dontrun{
 #'     # Will return all bam files from biosample A549.
-#'     queryEncodeGeneric(biosample_name = "A549", file_format = "bam")
+#'     res = queryEncodeGeneric(biosample_name = "A549", file_format = "bam")
 #'
 #'     # Will return all bam files from biosamples A549 and HeLA-S3.
-#'     queryEncodeGeneric(biosample_name = c("A549", "HeLa-S3", file_format = "bam")
+#'     res = queryEncodeGeneric(biosample_name = c("A549", "HeLa-S3"), file_format = "bam")
 #'
 #'     # Will return all fles where the assay contains RNA-Seq or a substrings
 #'     # thereof, such as "polyA mRNA RNA-Seq" or "small RNA-Seq".
-#'     queryEncodeGeneric(assay="RNA-Seq", fuzzy=TRUE)
-#'     }
+#'     res = queryEncodeGeneric(assay="RNA-Seq", fuzzy=TRUE)
 #' @import data.table
 #' @export
 queryEncodeGeneric <- function(df = ENCODExplorer::encode_df, fixed = TRUE, quiet = FALSE, 

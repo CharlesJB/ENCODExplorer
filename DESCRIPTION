@@ -26,7 +26,7 @@ License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODExplorer/issues
 VignetteBuilder: knitr
 Depends:
-    R (>= 3.3),
+    R (>= 3.5),
     shiny,
     DT,
     shinythemes
@@ -39,7 +39,8 @@ Imports:
     data.table,
     dplyr,
     stringr,
-    stringi
+    stringi,
+    utils
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

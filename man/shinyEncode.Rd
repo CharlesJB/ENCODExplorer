@@ -16,4 +16,3 @@ Launch a shiny interface for ENCODExplorer
  \dontrun{shinyEncode}
 
 }
-

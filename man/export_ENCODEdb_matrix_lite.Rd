@@ -20,6 +20,6 @@ Extract file metadata from the full set of ENCODE metadata tables.
 \examples{
     \dontrun{
         tables = prepare_ENCODEdb()
-        export_ENCODEdb_matrix(database_filename = tables)
+        export_ENCODEdb_matrix_lite(database_filename = tables)
     }
 }

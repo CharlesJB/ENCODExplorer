@@ -22,4 +22,3 @@ The tables were generated with the \code{prepare_ENCODEdb} function.
   database created with \code{\link{prepare_ENCODEdb}} function.
 }
 \keyword{datasets}
-

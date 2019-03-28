@@ -41,14 +41,14 @@ server <- function(input, output) {
                                     multipleTerm=multiple_Term, database=df)
             #Removing empty row and a few specific row
             resultFuzzy <<- resultFuzzy[ , !c("antibody_characterization",
-                                                "uuid","notes"), with=F]
+                                                "uuid","notes"), with=FALSE]
             resultFuzzy <<- resultFuzzy[,sapply(resultFuzzy, function(i){
-                !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
+                !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=FALSE]
             
             if(nrow(resultFuzzy)>0){
                 output$searchFuzzy <- DT::renderDataTable(resultFuzzy,
-                    options=list(searching=FALSE, fixedHeader=T, pageLength=25,
-                        scrollY="600px", scrollCollapse=T,scrollX=T, deferRender=T,
+                    options=list(searching=FALSE, fixedHeader=TRUE, pageLength=25,
+                        scrollY="600px", scrollCollapse=TRUE,scrollX=TRUE, deferRender=TRUE,
                         columnDefs=list(list(targets=1:ncol(resultFuzzy),
                                              className="dt-center")))
                 )
@@ -63,15 +63,15 @@ server <- function(input, output) {
                                         allFilter[as.numeric(input$filter)])
             #Removing empty row and a few specific row
             resultFuzzy <<- resultFuzzy[ , !c("antibody_characterization",
-                                                "uuid","notes"), with=F]
+                                                "uuid","notes"), with=FALSE]
             resultFuzzy <<- resultFuzzy[,sapply(resultFuzzy, function(i){
-                !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
+                !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=FALSE]
             
             if(nrow(resultFuzzy) > 0){
                 output$searchFuzzy <- DT::renderDataTable(resultFuzzy,
-                    options=list(searching=FALSE, fixedHeader=T,  pageLength=25,
-                            scrollY="600px", scrollCollapse=T,
-                            scrollX=T, deferRender=T, columnDefs=list(list(
+                    options=list(searching=FALSE, fixedHeader=TRUE,  pageLength=25,
+                            scrollY="600px", scrollCollapse=TRUE,
+                            scrollX=TRUE, deferRender=TRUE, columnDefs=list(list(
                             targets=1:ncol(resultFuzzy), className="dt-center")))
                 )
             }else{
@@ -123,8 +123,8 @@ server <- function(input, output) {
             
                 output$designFuzzy <- DT::renderDataTable(designFuzzy, 
                    options=list(searching=FALSE,pageLength = 25,searching=FALSE,
-                                fixedHeader=T, scrollX=T, scrollY="600px", 
-                                scrollCollapse=T, deferRender=T)
+                                fixedHeader=TRUE, scrollX=TRUE, scrollY="600px", 
+                                scrollCollapse=TRUE, deferRender=TRUE)
                 )
             
             }else{
@@ -161,7 +161,7 @@ server <- function(input, output) {
                         my_i <- i
                         tablename <- paste(acc[my_i])
                         output[[tablename]] <- DT::renderDataTable(designFuzzy[[my_i]],
-                                options=list(searching=FALSE, paging=F))
+                                options=list(searching=FALSE, paging=FALSE))
                     })
                 }
             }
@@ -238,7 +238,7 @@ server <- function(input, output) {
     }
     
     #Function that return the sum of selected files size
-    file_size_fuzzy <- function(rows=NULL,is_design=F){
+    file_size_fuzzy <- function(rows=NULL,is_design=FALSE){
         #Getting selected row and thier size
         selected_rows <- paste(rows)
         if(!viewDesign){
@@ -275,7 +275,7 @@ server <- function(input, output) {
         }else{ #for design object
             if(!input$splitFromSearch & length(input$designFuzzy_rows_selected) > 0 ){
                 paste("Number of selected files :",length(input$designFuzzy_rows_selected),
-                      " Total size of the selected files :",file_size_fuzzy(input$designFuzzy_rows_selected,T))
+                      " Total size of the selected files :",file_size_fuzzy(input$designFuzzy_rows_selected,TRUE))
             }
             
         }
@@ -337,20 +337,20 @@ server <- function(input, output) {
                                 assay=as, biosample_name=bn,
                                 biosample_type=bt, project=pr,file_accession=fa,
                                 file_format=ff,lab=lb, organism=og,target=tg,
-                                treatment=tr,file_status=fileStat, quiet=F,
+                                treatment=tr,file_status=fileStat, quiet=FALSE,
                                 status=es,fixed=as.logical(input$fixed))
         #Removing empty specific and empty row
         resultQuery <<- resultQuery[ , !c("antibody_characterization","uuid",
-                                          "notes"), with=F]
+                                          "notes"), with=FALSE]
         resultQuery <<- resultQuery[,sapply(resultQuery, function(i){
-            !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=F]
+            !all(sapply(i,function(val){is.na(val)|identical(val,"")}))}), with=FALSE]
         if(nrow(resultQuery) == 0){
           output$consoleQuery <- renderPrint(cat("Error : No result found"))
           output$resultQuery <- DT::renderDataTable(data.table())
         }else{
-            output$resultQuery <- DT::renderDataTable(resultQuery, escape=F,
-                options=list(searching=F, fixedHeader=T, pageLength=25,
-                    scrollY="600px", scrollCollapse=T, scrollX=T, deferRender=T,
+            output$resultQuery <- DT::renderDataTable(resultQuery, escape=FALSE,
+                options=list(searching=FALSE, fixedHeader=TRUE, pageLength=25,
+                    scrollY="600px", scrollCollapse=TRUE, scrollX=TRUE, deferRender=TRUE,
                     columnDefs=list(list(targets=1:ncol(resultQuery),
                                             className="dt-center")))
             )
@@ -390,8 +390,8 @@ server <- function(input, output) {
                 acc_list <- gsub(pattern = "/files/(.*)/.*/.*", replacement = "\\1",
                              x = designQuery$File)
                 output$designQuery <- DT::renderDataTable(designQuery,
-                    options=list(searching=F, pageLength = 25, scrollX = T,
-                                scrollY="600px", scrollCollapse=T, deferRender=T,
+                    options=list(searching=FALSE, pageLength = 25, scrollX = TRUE,
+                                scrollY="600px", scrollCollapse=TRUE, deferRender=TRUE,
                                 columnDefs=list(list(targets=1:ncol(designQuery),
                                                      className="dt-center")))
                 )
@@ -489,13 +489,13 @@ server <- function(input, output) {
           }else{ #for design object
               if(!input$splitFromQuery & length(input$designQuery_rows_selected) > 0 ){
                  paste("Number of selected files :",length(input$designQuery_rows_selected),
-                 " Total size of the selected files :",file_size_query(input$designQuery_rows_selected,T))
+                 " Total size of the selected files :",file_size_query(input$designQuery_rows_selected,TRUE))
               }
           }
      })
     
     #Function that return the sum of selected files size
-    file_size_query <- function(rows=NULL,is_design=F){
+    file_size_query <- function(rows=NULL,is_design=FALSE){
       selected_rows <- paste(rows)
       #Getting selected row and thier size
       if(!is_design){

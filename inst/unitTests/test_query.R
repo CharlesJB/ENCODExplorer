@@ -5,7 +5,7 @@ if(FALSE) {
 
 
 test.fixed_option <- function() {
-  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=T),
+  obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=TRUE),
                  error=function(e) e, warning=conditionMessage)
   msg = "queryEncode with approximative target name and fixed = T shouldn't return any dataset results"
   
@@ -14,7 +14,7 @@ test.fixed_option <- function() {
 
 test.query_with_target <- function() {
   data("encode_df")
-  res_regexp = queryEncode(df=encode_df, target = "rabbit iGG", fixed=T, quiet=T, fuzzy=T)
+  res_regexp = queryEncode(df=encode_df, target = "rabbit iGG", fixed=TRUE, quiet=TRUE, fuzzy=TRUE)
   checkEquals(sum(!grepl("experiments", x=res_regexp$dataset_type)), 0,
               msg = "2.query with a target filter shouldn't return any dataset results" )
   checkTrue(sum(grepl("experiments", x=res_regexp$dataset_type)) > 0,
@@ -25,7 +25,7 @@ test.query_with_target <- function() {
 test.combined_query <- function() {
   data("encode_df")
   res_combo = queryEncode(df=encode_df, biosample_name = "A549", assay = "chipseq",
-                          file_format = "bigwig", fixed = T, quiet=T, fuzzy=T,
+                          file_format = "bigwig", fixed = TRUE, quiet=TRUE, fuzzy=TRUE,
                           file_status="all", status="all")
   checkTrue("ENCFF366WNG" %in% as.character(res_combo$file_accession),
             msg = "this combined query should return a results set containing the id ENCFF366WNG")
@@ -43,8 +43,8 @@ test.combined_query <- function() {
 
 test.query_revoked_file <- function() {
   data("encode_df")
-  res_revok = queryEncode(assay = "chipseq", biosample_name = "mcf7", fixed = T,
-                          file_status = "revoked", df=encode_df, fuzzy=T)
+  res_revok = queryEncode(assay = "chipseq", biosample_name = "mcf7", fixed = TRUE,
+                          file_status = "revoked", df=encode_df, fuzzy=TRUE)
 
   checkTrue("ENCFF000ZKM" %in% as.character(res_revok$file_accession),
             msg = "this combined query should return a result set containg ENCFF000ZKM")
@@ -54,7 +54,7 @@ test.query_two_terms <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
-  res_two_terms = queryEncode(assay = c(assay1, assay2), biosample_name = "HeLa-S3", fixed = T)
+  res_two_terms = queryEncode(assay = c(assay1, assay2), biosample_name = "HeLa-S3", fixed = TRUE)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
             msg = paste0("this combined query should return a result set containg both ", assay1, " and ", assay2))
@@ -64,7 +64,7 @@ test.query_fuzzy_prefix <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
-  res_fuzzy = queryEncode(assay = "RNA-seq", biosample_name = "HeLa-S3", fixed = T, fuzzy = T)
+  res_fuzzy = queryEncode(assay = "RNA-seq", biosample_name = "HeLa-S3", fixed = TRUE, fuzzy = TRUE)
 
   checkTrue(assay1 %in% res_fuzzy$assay && assay2 %in% res_fuzzy$assay,
             msg = "this fuzzy query should return all assays which have RNA-seq as a substring")
@@ -74,7 +74,7 @@ test.query_regex <- function() {
   data("encode_df")
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
-  res_two_terms = queryEncode(assay = ".*RNA-seq", biosample_name = "HeLa-S3", fixed = F)
+  res_two_terms = queryEncode(assay = ".*RNA-seq", biosample_name = "HeLa-S3", fixed = FALSE)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
             msg = "this regex query should return all assays which have RNA-seq as a substring")

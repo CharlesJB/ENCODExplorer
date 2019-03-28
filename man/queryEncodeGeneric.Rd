@@ -49,15 +49,13 @@ By default, the query is made using exact matches. Set \code{fixed} to
 options cannot be combined.
 }
 \examples{
-    \dontrun{
     # Will return all bam files from biosample A549.
-    queryEncodeGeneric(biosample_name = "A549", file_format = "bam")
+    res = queryEncodeGeneric(biosample_name = "A549", file_format = "bam")
 
     # Will return all bam files from biosamples A549 and HeLA-S3.
-    queryEncodeGeneric(biosample_name = c("A549", "HeLa-S3", file_format = "bam")
+    res = queryEncodeGeneric(biosample_name = c("A549", "HeLa-S3"), file_format = "bam")
 
     # Will return all fles where the assay contains RNA-Seq or a substrings
     # thereof, such as "polyA mRNA RNA-Seq" or "small RNA-Seq".
-    queryEncodeGeneric(assay="RNA-Seq", fuzzy=TRUE)
-    }
+    res = queryEncodeGeneric(assay="RNA-Seq", fuzzy=TRUE)
 }

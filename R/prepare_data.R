@@ -15,7 +15,6 @@
 #'         prepare_ENCODEdb("ENCODEdb.RDA")
 #'     }
 #'     
-#' @import jsonlite
 #' @import data.table
 #' @export
 prepare_ENCODEdb <- function(database_filename = "tables.RDA",
@@ -70,11 +69,9 @@ prepare_ENCODEdb <- function(database_filename = "tables.RDA",
 #' @examples
 #'     \dontrun{
 #'         tables = prepare_ENCODEdb()
-#'         export_ENCODEdb_matrix(database_filename = tables)
+#'         export_ENCODEdb_matrix_lite(database_filename = tables)
 #'     }
 #' @import parallel
-#' 
-#' @export
 export_ENCODEdb_matrix_lite <- function(database_filename) {
   db = database_filename
   encode_df = db$file
@@ -187,6 +184,8 @@ full_db_cache_env=new.env()
 #' @return a \code{data.table} containing relevant metadata for all
 #'   ENCODE files.
 #'
+#' @examples
+#'     my_full_encode_df = get_encode_df_full()
 #' @export
 get_encode_df_full <- function() {
     if(!exists("full_db_cache", envir=full_db_cache_env)) {
@@ -206,6 +205,8 @@ get_encode_df_full <- function() {
 #' @return a \code{data.table} containing the most relevant 
 #'   metadata for all ENCODE files.
 #'
+#' @examples
+#'     my_encode_df = get_encode_df()
 #' @export
 get_encode_df <- function() {
     return(ENCODExplorer::encode_df)

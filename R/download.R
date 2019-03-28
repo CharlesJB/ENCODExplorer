@@ -11,6 +11,7 @@
 #' @return A \code{character} with the name of the downloaded file.
 #' 
 #' @import tools
+#' @importFrom utils download.file
 download_single_file <- function(file_url, file_md5, dir=".", experiment_name=NULL, force=TRUE) {
   # Determine the output filename.
   fileName = strsplit(x = file_url, split = "@@download/", fixed = TRUE)[[1]][2]
@@ -115,7 +116,6 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 #' @import tools
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
-#' 
 #' @export
 downloadEncode <- function (file_acc = NULL, df = ENCODExplorer::encode_df, format ="all", dir= ".",
                              force = TRUE) {
@@ -132,7 +132,7 @@ downloadEncode <- function (file_acc = NULL, df = ENCODExplorer::encode_df, form
     }
   }
   #If the input is a list of design (split option set to TRUE)
-  if(class(file_acc) == "list"){
+  if(is(file_acc, "list")){
     if(all(sapply(file_acc, is.data.table))){
      file_acc <- rbindlist(file_acc)
      file_acc <- sapply(file_acc$File, function(i){

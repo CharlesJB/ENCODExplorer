@@ -22,4 +22,3 @@ and/or columns that are \code{data.frames}.
 This function will either remove columns that are not relevant and convert
 columns to a vector or data.frame.
 }
-

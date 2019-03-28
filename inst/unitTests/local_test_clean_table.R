@@ -17,6 +17,6 @@ checkTrue(!("@type" %in% names(mouse_df_clean)), msg = "this function should rem
 checkTrue(!("references" %in% names(mouse_df_clean)), msg = "this function should remove empty column")
 
 # check column formatting
-alternate_access = strsplit(as.character(mouse_df_clean[23,]$alternate_accessions), split = ";", fixed = T)[[1]]
+alternate_access = strsplit(as.character(mouse_df_clean[23,]$alternate_accessions), split = ";", fixed = TRUE)[[1]]
 checkEquals(length(alternate_access),3, msg = "this function should tranform list in single vector whom elements are separated by a ;")
 

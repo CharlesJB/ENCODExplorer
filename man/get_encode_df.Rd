@@ -13,3 +13,6 @@ a \code{data.table} containing the most relevant
 \description{
 Returns a "light" version of ENCODE file metadata.
 }
+\examples{
+    my_encode_df = get_encode_df()
+}
