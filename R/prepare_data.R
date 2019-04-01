@@ -127,10 +127,10 @@ export_ENCODEdb_matrix_lite <- function(database_filename) {
                     "technical_replicates", "project", "dataset", "dbxrefs", "superseded_by",
                     "file_status", "submitted_by", "library", "derived_from",
                     "file_format_type", "file_format_specifications", "genome_annotation",
-                    "external_accession", "date_released", "biosample_ontology")
+                    "external_accession", "date_released", "biosample_ontology", "md5sum")
 
   ext_col_1 <- c("notes", "cloud_metadata.url", "s3_uri")
-  ext_col_2 <- c("date_created", "uuid", "md5sum", "cloud_metadata.md5sum_base64", "quality_metrics", "content_md5sum")
+  ext_col_2 <- c("date_created", "uuid",  "cloud_metadata.md5sum_base64", "quality_metrics", "content_md5sum")
   all_explicit_columns = c(main_columns, ext_col_1, ext_col_2)
   other_columns = setdiff(colnames(encode_df), all_explicit_columns)
   
