@@ -39,3 +39,32 @@ test.argument_consistency_dir <- function() {
   exp = "Can't write in /aabbbccc"
   RUnit::checkIdentical(obs, exp)
 }
+
+test.download_valid <- function() {
+    q_results = queryEncodeGeneric(biosample_name="A549", 
+                                   file_type="bed narrowPeak", 
+                                   target="BHLHE40")
+    d_results = downloadEncode(q_results)
+    d_result_files = gsub("Success downloading file : ", "", d_results)
+    
+    checkTrue(all(file.exists(d_result_files)))
+    unlink(d_result_files)
+    
+    # Download again with force=FALSE, should fail... Or not.
+    # file.remove(d_result_files)
+    # file.create(d_result_files)
+    # d_results = downloadEncode(q_results, force=FALSE)
+    
+    # Test specifying non-canonical df
+    q_mixed_up = q_results
+    q_mixed_up$file_accession = c("ABC", "DEF")
+    d_results = downloadEncode(c("ABC", "DEF"), df=q_mixed_up)
+    checkTrue(all(file.exists(d_result_files)))
+    unlink(d_result_files)
+    
+    # Test using other directory.
+    dir.create("Test_dir", showWarnings=FALSE)
+    d_results = downloadEncode(q_results, dir="Test_dir")
+    checkTrue(all(file.exists(file.path("Test_dir", d_result_files))))
+    unlink("Test_dir", recursive=TRUE)
+}
