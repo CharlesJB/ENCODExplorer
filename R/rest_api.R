@@ -361,7 +361,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
 #'
 #' @return a \code{list} of schemas.
 #' @examples
-#'   get_schemas()
+#'   ENCODExplorer:::get_schemas()
 #' @importFrom jsonlite fromJSON
 get_schemas <- function() {
   # 1. Extract the description of the schemas
@@ -398,6 +398,7 @@ get_schemas <- function() {
 #' @examples
 #'    get_encode_types()
 #' @import tools
+#' @export
 get_encode_types <- function() {
   encode_api_url <- "https://api.github.com/repos"
   encoded_repo <- "encode-dcc/encoded"
