@@ -4,11 +4,11 @@
 \alias{queryEncodeGeneric}
 \title{Produce a subset of data following predefined criteria.}
 \usage{
-queryEncodeGeneric(df = ENCODExplorer::encode_df, fixed = TRUE,
-  quiet = FALSE, fuzzy = FALSE, ...)
+queryEncodeGeneric(df = get_encode_df(), fixed = TRUE, quiet = FALSE,
+  fuzzy = FALSE, ...)
 }
 \arguments{
-\item{df}{\code{data.frame} containing ENCODE 
+\item{df}{\code{data.frame} containing ENCODE
 experiment and dataset metadata}
 
 \item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.
@@ -22,17 +22,17 @@ For example, "MCF7" will match "MCF-7" or "RNA-Seq" will match "polyA mRNA
 RNA-Seq".}
 
 \item{...}{All other named parameters are used as terms to be searched for,
-with the parameter name naming the field (biosample_name, assay, etc.) and 
+with the parameter name naming the field (biosample_name, assay, etc.) and
 the value being the terms that are searched for.}
 }
 \value{
-a \code{data.frame}s containing data about ENCODE 
+a \code{data.frame}s containing data about ENCODE
 experiments and datasets
 }
 \description{
-After running the \code{prepare_ENCODEDb} function, this function will allow 
+After running the \code{prepare_ENCODEDb} function, this function will allow
 you to extract a subset of the files it describes. Search terms are passed in
-as named parameters, where the parameter's name indicates the field, and its 
+as named parameters, where the parameter's name indicates the field, and its
 value the terms to be searched for. Each term may be a vector of values,
 which are processed using the OR logical operation (the function will return
 all results matching at least one of the terms). In contrast, separate

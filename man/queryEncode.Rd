@@ -4,15 +4,15 @@
 \alias{queryEncode}
 \title{Produce a subset of data following predefined criteria}
 \usage{
-queryEncode(df = ENCODExplorer::encode_df, set_accession = NULL,
-  assay = NULL, biosample_name = NULL, dataset_accession = NULL,
+queryEncode(df = get_encode_df(), set_accession = NULL, assay = NULL,
+  biosample_name = NULL, dataset_accession = NULL,
   file_accession = NULL, file_format = NULL, lab = NULL,
   organism = NULL, target = NULL, treatment = NULL, project = NULL,
   biosample_type = NULL, file_status = "released",
   status = "released", fixed = TRUE, quiet = FALSE, fuzzy = FALSE)
 }
 \arguments{
-\item{df}{\code{data.frame} containing ENCODE 
+\item{df}{\code{data.frame} containing ENCODE
 experiment and dataset metadata}
 
 \item{set_accession}{character string to select the accession}
@@ -39,32 +39,33 @@ experiment and dataset metadata}
 
 \item{biosample_type}{character string to select the biosample type}
 
-\item{file_status}{character string to select the file status 
+\item{file_status}{character string to select the file status
 ("released", "revoked", "all"). Default "released"}
 
 \item{status}{character string to select the dataset/experiment status}
 
 \item{fixed}{logical. If TRUE, pattern is a string to be matched as it is.}
 
-\item{quiet}{logical enables to switch off the result summary information 
+\item{quiet}{logical enables to switch off the result summary information
 when setting at TRUE.}
 
 \item{fuzzy}{Search for substring or alternate hyphenations. Default: TRUE}
 }
 \value{
-a \code{data.frame}s containing data about ENCODE 
+a \code{data.frame}s containing data about ENCODE
 experiments and datasets
 }
 \description{
-After running the \code{prepare_ENCODEDb} function, this function will allow 
-you to extract a subset of data encording to the following criteria : 
-accession, assay name, biosample, dataset accession, file accession, 
+After running the \code{prepare_ENCODEDb} function, this function will allow
+you to extract a subset of data encording to the following criteria :
+accession, assay name, biosample, dataset accession, file accession,
 file format, laboratory, donor organism, target and treatment.
 }
 \details{
-By default, the query can be made on an exact match term. This behaviour can 
+By default, the query can be made on an exact match term. This behaviour can
 be modified by setting the \code{fixed} argument at \code{TRUE}
 }
 \examples{
-    queryEncode(biosample_name = "A549", file_format = "bam")
+    queryEncode(df = get_encode_df_demo(), biosample_name = "A549",
+                file_format = "bam")
 }

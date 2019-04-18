@@ -2,7 +2,7 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 2.9.1
+Version: 2.9.2
 Date: 2015-02-25
 Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
     Audrey Lemacon <lemacon.audrey@ulaval.ca>, Louis Gendron
@@ -26,21 +26,21 @@ License: Artistic-2.0
 BugReports: https://github.com/CharlesJB/ENCODExplorer/issues
 VignetteBuilder: knitr
 Depends:
-    R (>= 3.5),
+    R (>= 3.6),
     shiny,
     DT,
     shinythemes
 Imports:
     tools,
     jsonlite,
-    parallel,
     RCurl,
     tidyr,
     data.table,
     dplyr,
     stringr,
     stringi,
-    utils
+    utils,
+    AnnotationHub
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

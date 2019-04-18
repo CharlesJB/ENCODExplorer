@@ -109,7 +109,7 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 #' @return A \code{character} with the downloaded files
 #' 
 #' @examples 
-#'  fuzzy_result <- fuzzySearch("ENCSR396EAG", encode_df, filterVector = "accession")
+#'  fuzzy_result <- fuzzySearch("ENCSR396EAG", get_encode_df_demo(), filterVector = "accession")
 #'  \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 #' 
 #' @import data.table
@@ -117,7 +117,7 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
 #' @export
-downloadEncode <- function (file_acc = NULL, df = ENCODExplorer::encode_df, format ="all", dir= ".",
+downloadEncode <- function (file_acc = NULL, df = get_encode_df(), format ="all", dir= ".",
                              force = TRUE) {
   #Extract accession if the user pass a data.table as input
   if(is.data.frame(file_acc)){

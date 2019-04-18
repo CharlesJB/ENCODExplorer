@@ -12,7 +12,7 @@ library(shinythemes)
 
 server <- function(input, output) {
     
-    data(encode_df)
+    encode_df <- get_encode_df()
     allFilter <- c("accession", "dataset_type","lab", "title", "file_type",
                    "platform","project", "type", "control", "biosample_type",
                    "replicate", "organism", "file_accession","target","assay",

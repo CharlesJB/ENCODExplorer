@@ -1,45 +1,3 @@
-#' Extract a data.frame corresponding to a table in ENCODE database
-#'
-#' @param type The type of table to extract from ENCODE rest api.
-#'
-#' @return a \code{data.frame} corresponding to the table asked. If no match is
-#'         found, returns an empty \code{data.frame}
-#'         
-#' @importFrom jsonlite fromJSON
-#' @import RCurl
-extract_table <- function(type) {
-  filters = "&limit=all"
-  filters = paste0(filters, "&frame=object&format=json")
-  
-  url <- "https://www.encodeproject.org/search/?type="
-  url <- paste0(url, type, filters)
-  results <- data.frame()
-  
-  if (RCurl::url.exists(url)) {
-    res <- jsonlite::fromJSON(url)
-    if (res[["notification"]] == "Success") {
-      results <- res[["@graph"]]
-    }
-  } else {
-    
-    temp <- strsplit(type, split="_")[[1]]
-    utype <- sapply(temp,function(x){paste0(toupper(substr(x,1,1)),
-                                           substr(x,2,nchar(x)))})
-    utype <- paste(utype, collapse='')
-    url <- "https://www.encodeproject.org/search/?type="
-    url <- paste0(url, utype, filters)
-
-    if (RCurl::url.exists(url)) {
-      res <- jsonlite::fromJSON(url)
-      if (res[["notification"]] == "Success") {
-        results <- res[["@graph"]]
-      }
-    }
-  }
-  
-  return(results)
-}
-
 #' Clean a single column of the data.frame
 #'
 #' The input column can either be a data.frame, a vector of character, a vector
@@ -273,7 +231,7 @@ clean_column <- function(column_name, table) {
   column
 }
 
-#' Clean a data.frame that was produced by extract_table
+#' Clean a data.frame that was produced by ENCODE REST API
 #'
 #' \code{data.frame}s produced when converting JSON to \code{data.frame} with
 #' the \code{fromJSON} function will sometime have columns that are lists
@@ -288,7 +246,6 @@ clean_column <- function(column_name, table) {
 #' input \code{data.frame}.
 #'
 #' 
-
 clean_table <- function(table) {
 
     class_vector <- as.vector(sapply(table, class))
@@ -346,65 +303,4 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
   if(!quiet) {cat(paste0("results : ",length(unique(search_results$accession)),"\n"))}
   
   search_results
-}
-
-
-#' Extract the schemas from ENCODE's github
-#'
-#' The JSONs are fetched from:
-#'        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
-#'
-#' The data is extracted using the github api:
-#'         https://developer.github.com/guides/getting-started/
-#'
-#' The data is then downloaded using the \code{jsonlite} package.
-#'
-#' @return a \code{list} of schemas.
-#' @examples
-#'   ENCODExplorer:::get_schemas()
-#' @importFrom jsonlite fromJSON
-get_schemas <- function() {
-  # 1. Extract the description of the schemas
-  types <- get_encode_types()
-  schema_names <- paste0(types, ".json")
-  names(schema_names) <- types
-  
-  # 2. Fetch all the JSON files
-  raw_git_url <- "https://raw.githubusercontent.com"
-  encoded_repo <- "encode-dcc/encoded"
-  schema_path <- "src/encoded/schemas"
-  
-  base_url <- paste(raw_git_url, encoded_repo, "master", schema_path, 
-                    sep = "/")
-  urls <- paste(base_url, schema_names, sep = "/")
-  # We need to suppress warnings:
-  #         Unexpected Content-Type: text/plain; charset=utf-8
-  schema_json <- suppressWarnings(lapply(urls, jsonlite::fromJSON))
-  schema_json
-}
-
-#' A list of known tables from ENCODE database.
-#'
-#' The type (table) names are extracted from the schema list from ENCODE-DCC
-#' github repository:
-#'        https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas
-#'
-#' The data is extracted using the github api:
-#'         https://developer.github.com/guides/getting-started/
-#'
-#' @return a vector of \code{character} with the names of the known tables in
-#'         the ENCODE database.
-#'
-#' @examples
-#'    get_encode_types()
-#' @import tools
-#' @export
-get_encode_types <- function() {
-  encode_api_url <- "https://api.github.com/repos"
-  encoded_repo <- "encode-dcc/encoded"
-  schemas <- "src/encoded/schemas"
-  url <- paste(encode_api_url, encoded_repo, "contents", schemas, sep = "/")
-  schema_names <- jsonlite::fromJSON(url)$name
-  schema_names <- schema_names[grepl(".json$", schema_names)]
-  tools::file_path_sans_ext(schema_names)
 }
