@@ -4,21 +4,25 @@ Type: Package
 Title: A compilation of ENCODE metadata
 Version: 2.9.2
 Date: 2015-02-25
-Author: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>,
-    Audrey Lemacon <lemacon.audrey@ulaval.ca>, Louis Gendron
-    <louisg.212@gmail.com> Astrid-Louise Deschenes,
-    <astrid-louise.deschenes@crchudequebec.ulaval.ca>,
-    Eric Fournier <Fournier.Eric.2@crchudequebec.ulaval.ca> and Arnaud Droit
-    <arnaud.droit@crchudequebec.ulaval.ca >
-Author@R: c(person("Charles","Joly Beauparlant", email = "charles.joly-
-    beauparlant@crchul.ulaval.ca", role = "aut,cre"), person("Audrey","Lemacon",
-    email = "lemacon.audrey@ulaval.ca", role = "aut"), person("Arnaud","Droit",
-    email = "arnaud.droit@crchudequebec.ulaval.ca", role = "aut"),
-    person("Louis", "Gendron", email = "louisg.212@gmail.com", role = "ctb"),
+Authors@R: Authors@R: c(
+    person("Charles","Joly Beauparlant",
+           email = "charles.joly-beauparlant@crchul.ulaval.ca",
+           role = c("aut","cre")), 
+    person("Audrey","Lemacon",
+           email = "lemacon.audrey@ulaval.ca", 
+           role = "aut"),
+    person("Eric","Fournier",
+           email = "Fournier.Eric.2@crchudequebec.ulaval.ca", 
+           role = "aut"),
+    person("Louis", "Gendron", 
+           email = "louisg.212@gmail.com", 
+           role = "ctb"),
     person("Astrid-Louise","Deschenes",
-    email = "astrid-louise.deschenes@crchudequebec.ulaval.ca", role = "ctb"),
-    person("Arnaud", "Droit", email = "arnaud.droit@crchudequebec.ulaval.ca"))
-Maintainer: Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>
+           email = "astrid-louise.deschenes@crchudequebec.ulaval.ca",
+           role = "ctb"),
+    person("Arnaud","Droit",
+           email = "arnaud.droit@crchudequebec.ulaval.ca",
+           role = "aut"))
 Description: This package allows user to quickly access ENCODE project files
     metadata and give access to helper functions to query the ENCODE rest api,
     download ENCODE datasets and save the database in SQLite format.
