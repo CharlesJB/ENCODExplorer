@@ -13,7 +13,7 @@ full_db_cache_env=new.env()
 #' @export
 get_encode_df_full <- function() {
     if(!exists("full_db_cache", envir=full_db_cache_env)) {
-	ah = AnnotationHub()
+        ah = AnnotationHub()
         full_db = query(ah, "ENCODExplorerData")[["AH69291"]]
         assign("full_db_cache", full_db, envir=full_db_cache_env)
     }
