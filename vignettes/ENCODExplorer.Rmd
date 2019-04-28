@@ -10,7 +10,7 @@ author:
   - Louis Gendron
   - Arnaud Droit
 vignette: >
-  % \VignetteIndexEntry{AnnotationHub: Access the AnnotationHub Web Service}
+  % \VignetteIndexEntry{ENCODExplorer}
   % \VignetteDepends{AnnotationHub}
   % \VignetteEngine{knitr::rmarkdown}
   % \VignetteEncoding{UTF-8}
