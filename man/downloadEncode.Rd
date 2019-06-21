@@ -5,8 +5,8 @@
 \title{downloadEncode is used to download a serie of files or datasets 
 using their accession.}
 \usage{
-downloadEncode(file_acc = NULL, df = ENCODExplorer::encode_df,
-  format = "all", dir = ".", force = TRUE)
+downloadEncode(file_acc = NULL, df = get_encode_df(), format = "all",
+  dir = ".", force = TRUE)
 }
 \arguments{
 \item{file_acc}{A \code{character} of ENCODE file or 
@@ -34,7 +34,7 @@ downloadEncode is used to download a serie of files or datasets
 using their accession.
 }
 \examples{
- fuzzy_result <- fuzzySearch("ENCSR396EAG", encode_df, filterVector = "accession")
+ fuzzy_result <- fuzzySearch("ENCSR396EAG", get_encode_df_demo(), filterVector = "accession")
  \dontrun{downloadEncode(fuzzy_result, format="tsv")}
 
 }

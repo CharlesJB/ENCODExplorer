@@ -4,25 +4,24 @@
 \alias{searchToquery}
 \title{Convert searchEncode output in queryEncode output.}
 \usage{
-searchToquery(df = ENCODExplorer::encode_df, searchResults,
-  quiet = TRUE)
+searchToquery(df = get_encode_df(), searchResults, quiet = TRUE)
 }
 \arguments{
-\item{df}{\code{list} of two \code{data.frame} containing ENCODE 
+\item{df}{\code{list} of two \code{data.frame} containing ENCODE
 experiment and dataset metadata.}
 
 \item{searchResults}{the results set generated from \code{searchEncode}}
 
-\item{quiet}{logical enables to switch off the result summary information 
+\item{quiet}{logical enables to switch off the result summary information
 when setting at TRUE.}
 }
 \value{
-a \code{list} of two \code{data.frame}s containing data about ENCODE 
+a \code{list} of two \code{data.frame}s containing data about ENCODE
 experiments and datasets
 }
 \description{
-After processing to a basic search with the \code{searchEncode} function 
-you can convert your result in a queryEncode output. Thus you can benefit 
+After processing to a basic search with the \code{searchEncode} function
+you can convert your result in a queryEncode output. Thus you can benefit
 from the collected metadata.
 }
 \details{

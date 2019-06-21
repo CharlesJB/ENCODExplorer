@@ -29,7 +29,7 @@ BUG FIXES
     o Solved various bug directly linked with the extraction of information from
       ENCODE database
 
-CHANGES IN VERSION 1.5.0
+CHANGES IN VERSION 1.6.0
 ------------------------
 
 NEW FEATURES
@@ -39,3 +39,14 @@ NEW FEATURES
     o New version of downloadEncode
     o Added the shinyApp of ENCODExplorer, see shinyEncode
     o Added a few column to encode_df database
+
+CHANGES IN VERSION 2.9.0
+------------------------
+
+NEW FEATURES
+
+    o The ENCODExplorer was split into 2 packages: ENCODExplorer and
+      ENCODExplorerData
+    o The encode_df object is now available through the AnnotationHub
+    o The functions to interact with the ENCODExplorer API (except the search
+      function) were moved to the ENCODExplorerData

@@ -5,16 +5,16 @@
 \title{Create a design for the files associated with the result of a queryEncode,
  fuzzySearch research or a \code{data.table} from createDesign.}
 \usage{
-createDesign(input = NULL, df = ENCODExplorer::encode_df,
-  split = FALSE, fileFormat = "bam", dataset_type = "experiments",
-  format = "long", output_type = "data.table", ID = c(1, 2))
+createDesign(input = NULL, df = get_encode_df(), split = FALSE,
+  fileFormat = "bam", dataset_type = "experiments", format = "long",
+  output_type = "data.table", ID = c(1, 2))
 }
 \arguments{
 \item{input}{The \code{data.table} created by a queryEncode or
 searchEncode research, or a}
 
 \item{df}{The \code{data.table} used to extract the files link.
-Default :\code{ENCODExplorer::encode_df}}
+Default :\code{get_encode_df()}}
 
 \item{split}{Allow to the function to return a \code{list} of \code{data.table}
 where each \code{data.table} contain the files for a single experiment
@@ -51,7 +51,11 @@ Create a design for the files associated with the result of a queryEncode,
  fuzzySearch research or a \code{data.table} from createDesign.
 }
 \examples{
-fuzzy_result <- fuzzySearch(searchTerm = "brca", database=encode_df, filterVector ="target")
-design_result <- createDesign(input = fuzzy_result,df=encode_df, fileFormat="fastq")
+# You will need to replace get_encode_df_demo() with your own encode_df object,
+# the get_encode_df() function or the get_encode_df_full() function.
+fuzzy_result <- fuzzySearch(searchTerm = "brca",
+database=get_encode_df_demo(), filterVector ="target")
+design_result <- createDesign(input = fuzzy_result,df=get_encode_df_demo(),
+fileFormat="fastq")
 
 }

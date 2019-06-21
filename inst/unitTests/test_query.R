@@ -3,6 +3,7 @@ if(FALSE) {
   library( "ENCODExplorer" )
 }
 
+encodexplorer_data <- get_encode_df()
 
 test.fixed_option <- function() {
   obs = tryCatch(queryEncode(target = "rabbit iGG", fixed=TRUE),
@@ -13,7 +14,7 @@ test.fixed_option <- function() {
 }
 
 test.query_with_target <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   res_regexp = queryEncode(df=encode_df, target = "rabbit iGG", fixed=TRUE, quiet=TRUE, fuzzy=TRUE)
   checkEquals(sum(!grepl("experiments", x=res_regexp$dataset_type)), 0,
               msg = "2.query with a target filter shouldn't return any dataset results" )
@@ -23,7 +24,7 @@ test.query_with_target <- function() {
 
 
 test.combined_query <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   res_combo = queryEncode(df=encode_df, biosample_name = "A549", assay = "chipseq",
                           file_format = "bigwig", fixed = TRUE, quiet=TRUE, fuzzy=TRUE,
                           file_status="all", status="all")
@@ -42,7 +43,7 @@ test.combined_query <- function() {
 #}
 
 test.query_revoked_file <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   res_revok = queryEncode(assay = "chipseq", biosample_name = "mcf7", fixed = TRUE,
                           file_status = "revoked", df=encode_df, fuzzy=TRUE)
 
@@ -51,7 +52,7 @@ test.query_revoked_file <- function() {
 }
 
 test.query_two_terms <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
   res_two_terms = queryEncode(assay = c(assay1, assay2), biosample_name = "HeLa-S3", fixed = TRUE)
@@ -61,7 +62,7 @@ test.query_two_terms <- function() {
 }
 
 test.query_fuzzy_prefix <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
   res_fuzzy = queryEncode(assay = "RNA-seq", biosample_name = "HeLa-S3", fixed = TRUE, fuzzy = TRUE)
@@ -71,7 +72,7 @@ test.query_fuzzy_prefix <- function() {
 }
 
 test.query_regex <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
   assay2 = "polyA RNA-seq"
   res_two_terms = queryEncode(assay = ".*RNA-seq", biosample_name = "HeLa-S3", fixed = FALSE)
@@ -81,7 +82,7 @@ test.query_regex <- function() {
 }
 
 test.query_na <- function() {
-  data("encode_df")
+  encode_df <- encodexplorer_data 
 
   # Run a query twice: once with all treatment values, and once only with NA treatment.
   res_null = queryEncodeGeneric(assay="ChIP-seq", biosample_name="A549", 

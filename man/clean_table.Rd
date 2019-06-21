@@ -2,7 +2,7 @@
 % Please edit documentation in R/rest_api.R
 \name{clean_table}
 \alias{clean_table}
-\title{Clean a data.frame that was produced by extract_table}
+\title{Clean a data.frame that was produced by ENCODE REST API}
 \usage{
 clean_table(table)
 }

@@ -10,7 +10,7 @@
 #' 
 #' @examples  
 #'    fuzz_ex <- fuzzySearch(searchTerm=c("ELAVL1","atf7"),
-#'    database=encode_df, filterVector ="target", multipleTerm = TRUE)
+#'    database=get_encode_df_demo(), filterVector ="target", multipleTerm = TRUE)
 #'
 #' @return A \code{data.table} corresponding the every row of the database that
 #' contain at least of one the searchTerm.
@@ -20,7 +20,7 @@
 #' @importFrom dplyr filter
 #' @export
 
-fuzzySearch <- function(searchTerm=NULL, database=ENCODExplorer::encode_df,filterVector=NULL,
+fuzzySearch <- function(searchTerm=NULL, database=get_encode_df(),filterVector=NULL,
                         multipleTerm=FALSE, ignore_case=TRUE){
     #Testing if the searchTerm input is valid
     if(!(is.list(searchTerm)|is.character(searchTerm)|is.null(searchTerm))){

@@ -5,6 +5,9 @@ if(FALSE) {
 }
 library( "RUnit" )
 library("data.table")
+
+encode_df <- get_encode_df()
+
 test.design_long <- function(){
     load(file = system.file("extdata/BRCA.rda", package = "ENCODExplorer"))
     brca <- dplyr::filter(brca, accession %in% c("ENCSR000EDY","ENCSR000EDB"))

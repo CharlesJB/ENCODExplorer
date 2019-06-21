@@ -6,7 +6,7 @@
 within the encode_df \code{data.table}. For faster processing, pass encode_df
 object as database parameter.}
 \usage{
-fuzzySearch(searchTerm = NULL, database = ENCODExplorer::encode_df,
+fuzzySearch(searchTerm = NULL, database = get_encode_df(),
   filterVector = NULL, multipleTerm = FALSE, ignore_case = TRUE)
 }
 \arguments{
@@ -33,6 +33,6 @@ object as database parameter.
 \examples{
  
    fuzz_ex <- fuzzySearch(searchTerm=c("ELAVL1","atf7"),
-   database=encode_df, filterVector ="target", multipleTerm = TRUE)
+   database=get_encode_df_demo(), filterVector ="target", multipleTerm = TRUE)
 
 }

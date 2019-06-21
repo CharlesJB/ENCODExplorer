@@ -7,7 +7,7 @@
 get_encode_df()
 }
 \value{
-a \code{data.table} containing the most relevant 
+a \code{data.table} containing the most relevant
   metadata for all ENCODE files.
 }
 \description{
@@ -15,4 +15,5 @@ Returns a "light" version of ENCODE file metadata.
 }
 \examples{
     my_encode_df = get_encode_df()
+
 }
