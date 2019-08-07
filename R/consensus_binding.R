@@ -1,3 +1,101 @@
+#' ENCODEBindingConsensus objects represents consensus peaks derived from a 
+#' set of ENCODE files.
+#'
+#' @slot metadata A list of data-frames representing the ENCODE metadata
+#'                of the files used to build the per-condition consensus.
+#' @slot peaks The per-condition original peaks used to build the consensus.
+#' @slot consensus The per-condition consensus peaks.
+#'
+#' @name ENCODEBindingConsensus-class
+#' @rdname ENCODEBindingConsensus-class
+#' @export
+setClass("ENCODEBindingConsensus",
+         slots=list(metadata="list",
+                    peaks="list", 
+                    consensus="GRangesList",
+                    consensus_threshold="numeric"))
+
+#' Returns the names of the elements of a \linkS4class{ENCODEBindingConsensus} 
+#' object. 
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @return The names of the elements in \code{x}.
+setMethod("names",
+          c(x="ENCODEBindingConsensus"),
+          function(x) {
+            names(x@consensus)
+          })
+
+#' Set names of the elements of a \linkS4class{ENCODEBindingConsensus} object. 
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @param value The new names for the elements of the 
+#'              \linkS4class{ENCODEBindingConsensus} object.
+setMethod("names<-",
+          c(x="ENCODEBindingConsensus", value="character"),
+          function(x, value) {
+            names(x@metadata) <- value
+            names(x@consensus) <- value
+            names(x@peaks) <- value
+            x
+          })
+
+#' Returns the number of elements of a \linkS4class{ENCODEBindingConsensus}
+#' object. 
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @return The number of elements in \code{x}.        
+setMethod("length",
+          c(x="ENCODEBindingConsensus"),
+          function(x) {
+            length(x@consensus)
+          })   
+
+setGeneric("metadata", function(x, ...) standardGeneric("metadata"))
+
+#' Returns a list of per-condition metadata of the ENCODE files used to build
+#' the \linkS4class{ENCODEBindingConsensus} object.
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @return A \code{list} of per-condition metadata of the ENCODE files used to 
+#' build the \linkS4class{ENCODEBindingConsensus} object.
+#' @export
+setMethod("metadata",
+          c(x="ENCODEBindingConsensus"),
+          function(x) {
+            x@metadata
+          })
+
+setGeneric("peaks", function(x, ...) standardGeneric("peaks"))
+
+#' Returns a \code{list} of \linkS4class{GRangesList} of the per-condition 
+#' original peaks used to build the \linkS4class{ENCODEBindingConsensus} object.
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @return A \code{list} of \linkS4class{GRangesList} of the per-condition  
+#'         original peaks usedto build the \linkS4class{ENCODEBindingConsensus} 
+#'         object.
+#' @export
+setMethod("peaks",
+          c(x="ENCODEBindingConsensus"),
+          function(x) {
+            x@peaks
+          })
+
+setGeneric("consensus", function(x, ...) standardGeneric("consensus"))
+
+#' Returns a \linkS4class{GRangesList} of the per-condition consensus peaks.
+#'
+#' @param x The \linkS4class{ENCODEBindingConsensus} object.
+#' @return A \linkS4class{GRangesList} of the per-condition consensus peaks.
+#' @export
+setMethod("consensus",
+          c(x="ENCODEBindingConsensus"),
+          function(x) {
+            x@consensus
+          })
+
+# Make sure a given column from query_results has only one unique value.
 verify_unique <- function(query_results, col_name, label) {
     values = unique(query_results[[col_name]])
     if(length(values) != 1) {
@@ -10,6 +108,7 @@ verify_unique <- function(query_results, col_name, label) {
 # Given a metadata data-frame and a vector of column names (split_by),
 # builds a partition of rows based on all possible combinations
 # of the columns identified by split_by.
+#' importFrom data.table rbindlist
 split_by_metadata = function(metadata, split_by) {
     if(!all(split_by %in% colnames(metadata))) {
         stop("split_by must be a character vector of ",
@@ -60,13 +159,9 @@ split_by_metadata = function(metadata, split_by) {
     return(list(Indices=out_subsets, Metadata=new_metadata, Partition=partition))        
 }
 
-###############################################################################
-# Function to load and query DNA binding protein data
-###############################################################################
-build_binding_consensus <- function(query_results, split_by,
-                                    consensus_threshold=1,
-                                    temp_dir=".", diagnostic_dir=NULL,
-                                    force=FALSE) {
+# Makes sure the provided query_results can be used to build a consensus of 
+# binding sites by checking column names and values.
+validate_query_results_for_consensus <- function(query_results, split_by) {
     # Make sure query_results is a valid output from queryEncode, or at
     # least similar enough to be processed by downloadEncode.
     if(!is.data.frame(query_results)) {
@@ -96,6 +191,43 @@ build_binding_consensus <- function(query_results, split_by,
         stop("Only narrowPeak and broadPeak files can be used to build a",
              "binding consensus.")
     }
+}
+
+#' Calculates the consensus peaks defined by the results of a previously
+#' completed ENCODE query.
+#'
+#' This function takes the result of a previous call to 
+#' \code{\link{queryEncode}}, splits the contained peak files by conditions (as
+#' specified by the \code{split_by} argument), then builds consensus peaks for 
+#' each condition.
+#'
+#' @param query_results A data.table returned by \code{\link{queryEncode}} or 
+#'                      \code{\link{queryEncodeGeneric}}.
+#' @param split_by A vector of column names from query_results that will be used
+#'                 to split the consensus binding sites according to condition.
+#'                 If \code{NULL}, all elements of query_results are used in the
+#'                 same consensus calculation.
+#' @param consensus_threshold A numeric value between 0 and 1, indicating the
+#'                            proportion of peak files in which a peak must
+#'                            appear for it to be included within the consensus.
+#' @param temp_dir The path to a directory where peak files will be 
+#'                 downloaded.
+#' @param diagnostic_dir The path to a directory where information about the
+#'                       peaks in individual files will be reported.
+#' @param force A logical indicating whether already present files be 
+#'              redownloaded.
+#' @return An object of class \linkS4class{ENCODEBindingConsensus}.
+#' @importFrom rtracklayer import
+#' @importFrom GenomicRanges GRangesList
+#' @importFrom GenomicOperations GenomicOverlaps
+#' @importFrom GenomicOperations plot_venn
+#' @importFrom GenomicOperations combined_regions
+#' @export
+buildConsensusPeaks <- function(query_results, split_by=NULL,
+                                  consensus_threshold=1,
+                                  temp_dir=".", diagnostic_dir=NULL,
+                                  force=FALSE) {
+    validate_query_results_for_consensus(query_results, split_by)
     
     dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
     if(!is.null(diagnostic_dir)) {
@@ -107,22 +239,28 @@ build_binding_consensus <- function(query_results, split_by,
     names(downloaded_files) = gsub(".*\\/(.*).bed.gz", "\\1", downloaded_files)
 
     file_format = gsub("bed ", "", unique(query_results$file_type))
-    all_binding_sites = GRangesList(lapply(downloaded_files, 
-                                           rtracklayer::import, 
-                                           format=file_format))
+    all_peaks = lapply(downloaded_files, rtracklayer::import, format=file_format)
+    all_peaks = GenomicRanges::GRangesList(all_peaks)
     
-    # Split files by split_by values.
-    split_res = split_by_metadata(query_results, split_by)
-    metadata = list()
-    binding_sites = list()
-    for(i in names(split_res$Indices)) {
-        metadata[[i]] = query_results[split_res$Indices[[i]]]
-        binding_sites[[i]] = all_binding_sites[metadata[[i]]$file_accession]
+    # Determine how to split files according to split_by.
+    if(is.null(split_by)) {
+        split_indices = list(All=rep(TRUE, nrow(query_results)))
+    } else {
+        split_indices = split_by_metadata(query_results, split_by)$Indices
     }
     
+    # Split imported peaks and metadata.
+    metadata = list()
+    peaks = list()
+    for(i in names(split_indices)) {
+        metadata[[i]] = query_results[split_indices[[i]]]
+        peaks[[i]] = all_peaks[metadata[[i]]$file_accession]
+    }
+    
+    # Build consensus for each condition.
     consensus = list()
-    for(i in names(binding_sites)) {
-        overlap_obj = GenomicOperations::GenomicOverlaps(binding_sites[[i]])
+    for(i in names(peaks)) {
+        overlap_obj = GenomicOperations::GenomicOverlaps(peaks[[i]])
 
 #        if(!is.null(diagnostic_dir)) {
 #            # Turn off VennDiagram logging.
@@ -137,5 +275,71 @@ build_binding_consensus <- function(query_results, split_by,
         consensus[[i]] = combined_regions(overlap_obj)[proportions >= consensus_threshold]
     }
     
-    return(list(Metadata=metadata, BindingSites=binding_sites, Consensus=consensus))
+    methods::new("ENCODEBindingConsensus",
+                 metadata=metadata,
+                 peaks=peaks, 
+                 consensus=GenomicRanges::GRangesList(consensus),
+                 consensus_threshold=consensus_threshold)
+}
+
+#' Queries ENCODE for consensus peaks.
+#'
+#' Queries the ENCODE metadata to determine which peak files exists for the 
+#' \code{target} protein in the \code{biosample_name} biosample for the 
+#' \code{assembly} genomic assembly, then builds per-condition (as determined 
+#' by the \code{treatment} column and its adjuncts) consensus peaks.
+#'
+#' If you wish to have more control over the files used to build the consensus,
+#' use \code{\link{buildConsensusPeaks}}.
+#'
+#' @param biosample_name The cell-line/tissue for which consensus peaks should 
+#'                       be queried.
+#' @param assembly The target genomic assembly.
+#' @param target The target protein.
+#' @return An object of class \linkS4class{ENCODEBindingConsensus}.
+#' @seealso \code{\link{buildConsensusPeaks}}
+#' @importFrom rtracklayer import
+#' @importFrom GenomicRanges GRangesList
+#' @importFrom GenomicOperations GenomicOverlaps
+#' @importFrom GenomicOperations plot_venn
+#' @importFrom GenomicOperations combined_regions
+#' @export
+queryConsensusPeaks <- function(biosample_name, assembly, target) {
+    query_results = queryEncodeGeneric(biosample_name=biosample_name, 
+                                       assembly=assembly,
+                                       target=target,
+                                       assay="ChIP-seq")
+                                      
+    if(nrow(query_results)==0) {
+        warning("No result found for the specified query.")
+        return(NULL)
+    }
+    
+    # Filter by file type.
+    n_broad = sum(query_results$file_type=="bed broadPeak")
+    n_narrow = sum(query_results$file_type=="bed narrowPeak")
+    chosen_file_type = "bed narrowPeak"
+    if(n_broad == 0 && n_narrow == 0) {
+        warning("No peak files found for the specified query.")
+        return(NULL)
+    } else if(n_broad == n_narrow) {
+        warning("Both broad and narrow peaks are present.",
+                "Defaulting to using narrow peaks.")
+    } else if(n_broad > n_narrow) {
+        chosen_file_type = "bed broadPeak"
+    } 
+    
+    query_results = query_results[query_results$file_type == chosen_file_type,]
+    
+    default_split_by = c("treatment", 
+                         "treatment_amount", "treatment_amount_unit",
+                         "treatment_duration", "treatment_duration_unit")
+    
+    res = buildConsensusPeaks(query_results, default_split_by)
+    if(length(res) == 1) {
+        names(res) = "All"
+    
+    }
+    
+    return(res)
 }

@@ -46,6 +46,7 @@ Imports:
     utils,
     AnnotationHub,
     GenomicOperations,
+    GenomicRanges,
     rtracklayer
 Suggests:
     RUnit,BiocGenerics,knitr,
