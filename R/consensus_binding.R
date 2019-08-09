@@ -224,9 +224,9 @@ validate_query_results_for_consensus <- function(query_results, split_by) {
 #' @importFrom GenomicOperations combined_regions
 #' @export
 buildConsensusPeaks <- function(query_results, split_by=NULL,
-                                  consensus_threshold=1,
-                                  temp_dir=".", diagnostic_dir=NULL,
-                                  force=FALSE) {
+                                consensus_threshold=1,
+                                temp_dir=".", diagnostic_dir=NULL,
+                                force=FALSE) {
     validate_query_results_for_consensus(query_results, split_by)
     
     dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
@@ -271,8 +271,7 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
 #            dev.off()
 #        }
 
-        proportions = rowSums(intersect_matrix(overlap_obj)) / length(overlap_obj)
-        consensus[[i]] = combined_regions(overlap_obj)[proportions >= consensus_threshold]
+        consensus[[i]] = consensus_regions(overlap_obj, consensus_threshold)
     }
     
     methods::new("ENCODEBindingConsensus",
@@ -281,6 +280,44 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
                  consensus=GenomicRanges::GRangesList(consensus),
                  consensus_threshold=consensus_threshold)
 }
+
+filter_results_by_file_type = function(query_results) {
+    n_broad = sum(query_results$file_type=="bed broadPeak")
+    n_narrow = sum(query_results$file_type=="bed narrowPeak")
+    chosen_file_type = "bed narrowPeak"
+    if(n_broad == 0 && n_narrow == 0) {
+        warning("No peak files found for the specified query.")
+    } else if(n_broad == n_narrow) {
+        warning("Both broad and narrow peaks are present.",
+                "Defaulting to using narrow peaks.")
+    } else if(n_broad > n_narrow) {
+        chosen_file_type = "bed broadPeak"
+    } 
+    
+    query_results[query_results$file_type == chosen_file_type,]
+}
+
+filter_results_by_output_type = function(query_results) {
+    unique_output = unique(query_results$output_type)
+    if(length(unique_output) > 1) {
+        prefered_output = c("optimal idr thresholded peaks",
+                            "conservative idr thresholded peaks",
+                            "peaks",
+                            "replicated peaks",
+                            "stable peaks")
+                           
+        output_matches = which(prefered_output %in% unique_output)
+        if(length(output_matches) > 0) {
+            best_output = prefered_output[output_matches[1]]
+            query_results = query_results[query_results$output_type == best_output]
+        } else {
+            warning("Multiple output types were detected, and we could not choose one automatically.")
+        }
+    }
+    
+    query_results
+}
+
 
 #' Queries ENCODE for consensus peaks.
 #'
@@ -308,28 +345,17 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        assembly=assembly,
                                        target=target,
-                                       assay="ChIP-seq")
-                                      
+                                       assay="ChIP-seq",
+                                       file_status="released")
+    
+    # Filter the results so we only keep "final" peaks.
+    query_results = filter_results_by_file_type(query_results)
+    query_results = filter_results_by_output_type(query_results)
+
     if(nrow(query_results)==0) {
-        warning("No result found for the specified query.")
-        return(NULL)
+        warning("No results found for the specified query.")
+        return(NULL)    
     }
-    
-    # Filter by file type.
-    n_broad = sum(query_results$file_type=="bed broadPeak")
-    n_narrow = sum(query_results$file_type=="bed narrowPeak")
-    chosen_file_type = "bed narrowPeak"
-    if(n_broad == 0 && n_narrow == 0) {
-        warning("No peak files found for the specified query.")
-        return(NULL)
-    } else if(n_broad == n_narrow) {
-        warning("Both broad and narrow peaks are present.",
-                "Defaulting to using narrow peaks.")
-    } else if(n_broad > n_narrow) {
-        chosen_file_type = "bed broadPeak"
-    } 
-    
-    query_results = query_results[query_results$file_type == chosen_file_type,]
     
     default_split_by = c("treatment", 
                          "treatment_amount", "treatment_amount_unit",
@@ -342,4 +368,66 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
     }
     
     return(res)
+}
+
+queryConsensusPeaksAll <- function(biosample_name, assembly) {
+    query_results = queryEncodeGeneric(biosample_name, assembly, assay="ChIP-seq")
+    
+    all_targets = unique(query_results$target)
+    lapply(all_targets, function(x) {
+        queryConsensusPeaks(biosample_name, assembly, x)
+    }
+}
+
+queryGeneExpression <- function() {
+
+}
+
+queryTranscriptExpression <- function() {
+
+}
+
+buildExpressionMean <- function(query_results, split_by, 
+                                temp_dir=".", force=FALSE) {
+
+                                
+}
+
+download_encode_rna <- function(biosample, assembly, download.filter=default_download_filter_rna, 
+                                download.dir=file.path("input/ENCODE", biosample, assembly, "rna-seq")) {
+    # Query ENCODE to obtain appropriate files.
+    # queryEncode has a bug and will fail if encode_df is not loaded.
+    query_results = queryEncode(assay="RNA-seq", biosample_name=biosample, file_format="tsv", status="released")
+
+    # Filter the ENCODE files using the supplied functions.  Only download relevant files.
+    query.results = download.filter(query.results, assembly)
+    dir.create(download.dir, recursive=TRUE, showWarnings=FALSE)
+    if(nrow(query.results)) {
+        downloaded.files = ENCODExplorer::downloadEncode(file_acc=query.results, dir=download.dir, force=FALSE)
+    } else {
+        downloaded.files = c()
+    }
+
+    # Read the files.
+    if(!is.null(query.results) && nrow(query.results) > 0) {
+        #rna.filenames = list.files(download.dir)
+        rna.data = read_identical(downloaded.files, 1:5, 6:7, file.labels=gsub(".tsv", "", downloaded.files))
+        
+        # Calculate mean of metrics.
+        for(metric in c("TPM", "FPKM")) {
+            mean.metric = apply(rna.data[,grepl(metric, colnames(rna.data))], 1, mean, na.rm=TRUE)
+            #sd.metric = apply(rna.data[,grepl(metric, colnames(rna.data))], 1, sd, na.rm=TRUE)
+            rna.data = cbind(rna.data, mean.metric)
+            colnames(rna.data)[ncol(rna.data)] <- paste0("Mean.", metric)
+            #rna.data = cbind(rna.data, mean.metric)
+            #colnames(rna.data)[ncol(rna.data)] <- paste0("SD.", metric)
+        }
+    } else {
+        rna.data = NULL
+    }
+    
+    # Return results
+    return(list(Metadata=query.results$experiment,
+                Downloaded=downloaded.files,
+                Expression=rna.data))    
 }
