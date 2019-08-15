@@ -370,13 +370,34 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
     return(res)
 }
 
+#' Queries and returns consensus peaks for all available targets of a given 
+#' biosample_name.
+#'
+#' This utility function calls \link{queryConsensusPeaks} in a loop over all
+#' available targets for a given biosample_name, and returns the results in a 
+#' list.
+#'
+#' @param biosample_name The cell-line/tissue for which consensus peaks should 
+#'                       be queried.
+#' @param assembly The target genomic assembly.
+
+#' @return A list of \linkS4class{ENCODEBindingConsensus}, one per available 
+#'         target.
+#' @seealso \code{\link{buildConsensusPeaks}}, \code{\link{queryConsensusPeaks}}
+#' @export
 queryConsensusPeaksAll <- function(biosample_name, assembly) {
-    query_results = queryEncodeGeneric(biosample_name, assembly, assay="ChIP-seq")
+    query_results = queryEncodeGeneric(biosample_name=biosample_name, 
+                                       assembly=assembly, assay="ChIP-seq")
     
     all_targets = unique(query_results$target)
     lapply(all_targets, function(x) {
         queryConsensusPeaks(biosample_name, assembly, x)
     }
+}
+
+queryExpressionGeneric <- function(biosample_name, assembly) {
+    query_results = queryEncodeGeneric(biosample_name=biosample_name, 
+                                       assembly=assembly, assay="polyA RNA-seq")
 }
 
 queryGeneExpression <- function() {
