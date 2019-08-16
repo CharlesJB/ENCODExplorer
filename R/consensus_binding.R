@@ -186,12 +186,25 @@ validate_query_results_for_consensus <- function(query_results, split_by) {
     verify_unique(query_results, "target", "antibody")
     verify_unique(query_results, "assembly", "assembly")
     verify_unique(query_results, "file_type", "file type")
+}
+
+validate_query_results_for_consensus_chip <- function(query_results, split_by) {
+    validate_query_results_for_consensus(query_results, split_by)
     
     if(!all(query_results$file_type %in% c("bed narrowPeak", "bed broadPeak"))) {
         stop("Only narrowPeak and broadPeak files can be used to build a",
              "binding consensus.")
     }
 }
+
+validate_query_results_for_consensus_rna <- function(query_results, split_by) {
+    validate_query_results_for_consensus(query_results, split_by)
+    
+    if(!all(query_results$file_type %in% c("tsv"))) {
+        stop("Only tsv files can be used to build an expression consensus")
+    }
+}
+
 
 #' Calculates the consensus peaks defined by the results of a previously
 #' completed ENCODE query.
@@ -227,7 +240,7 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
                                 consensus_threshold=1,
                                 temp_dir=".", diagnostic_dir=NULL,
                                 force=FALSE) {
-    validate_query_results_for_consensus(query_results, split_by)
+    validate_query_results_for_consensus_chip(query_results, split_by)
     
     dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
     if(!is.null(diagnostic_dir)) {
@@ -364,7 +377,6 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
     res = buildConsensusPeaks(query_results, default_split_by)
     if(length(res) == 1) {
         names(res) = "All"
-    
     }
     
     return(res)
@@ -392,63 +404,139 @@ queryConsensusPeaksAll <- function(biosample_name, assembly) {
     all_targets = unique(query_results$target)
     lapply(all_targets, function(x) {
         queryConsensusPeaks(biosample_name, assembly, x)
+    })
+}
+
+selectAssembly <- function(input_assemblies) {
+    prefered_assembly = c("GRCh38", "GRCh38-minimal", "hg19",
+                          "mm10", "mm10-minimal", "mm9",
+                          "dm6", "dm3",
+                          "ce11", "ce10",
+                          "J02459.1")
+
+    if(all(is.na(input_assemblies))) {
+        message("Only assembly NA was found. Selecting it.")
+        return(NA)
+    } else {
+        assembly_matches = which(prefered_assembly %in% input_assemblies)
+        
+        matched_assemblies = prefered_assembly[assembly_matches]
+        selected_assembly = matched_assemblies[1]
+        message("Found the following assemblies: ", paste0(matched_assemblies, collapse=", "))
+        message("Selecting ", selected_assembly)
+        
+        return(selected_assembly)
     }
 }
 
-queryExpressionGeneric <- function(biosample_name, assembly) {
+selectRNASeqAssay <- function(input_assays) {
+    prefered_assay = c("total RNA-seq",
+                       "polyA RNA-seq",
+                       "polyA depleted RNA-seq",
+                       "single cell RNA-seq",
+                       "small RNA-seq")
+    
+    assay_matches = which(prefered_assay %in% input_assays)
+    matched_assays = prefered_assay[assay_matches]
+    
+    return(prefered_assay[assay_matches[1]])
+}
+
+queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
+                                   assay=NULL, assembly=NULL) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
-                                       assembly=assembly, assay="polyA RNA-seq")
+                                       file_type="tsv", 
+                                       file_status="released",
+                                       output_type=level)
+                                       
+    if(is.null(assembly)) {
+        assembly = selectAssembly(query_results$assembly)
+    }
+    
+    if(is.na(assembly)) {
+        query_results = query_results[is.na(query_results$assembly),]
+    } else {
+        # assembly is a column name. data.table will interpret an "assembly"
+        # variable as refering to the column, so the condition becomes
+        # tautological. We avoid this by renaming the assembly external 
+        # variable.
+        # We could use with=FALSE, but then we'd need to explicitly specify
+        # the columns we want (j-argument).
+        chosen_assembly=assembly
+        query_results = query_results[query_results$assembly==chosen_assembly,]
+    }
+    
+    if(is.null(assay)) {
+        assay = selectRNASeqAssay(query_results$assay)
+    }
+    # See note for chosen_assembly above.
+    chosen_assay = assay
+    query_results = query_results[query_results$assay==chosen_assay,]
+    
+    default_split_by=c("dataset_description", "treatment", 
+                       "treatment_amount", "treatment_amount_unit",
+                       "treatment_duration", "treatment_duration_unit")
+    
+    return(buildExpressionMean(query_results, split_by=default_split_by))
 }
 
-queryGeneExpression <- function() {
-
+queryGeneExpression <- function(biosample_name, assembly=NULL) {
+    queryExpressionGeneric(biosample_name, "gene quantifications", assembly)
 }
 
-queryTranscriptExpression <- function() {
+queryTranscriptExpression <- function(biosample_name, assembly=NULL) {
+    queryExpressionGeneric(biosample_name, "transcript quantifications", assembly)
+}
 
+dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
+    apply(do.call(cbind, lapply(dt_files, '[[', column_name)), 1, summary_method)
 }
 
 buildExpressionMean <- function(query_results, split_by, 
                                 temp_dir=".", force=FALSE) {
+    validate_query_results_for_consensus_rna(query_results, split_by)
 
-                                
-}
+    dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
+    
+    # Download and import the peak files.
+    downloaded_files = downloadEncode(query_results, dir=temp_dir, force=force)
+    names(downloaded_files) = gsub(".*\\/(.*).tsv", "\\1", downloaded_files)
 
-download_encode_rna <- function(biosample, assembly, download.filter=default_download_filter_rna, 
-                                download.dir=file.path("input/ENCODE", biosample, assembly, "rna-seq")) {
-    # Query ENCODE to obtain appropriate files.
-    # queryEncode has a bug and will fail if encode_df is not loaded.
-    query_results = queryEncode(assay="RNA-seq", biosample_name=biosample, file_format="tsv", status="released")
-
-    # Filter the ENCODE files using the supplied functions.  Only download relevant files.
-    query.results = download.filter(query.results, assembly)
-    dir.create(download.dir, recursive=TRUE, showWarnings=FALSE)
-    if(nrow(query.results)) {
-        downloaded.files = ENCODExplorer::downloadEncode(file_acc=query.results, dir=download.dir, force=FALSE)
+    # Determine how to split files according to split_by.
+    if(is.null(split_by)) {
+        split_indices = list(All=rep(TRUE, nrow(query_results)))
     } else {
-        downloaded.files = c()
+        split_indices = split_by_metadata(query_results, split_by)$Indices
     }
 
-    # Read the files.
-    if(!is.null(query.results) && nrow(query.results) > 0) {
-        #rna.filenames = list.files(download.dir)
-        rna.data = read_identical(downloaded.files, 1:5, 6:7, file.labels=gsub(".tsv", "", downloaded.files))
-        
-        # Calculate mean of metrics.
-        for(metric in c("TPM", "FPKM")) {
-            mean.metric = apply(rna.data[,grepl(metric, colnames(rna.data))], 1, mean, na.rm=TRUE)
-            #sd.metric = apply(rna.data[,grepl(metric, colnames(rna.data))], 1, sd, na.rm=TRUE)
-            rna.data = cbind(rna.data, mean.metric)
-            colnames(rna.data)[ncol(rna.data)] <- paste0("Mean.", metric)
-            #rna.data = cbind(rna.data, mean.metric)
-            #colnames(rna.data)[ncol(rna.data)] <- paste0("SD.", metric)
-        }
-    } else {
-        rna.data = NULL
+    dt_files = lapply(downloaded_files, read.table, sep="\t", header=TRUE, stringsAsFactors=FALSE)
+    
+    id_column = ifelse("transcript quantifications" %in% query_results$output_type,
+                       "transcript_id.s.",
+                       "gene_id")
+                       
+    # Make sure the id-columns are identical across all files.
+    example_ids = dt_files[[1]][[id_column]]
+    all_same_ids = lapply(dt_files, function(x) { all(x[[id_column]] == example_ids) })
+    if(!all(unlist(all_same_ids))) {
+        stop("Some quantification files have different gene/transcript ids.")
     }
     
-    # Return results
-    return(list(Metadata=query.results$experiment,
-                Downloaded=downloaded.files,
-                Expression=rna.data))    
+    # Build per-condition
+    metadata = list()
+    raw_data = list()
+    tpm = list()
+    fpkm = list()
+    for(i in names(split_indices)) {
+        metadata[[i]] = query_results[split_indices[[i]]]
+        raw_data[[i]] = dt_files[split_indices[[i]]]
+
+        tpm[[i]] = dtColumnSummary(dt_files[split_indices[[i]]], 'TPM', mean)
+        fpkm[[i]] = dtColumnSummary(dt_files[split_indices[[i]]], 'FPKM', mean)
+    }
+
+    tpm_df = cbind(data.frame(id=example_ids), tpm)
+    fpkm_df = cbind(data.frame(id=example_ids), fpkm)
+    
+    return(list(Metadata=metadata, TPM=tpm_df, FPKM=fpkm_df))
 }
