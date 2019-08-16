@@ -1,99 +1,26 @@
-#' ENCODEBindingConsensus objects represents consensus peaks derived from a 
-#' set of ENCODE files.
-#'
-#' @slot metadata A list of data-frames representing the ENCODE metadata
-#'                of the files used to build the per-condition consensus.
-#' @slot peaks The per-condition original peaks used to build the consensus.
-#' @slot consensus The per-condition consensus peaks.
-#'
-#' @name ENCODEBindingConsensus-class
-#' @rdname ENCODEBindingConsensus-class
-#' @export
-setClass("ENCODEBindingConsensus",
-         slots=list(metadata="list",
-                    peaks="list", 
-                    consensus="GRangesList",
-                    consensus_threshold="numeric"))
+buildConsensusCommon = function(query_result, split_by, temp_dir, extension) {
+    validate_query_results_for_consensus(query_results, split_by)
+    
+    dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
+    
+    # Download and import the peak files.
+    downloaded_files = downloadEncode(query_results, dir=temp_dir, force=force)
+    name_regex = paste0(".*\\/(.*)", extension)
+    names(downloaded_files) = gsub(name_regex, "\\1", downloaded_files)
 
-#' Returns the names of the elements of a \linkS4class{ENCODEBindingConsensus} 
-#' object. 
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return The names of the elements in \code{x}.
-setMethod("names",
-          c(x="ENCODEBindingConsensus"),
-          function(x) {
-            names(x@consensus)
-          })
+    # Determine how to split files according to split_by.
+    if(is.null(split_by)) {
+        split_indices = list(All=rep(TRUE, nrow(query_results)))
+    } else {
+        split_info = split_by_metadata(query_results, split_by)
+        split_indices = split_info$Indices
+    }
+    
+    return(Files=downloaded_files, 
+           Metadata=split_info$metadata, 
+           Indices=split_info$Indices)
 
-#' Set names of the elements of a \linkS4class{ENCODEBindingConsensus} object. 
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @param value The new names for the elements of the 
-#'              \linkS4class{ENCODEBindingConsensus} object.
-setMethod("names<-",
-          c(x="ENCODEBindingConsensus", value="character"),
-          function(x, value) {
-            names(x@metadata) <- value
-            names(x@consensus) <- value
-            names(x@peaks) <- value
-            x
-          })
-
-#' Returns the number of elements of a \linkS4class{ENCODEBindingConsensus}
-#' object. 
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return The number of elements in \code{x}.        
-setMethod("length",
-          c(x="ENCODEBindingConsensus"),
-          function(x) {
-            length(x@consensus)
-          })   
-
-setGeneric("metadata", function(x, ...) standardGeneric("metadata"))
-
-#' Returns a list of per-condition metadata of the ENCODE files used to build
-#' the \linkS4class{ENCODEBindingConsensus} object.
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return A \code{list} of per-condition metadata of the ENCODE files used to 
-#' build the \linkS4class{ENCODEBindingConsensus} object.
-#' @export
-setMethod("metadata",
-          c(x="ENCODEBindingConsensus"),
-          function(x) {
-            x@metadata
-          })
-
-setGeneric("peaks", function(x, ...) standardGeneric("peaks"))
-
-#' Returns a \code{list} of \linkS4class{GRangesList} of the per-condition 
-#' original peaks used to build the \linkS4class{ENCODEBindingConsensus} object.
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return A \code{list} of \linkS4class{GRangesList} of the per-condition  
-#'         original peaks usedto build the \linkS4class{ENCODEBindingConsensus} 
-#'         object.
-#' @export
-setMethod("peaks",
-          c(x="ENCODEBindingConsensus"),
-          function(x) {
-            x@peaks
-          })
-
-setGeneric("consensus", function(x, ...) standardGeneric("consensus"))
-
-#' Returns a \linkS4class{GRangesList} of the per-condition consensus peaks.
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return A \linkS4class{GRangesList} of the per-condition consensus peaks.
-#' @export
-setMethod("consensus",
-          c(x="ENCODEBindingConsensus"),
-          function(x) {
-            x@consensus
-          })
+}
 
 # Make sure a given column from query_results has only one unique value.
 verify_unique <- function(query_results, col_name, label) {
@@ -259,7 +186,8 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
     if(is.null(split_by)) {
         split_indices = list(All=rep(TRUE, nrow(query_results)))
     } else {
-        split_indices = split_by_metadata(query_results, split_by)$Indices
+        split_info = split_by_metadata(query_results, split_by)
+        split_indices = split_info$Indices
     }
     
     # Split imported peaks and metadata.
@@ -284,11 +212,13 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
 #            dev.off()
 #        }
 
-        consensus[[i]] = consensus_regions(overlap_obj, consensus_threshold)
+        consensus[[i]] = GenomicOperations::consensus_regions(overlap_obj, consensus_threshold)
     }
     
     methods::new("ENCODEBindingConsensus",
-                 metadata=metadata,
+                 files=downloaded_files,
+                 metadata=split_info$Metadata,
+                 file_metadata=metadata,
                  peaks=peaks, 
                  consensus=GenomicRanges::GRangesList(consensus),
                  consensus_threshold=consensus_threshold)
@@ -506,6 +436,7 @@ buildExpressionMean <- function(query_results, split_by,
     if(is.null(split_by)) {
         split_indices = list(All=rep(TRUE, nrow(query_results)))
     } else {
+        split_info = split_by_metadata(query_results, split_by)
         split_indices = split_by_metadata(query_results, split_by)$Indices
     }
 
@@ -538,5 +469,10 @@ buildExpressionMean <- function(query_results, split_by,
     tpm_df = cbind(data.frame(id=example_ids), tpm)
     fpkm_df = cbind(data.frame(id=example_ids), fpkm)
     
-    return(list(Metadata=metadata, TPM=tpm_df, FPKM=fpkm_df))
+    methods::new("ENCODEExpressionSummary",
+             files=downloaded_files,
+             file_metadata=metadata,
+             metadata=split_info$Metadata,
+             tpm=tpm_df,
+             fpkm=fpkm_df)
 }
