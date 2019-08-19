@@ -93,6 +93,18 @@ setMethod("files",
             x@files
           })
 
+#' Prints a summary of a \linkS4class{ENCODESummary} object.
+#'
+#' @param object The \linkS4class{ENCODESummary} object.
+#' @export
+setMethod("show", "ENCODESummary",
+          function(object) {
+            cat("Summarizing", length(files(object)), "ENCODE files into",
+                length(object), "categories.\n\n")
+            cat("Metadata:\n")
+            print(metadata(object))
+          })
+
 #' ENCODEBindingConsensus objects represents consensus peaks derived from a 
 #' set of ENCODE files.
 #'
@@ -153,6 +165,18 @@ setMethod("consensus",
             x@consensus
           })
 
+#' Prints a summary of a \linkS4class{ENCODEBindingConsensus} object.
+#'
+#' @param object The \linkS4class{ENCODEBindingConsensus} object.
+#' @export
+setMethod("show", "ENCODEBindingConsensus",
+          function(object) {
+            cat("An object of class ENCODEBindingConsensus.\n")
+            callNextMethod()
+            cat("\nConsensus regions:\n")
+            print(consensus(object))
+          })
+
 #' ENCODEExpressionSummary objects represents means of gene- or 
 #' transcript-levels of expression across a set of ENCODE files.
 #'
@@ -165,7 +189,8 @@ setMethod("consensus",
 #' @export
 setClass("ENCODEExpressionSummary",
          slots=list(tpm="data.frame", 
-                    fpkm="data.frame"),
+                    fpkm="data.frame",
+                    expression_type="character"),
          contains="ENCODESummary")
 
 #' Set names of the elements of a \linkS4class{ENCODEExpressionSummary} object. 
@@ -208,4 +233,16 @@ setMethod("fpkm",
           c(x="ENCODEExpressionSummary"),
           function(x) {
             x@fpkm
-          })                   
+          })     
+
+#' Prints a summary of a \linkS4class{ENCODEExpressionSummary} object.
+#'
+#' @param object The \linkS4class{ENCODEExpressionSummary} object.
+#' @export
+setMethod("show", "ENCODEExpressionSummary",
+          function(object) {
+            cat("An object of class ENCODEExpressionSummary.\n")
+            callNextMethod()
+            cat("\nSumarizing", nrow(tpm(object)), object@expression_type, 
+                "expression levels.\n")
+          })          

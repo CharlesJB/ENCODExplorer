@@ -372,6 +372,24 @@ selectRNASeqAssay <- function(input_assays) {
     return(prefered_assay[assay_matches[1]])
 }
 
+#' Queries and returns average expression levels for a given biosample_name.
+#'
+#' ENCODE files are automatically split by biosample_description (which will
+#' separate samples from different cell fractions or sequencing methods) and by
+#' the treatment columns.
+#'
+#' @param biosample_name The cell-line/tissue for which average expression 
+#'                       levels should be queried.
+#' @param level The type of expression level to summarize, either 
+#'              "gene quantifications" or "transcript quantifications".
+#' @param assay The assay type to summarize. If \code{NULL}, the most generic
+#'              assay type is automatically selected.
+#' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
+#'                 available assembly is selected.
+#' @return An object of class \linkS4class{ENCODEExpressionSummary}.
+#' @seealso \code{\link{buildExpressionMean}}, 
+#'          \code{\link{queryGeneExpression}}
+#' @export
 queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
                                    assay=NULL, assembly=NULL) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
@@ -410,11 +428,43 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
     return(buildExpressionMean(query_results, split_by=default_split_by))
 }
 
-queryGeneExpression <- function(biosample_name, assembly=NULL) {
+#' Queries and returns average gene expression level for a given biosample_name.
+#'
+#' ENCODE files are automatically split by biosample_description (which will
+#' separate samples from different cell fractions or sequencing methods) and by
+#' the treatment columns.
+#' @param biosample_name The cell-line/tissue for which average expression 
+#'                       levels should be queried.
+#' @param assay The assay type to summarize. If \code{NULL}, the most generic
+#'              assay type is automatically selected.
+#' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
+#'                 available assembly is selected.
+#' @return An object of class \linkS4class{ENCODEExpressionSummary}.
+#' @seealso \code{\link{buildExpressionMean}}, 
+#'          \code{\link{queryTranscriptExpression}}
+#' @export
+queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL) {
     queryExpressionGeneric(biosample_name, "gene quantifications", assembly)
 }
 
-queryTranscriptExpression <- function(biosample_name, assembly=NULL) {
+#' Queries and returns average transcript expression level for a given 
+#' biosample_name.
+#'
+#' ENCODE files are automatically split by biosample_description (which will
+#' separate samples from different cell fractions or sequencing methods) and by
+#' the treatment columns.
+#'
+#' @param biosample_name The cell-line/tissue for which average expression 
+#'                       levels should be queried.
+#' @param assay The assay type to summarize. If \code{NULL}, the most generic
+#'              assay type is automatically selected.
+#' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
+#'                 available assembly is selected.
+#' @return An object of class \linkS4class{ENCODEExpressionSummary}.
+#' @seealso \code{\link{buildExpressionMean}}, 
+#'          \code{\link{queryGeneExpression}}
+#' @export
+queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL) {
     queryExpressionGeneric(biosample_name, "transcript quantifications", assembly)
 }
 
@@ -422,6 +472,27 @@ dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
     apply(do.call(cbind, lapply(dt_files, '[[', column_name)), 1, summary_method)
 }
 
+
+#' Calculates average expression levels of the results of a previously
+#' completed ENCODE query.
+#'
+#' This function takes the result of a previous call to 
+#' \code{\link{queryEncode}}, splits the contained expression files by 
+#' conditions (as specified by the \code{split_by} argument), then calculates
+#' average expression levels for each condition.
+#'
+#' @param query_results A data.table returned by \code{\link{queryEncode}} or 
+#'                      \code{\link{queryEncodeGeneric}}.
+#' @param split_by A vector of column names from query_results that will be used
+#'                 to split the average expression levels.
+#'                 If \code{NULL}, all elements of query_results are used in the
+#'                 same average expression calculation.
+#' @param temp_dir The path to a directory where peak files will be 
+#'                 downloaded.
+#' @param force A logical indicating whether already present files be 
+#'              redownloaded.
+#' @return An object of class \linkS4class{ENCODEExpressionSummary}.
+#' @export
 buildExpressionMean <- function(query_results, split_by, 
                                 temp_dir=".", force=FALSE) {
     validate_query_results_for_consensus_rna(query_results, split_by)
@@ -442,9 +513,9 @@ buildExpressionMean <- function(query_results, split_by,
 
     dt_files = lapply(downloaded_files, read.table, sep="\t", header=TRUE, stringsAsFactors=FALSE)
     
-    id_column = ifelse("transcript quantifications" %in% query_results$output_type,
-                       "transcript_id.s.",
-                       "gene_id")
+    is_transcript_level = "transcript quantifications" %in% query_results$output_type
+    id_column = ifelse(is_transcript_level, "transcript_id.s.", "gene_id")
+    expression_type = ifelse(is_transcript_level, "transcript", "gene")
                        
     # Make sure the id-columns are identical across all files.
     example_ids = dt_files[[1]][[id_column]]
@@ -474,5 +545,6 @@ buildExpressionMean <- function(query_results, split_by,
              file_metadata=metadata,
              metadata=split_info$Metadata,
              tpm=tpm_df,
-             fpkm=fpkm_df)
+             fpkm=fpkm_df,
+             expression_type=expression_type)
 }
