@@ -237,6 +237,9 @@ filter_results_by_output_type = function(query_results) {
     query_results
 }
 
+DEFAULT_CONSENSUS_SPLIT_BY = c("treatment", 
+                               "treatment_amount", "treatment_amount_unit",
+                               "treatment_duration", "treatment_duration_unit")
 
 #' Queries ENCODE for consensus peaks.
 #'
@@ -276,11 +279,7 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
         return(NULL)    
     }
     
-    default_split_by = c("treatment", 
-                         "treatment_amount", "treatment_amount_unit",
-                         "treatment_duration", "treatment_duration_unit")
-    
-    res = buildConsensusPeaks(query_results, default_split_by)
+    res = buildConsensusPeaks(query_results, DEFAULT_CONSENSUS_SPLIT_BY)
     if(length(res) == 1) {
         names(res) = "All"
     }
@@ -348,6 +347,10 @@ selectRNASeqAssay <- function(input_assays) {
     return(prefered_assay[assay_matches[1]])
 }
 
+DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment", 
+                                "treatment_amount", "treatment_amount_unit",
+                                "treatment_duration", "treatment_duration_unit")
+
 #' Queries and returns average expression levels for a given biosample_name.
 #'
 #' ENCODE files are automatically split by biosample_description (which will
@@ -397,11 +400,8 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
     chosen_assay = assay
     query_results = query_results[query_results$assay==chosen_assay,]
     
-    default_split_by=c("dataset_description", "treatment", 
-                       "treatment_amount", "treatment_amount_unit",
-                       "treatment_duration", "treatment_duration_unit")
-    
-    return(buildExpressionMean(query_results, split_by=default_split_by))
+    return(buildExpressionMean(query_results,
+                               split_by=DEFAULT_EXPRESSION_SPLIT_BY))
 }
 
 #' Queries and returns average gene expression level for a given biosample_name.
