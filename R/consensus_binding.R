@@ -1,4 +1,6 @@
-buildConsensusCommon = function(query_result, split_by, temp_dir, extension) {
+# Encapsulates teh common parts for consensus peaks and expression summaries.
+buildConsensusCommon = function(query_results, split_by, temp_dir, force, 
+                                extension) {
     validate_query_results_for_consensus(query_results, split_by)
     
     dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
@@ -15,10 +17,15 @@ buildConsensusCommon = function(query_result, split_by, temp_dir, extension) {
         split_info = split_by_metadata(query_results, split_by)
         split_indices = split_info$Indices
     }
+
+    file_metadata = lapply(split_indices, function(x) {
+        query_results[x]
+    })
     
-    return(Files=downloaded_files, 
-           Metadata=split_info$metadata, 
-           Indices=split_info$Indices)
+    return(list(Files=downloaded_files, 
+                Metadata=split_info$Metadata, 
+                FileMetadata=file_metadata,
+                Indices=split_info$Indices))
 
 }
 
@@ -152,8 +159,6 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #'                            appear for it to be included within the consensus.
 #' @param temp_dir The path to a directory where peak files will be 
 #'                 downloaded.
-#' @param diagnostic_dir The path to a directory where information about the
-#'                       peaks in individual files will be reported.
 #' @param force A logical indicating whether already present files be 
 #'              redownloaded.
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
@@ -165,60 +170,31 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @export
 buildConsensusPeaks <- function(query_results, split_by=NULL,
                                 consensus_threshold=1,
-                                temp_dir=".", diagnostic_dir=NULL,
-                                force=FALSE) {
+                                temp_dir=".", force=FALSE) {
+    common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
+                                  ".bed.gz")
     validate_query_results_for_consensus_chip(query_results, split_by)
     
-    dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
-    if(!is.null(diagnostic_dir)) {
-        dir.create(diagnostic_dir, recursive=TRUE, showWarnings=FALSE)
-    }
-    
-    # Download and import the peak files.
-    downloaded_files = downloadEncode(query_results, dir=temp_dir, force=force)
-    names(downloaded_files) = gsub(".*\\/(.*).bed.gz", "\\1", downloaded_files)
-
     file_format = gsub("bed ", "", unique(query_results$file_type))
-    all_peaks = lapply(downloaded_files, rtracklayer::import, format=file_format)
+    all_peaks = lapply(common$Files, rtracklayer::import, format=file_format)
     all_peaks = GenomicRanges::GRangesList(all_peaks)
     
-    # Determine how to split files according to split_by.
-    if(is.null(split_by)) {
-        split_indices = list(All=rep(TRUE, nrow(query_results)))
-    } else {
-        split_info = split_by_metadata(query_results, split_by)
-        split_indices = split_info$Indices
-    }
-    
     # Split imported peaks and metadata.
-    metadata = list()
-    peaks = list()
-    for(i in names(split_indices)) {
-        metadata[[i]] = query_results[split_indices[[i]]]
-        peaks[[i]] = all_peaks[metadata[[i]]$file_accession]
-    }
+    peaks = lapply(common$FileMetadata, function(x) {
+        all_peaks[x$file_accession]
+    })
     
     # Build consensus for each condition.
     consensus = list()
     for(i in names(peaks)) {
         overlap_obj = GenomicOperations::GenomicOverlaps(peaks[[i]])
-
-#        if(!is.null(diagnostic_dir)) {
-#            # Turn off VennDiagram logging.
-#            futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
-#            
-#            pdf(file.path(diagnostic_dir, "Venn diagrams of peak calls", paste0(i, ".pdf")))
-#            GenomicOperations::plot_venn(overlap_obj)        
-#            dev.off()
-#        }
-
         consensus[[i]] = GenomicOperations::consensus_regions(overlap_obj, consensus_threshold)
     }
     
     methods::new("ENCODEBindingConsensus",
-                 files=downloaded_files,
-                 metadata=split_info$Metadata,
-                 file_metadata=metadata,
+                 files=common$Files,
+                 metadata=common$Metadata,
+                 file_metadata=common$FileMetadata,
                  peaks=peaks, 
                  consensus=GenomicRanges::GRangesList(consensus),
                  consensus_threshold=consensus_threshold)
@@ -495,27 +471,17 @@ dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
 #' @export
 buildExpressionMean <- function(query_results, split_by, 
                                 temp_dir=".", force=FALSE) {
+    common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
+                                  ".tsv")
     validate_query_results_for_consensus_rna(query_results, split_by)
 
-    dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
+    dt_files = lapply(common$Files, read.table, sep="\t", header=TRUE, 
+                      stringsAsFactors=FALSE)
     
-    # Download and import the peak files.
-    downloaded_files = downloadEncode(query_results, dir=temp_dir, force=force)
-    names(downloaded_files) = gsub(".*\\/(.*).tsv", "\\1", downloaded_files)
-
-    # Determine how to split files according to split_by.
-    if(is.null(split_by)) {
-        split_indices = list(All=rep(TRUE, nrow(query_results)))
-    } else {
-        split_info = split_by_metadata(query_results, split_by)
-        split_indices = split_by_metadata(query_results, split_by)$Indices
-    }
-
-    dt_files = lapply(downloaded_files, read.table, sep="\t", header=TRUE, stringsAsFactors=FALSE)
-    
-    is_transcript_level = "transcript quantifications" %in% query_results$output_type
-    id_column = ifelse(is_transcript_level, "transcript_id.s.", "gene_id")
-    expression_type = ifelse(is_transcript_level, "transcript", "gene")
+    expression_type = ifelse("transcript quantifications" %in% query_results$output_type,
+                             "transcript", 
+                             "gene")
+    id_column = ifelse(expression_type=="transcript", "transcript_id.s.", "gene_id")
                        
     # Make sure the id-columns are identical across all files.
     example_ids = dt_files[[1]][[id_column]]
@@ -524,27 +490,20 @@ buildExpressionMean <- function(query_results, split_by,
         stop("Some quantification files have different gene/transcript ids.")
     }
     
-    # Build per-condition
-    metadata = list()
-    raw_data = list()
-    tpm = list()
-    fpkm = list()
-    for(i in names(split_indices)) {
-        metadata[[i]] = query_results[split_indices[[i]]]
-        raw_data[[i]] = dt_files[split_indices[[i]]]
-
-        tpm[[i]] = dtColumnSummary(dt_files[split_indices[[i]]], 'TPM', mean)
-        fpkm[[i]] = dtColumnSummary(dt_files[split_indices[[i]]], 'FPKM', mean)
-    }
-
-    tpm_df = cbind(data.frame(id=example_ids), tpm)
-    fpkm_df = cbind(data.frame(id=example_ids), fpkm)
+    # Build per-condition summaries
+    raw_data = lapply(common$Indices, function(x) {dt_files[x]})
+    tpm = lapply(common$Indices, function(x) {
+        dtColumnSummary(dt_files[x], 'TPM', mean)
+    })
+    fpkm = lapply(common$Indices, function(x) {
+        dtColumnSummary(dt_files[x], 'FPKM', mean)
+    })    
     
     methods::new("ENCODEExpressionSummary",
-             files=downloaded_files,
-             file_metadata=metadata,
-             metadata=split_info$Metadata,
-             tpm=tpm_df,
-             fpkm=fpkm_df,
+             files=common$Files,
+             file_metadata=common$FileMetadata,
+             metadata=common$Metadata,
+             tpm=cbind(data.frame(id=example_ids), tpm),
+             fpkm=cbind(data.frame(id=example_ids), fpkm),
              expression_type=expression_type)
 }
