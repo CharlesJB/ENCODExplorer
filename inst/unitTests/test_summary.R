@@ -18,10 +18,12 @@ test.query_consensus_peaks <- function() {
   # Test name assignment.
   new_names = letters[seq_along(res)]
   names(res) <- new_names
-  checkTrue(names(res) == new_names)
+  print(names(res))
+  print(new_names)
+  checkTrue(all(names(res) == new_names))
 
   # Make sure files are split by the default split.
-  checkTrue(colnames(metadata(res) == ENCODExplorer:::DEFAULT_CONSENSUS_SPLIT_BY)
+  checkTrue(all(colnames(metadata(res)) == c(ENCODExplorer:::DEFAULT_CONSENSUS_SPLIT_BY, "split_regions")))
     
   # Test consensus slot.  
   checkTrue(is(consensus(res), "GRangesList"))
@@ -29,7 +31,8 @@ test.query_consensus_peaks <- function() {
   
   # Test peak slot.
   checkTrue(names(peaks(res)) == names(res))
-  checkTrue(is(peaks(res), "GRangesList"))
+  checkTrue(is(peaks(res), "list"))
+  checkTrue(all(unlist(lapply(peaks(res), function(x) { is(x, "GRangesList")}))))
   checkTrue(sum(unlist(lapply(peaks(res), length)))==length(files(res)))
   
   # Test print. Just making sure it doesn't crash.
@@ -59,24 +62,27 @@ test.query_expression_levels <- function() {
   # Test name assignment.
   new_names = letters[seq_along(res)]
   names(res) <- new_names
-  checkTrue(names(res) == new_names)
+  print(names(res))
+  print(new_names)
+  checkTrue(all(names(res) == new_names))
 
   # Make sure files are split by the default split.
-  checkTrue(colnames(metadata(res) == ENCODExplorer:::DEFAULT_EXPRESSION_SPLIT_BY)
+  meta_col_names = colnames(metadata(res))
+  expected_names = c(ENCODExplorer:::DEFAULT_EXPRESSION_SPLIT_BY, "split_regions")
+  checkTrue(all(meta_col_names == expected_names))
   
   # Test tpm, fpkm slots
   checkTrue(nrow(tpm(res))==nrow(fpkm(res)))
-  checkTrue(tpm(res)$id==fpkm(res)$id)
+  checkTrue(all(tpm(res)$id==fpkm(res)$id))
   checkTrue(nrow(tpm(res)) > 0)
-  checkTrue(colnames(tpm(res))==colnames(fpkm(res)))
-  checkTrue(ncol(tpm(res))==length(res))
+  checkTrue(all(colnames(tpm(res))==colnames(fpkm(res))))
+  checkTrue(ncol(tpm(res))==(length(res)+1))
   
   print(res)
   
   # These were functional when written using version 0.99.1 of ENCODExplorerData
   # (2019-04-12 build)
   res = queryGeneExpression("GM12878")
-  checkTrue(names(res) == "All")
   checkTrue(length(res) == 3)
   checkTrue(length(files(res))==6)
   checkTrue(nrow(tpm(res))==61471)

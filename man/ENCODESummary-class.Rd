@@ -12,6 +12,8 @@ files.
 \section{Slots}{
 
 \describe{
+\item{\code{files}}{The path of the files used in this summary.}
+
 \item{\code{file_metadata}}{A list of data-frames representing the ENCODE metadata
 of the files used to build the per-condition consensus.}
 

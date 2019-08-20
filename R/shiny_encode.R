@@ -8,6 +8,7 @@
 #' @export
 #' @import shiny
 #' @import shinythemes
+#' @import DT
 #'
 #' @export
 shinyEncode <- function(){

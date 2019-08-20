@@ -39,9 +39,15 @@ verify_unique <- function(query_results, col_name, label) {
     }
 }
 
-# Given a metadata data-frame and a vector of column names (split_by),
-# builds a partition of rows based on all possible combinations
-# of the columns identified by split_by.
+#' Given a metadata data-frame and a vector of column names (split_by),
+#' builds a partition of rows based on all possible combinations
+#' of the columns identified by split_by.
+#'
+#' @param metadata A data.frame with the metadata.
+#' @param split_by The names of the columns in metadata according to which they 
+#'        should be split.
+#' @return A list with information about the new partition.
+#' @keywords internal
 #' importFrom data.table rbindlist
 split_by_metadata = function(metadata, split_by) {
     if(!all(split_by %in% colnames(metadata))) {
@@ -475,7 +481,7 @@ buildExpressionMean <- function(query_results, split_by,
                                   ".tsv")
     validate_query_results_for_consensus_rna(query_results, split_by)
 
-    dt_files = lapply(common$Files, read.table, sep="\t", header=TRUE, 
+    dt_files = lapply(common$Files, utils::read.table, sep="\t", header=TRUE, 
                       stringsAsFactors=FALSE)
     
     expression_type = ifelse("transcript quantifications" %in% query_results$output_type,

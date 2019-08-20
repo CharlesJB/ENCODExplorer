@@ -16,5 +16,8 @@ transcript-levels of expression across a set of ENCODE files.
 
 \item{\code{fpkm}}{A \link{data.frame} of the per-condition fragments per kilobase
 of exon model per million reads mapped (FPKM).}
+
+\item{\code{expression_type}}{The type of expression which is being reported, either 
+gene or transcripts.}
 }}
 

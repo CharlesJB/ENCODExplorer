@@ -1,6 +1,7 @@
 #' ENCODESummary objects represents a summary derived from multiple ENCODE 
 #' files.
 #'
+#' @slot files The path of the files used in this summary.
 #' @slot file_metadata A list of data-frames representing the ENCODE metadata
 #'                     of the files used to build the per-condition consensus.
 #' @slot metadata A data-frame with the metadata of each element in the summary.
@@ -48,45 +49,57 @@ setMethod("length",
             length(x@file_metadata)
           }) 
 
-setGeneric("metadata", function(x, ...) standardGeneric("metadata"))
-
 #' Returns a data-frame list of the common per-condition metadata of the ENCODE 
 #' files used to build the \linkS4class{ENCODESummary} object.
 #'
 #' @param x The \linkS4class{ENCODESummary} object.
 #' @return A \code{data.frame} of the common per-condition metadata of the 
 #' ENCODE files used to build the \linkS4class{ENCODESummary} object.
+#' @docType methods
+#' @rdname metadata-methods
 #' @export
+setGeneric("metadata", function(x) standardGeneric("metadata"))
+
+#' @rdname metadata-methods
+#' @aliases metadata,ENCODESummary,ENCODESummary-method
 setMethod("metadata",
           c(x="ENCODESummary"),
           function(x) {
             x@metadata
           })
 
-setGeneric("file_metadata", function(x, ...) standardGeneric("file_metadata"))
-
 #' Returns a list of per-condition metadata of the ENCODE files used to build
 #' the \linkS4class{ENCODESummary} object.
 #'
 #' @param x The \linkS4class{ENCODESummary} object.
 #' @return A \code{list} of per-condition metadata of the ENCODE files used to 
 #' build the \linkS4class{ENCODESummary} object.
+#' @docType methods
+#' @rdname file_metadata-methods
 #' @export
+setGeneric("file_metadata", function(x) standardGeneric("file_metadata"))
+
+#' @rdname file_metadata-methods
+#' @aliases file_metadata,ENCODESummary,ENCODESummary-method
 setMethod("file_metadata",
           c(x="ENCODESummary"),
           function(x) {
             x@file_metadata
           })
 
-setGeneric("files", function(x, ...) standardGeneric("files"))
-
 #' Returns a list of per-condition metadata of the ENCODE files used to build
 #' the \linkS4class{ENCODESummary} object.
 #'
 #' @param x The \linkS4class{ENCODESummary} object.
 #' @return A \code{list} of per-condition metadata of the ENCODE files used to 
-#' build the \linkS4class{ENCODESummary} object.
+#'         build the \linkS4class{ENCODESummary} object.
+#' @docType methods
+#' @rdname files-methods
 #' @export
+setGeneric("files", function(x) standardGeneric("files"))
+
+#' @rdname files-methods
+#' @aliases files,ENCODESummary,ENCODESummary-method
 setMethod("files",
           c(x="ENCODESummary"),
           function(x) {
@@ -133,10 +146,8 @@ setMethod("names<-",
           function(x, value) {
             names(x@peaks) <- value
             names(x@consensus) <- value
-            callNextMethod()
+            methods::callNextMethod()
           })
-
-setGeneric("peaks", function(x, ...) standardGeneric("peaks"))
 
 #' Returns a \code{list} of \linkS4class{GRangesList} of the per-condition 
 #' original peaks used to build the \linkS4class{ENCODEBindingConsensus} object.
@@ -145,20 +156,30 @@ setGeneric("peaks", function(x, ...) standardGeneric("peaks"))
 #' @return A \code{list} of \linkS4class{GRangesList} of the per-condition  
 #'         original peaks usedto build the \linkS4class{ENCODEBindingConsensus} 
 #'         object.
+#' @docType methods
+#' @rdname peaks-methods
 #' @export
+setGeneric("peaks", function(x) standardGeneric("peaks"))
+
+#' @rdname peaks-methods
+#' @aliases peaks,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("peaks",
           c(x="ENCODEBindingConsensus"),
           function(x) {
             x@peaks
           })
 
-setGeneric("consensus", function(x, ...) standardGeneric("consensus"))
-
 #' Returns a \linkS4class{GRangesList} of the per-condition consensus peaks.
 #'
 #' @param x The \linkS4class{ENCODEBindingConsensus} object.
 #' @return A \linkS4class{GRangesList} of the per-condition consensus peaks.
+#' @docType methods
+#' @rdname consensus-methods
 #' @export
+setGeneric("consensus", function(x) standardGeneric("consensus"))
+
+#' @rdname consensus-methods
+#' @aliases consensus,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("consensus",
           c(x="ENCODEBindingConsensus"),
           function(x) {
@@ -172,7 +193,7 @@ setMethod("consensus",
 setMethod("show", "ENCODEBindingConsensus",
           function(object) {
             cat("An object of class ENCODEBindingConsensus.\n")
-            callNextMethod()
+            methods::callNextMethod()
             cat("\nConsensus regions:\n")
             print(consensus(object))
           })
@@ -183,6 +204,8 @@ setMethod("show", "ENCODEBindingConsensus",
 #' @slot tpm A \link{data.frame} of the per-condition transcript-per-millions.
 #' @slot fpkm A \link{data.frame} of the per-condition fragments per kilobase
 #'            of exon model per million reads mapped (FPKM).
+#' @slot expression_type The type of expression which is being reported, either 
+#'                       gene or transcripts.
 #'
 #' @name ENCODEExpressionSummary-class
 #' @rdname ENCODEExpressionSummary-class
@@ -203,24 +226,26 @@ setMethod("names<-",
           function(x, value) {
             colnames(x@tpm) <- c("id", value)
             colnames(x@fpkm) <- c("id", value)
-            callNextMethod()
+            methods::callNextMethod()
           })
          
-setGeneric("tpm", function(x, ...) standardGeneric("tpm"))
-
 #' Returns a \link{data.frame} of the per-condition transcript-per-millions 
 #' (TPM).
 #'
 #' @param x The \linkS4class{ENCODEExpressionSummary} object.
 #' @return A \link{data.frame} of the per-condition transcript-per-millions.
-#' @export
+#' @docType methods
+#' @rdname tpm-methods
+#' @export         
+setGeneric("tpm", function(x) standardGeneric("tpm"))
+
+#' @rdname tpm-methods
+#' @aliases tpm,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("tpm",
           c(x="ENCODEExpressionSummary"),
           function(x) {
             x@tpm
           })         
-          
-setGeneric("fpkm", function(x, ...) standardGeneric("fpkm"))
 
 #' Returns a \link{data.frame} of the per-condition 
 #' fragments per kilobase of exon model per million reads mapped (FPKM).
@@ -228,7 +253,13 @@ setGeneric("fpkm", function(x, ...) standardGeneric("fpkm"))
 #' @return A \link{data.frame} of the per-condition fragments per kilobase
 #'         of exon model per million reads mapped (FPKM).
 #'         
-#' @export
+#' @docType methods
+#' @rdname fpkm-methods
+#' @export          
+setGeneric("fpkm", function(x) standardGeneric("fpkm"))
+
+#' @rdname fpkm-methods
+#' @aliases fpkm,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("fpkm",
           c(x="ENCODEExpressionSummary"),
           function(x) {
@@ -242,7 +273,7 @@ setMethod("fpkm",
 setMethod("show", "ENCODEExpressionSummary",
           function(object) {
             cat("An object of class ENCODEExpressionSummary.\n")
-            callNextMethod()
+            methods::callNextMethod()
             cat("\nSumarizing", nrow(tpm(object)), object@expression_type, 
                 "expression levels.\n")
           })          

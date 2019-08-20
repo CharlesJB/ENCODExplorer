@@ -32,9 +32,10 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.6),
     shiny,
-    DT,
-    shinythemes
+    shinythemes,
+    DT
 Imports:
+    methods,
     tools,
     jsonlite,
     RCurl,
