@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{The \linkS4class{ENCODEExpressionSummary} object.}
 }
+\value{
+Nothing.
+}
 \description{
 Prints a summary of a \linkS4class{ENCODEExpressionSummary} object.
 }

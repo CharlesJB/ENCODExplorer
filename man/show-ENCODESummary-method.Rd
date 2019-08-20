@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{The \linkS4class{ENCODESummary} object.}
 }
+\value{
+Nothing.
+}
 \description{
 Prints a summary of a \linkS4class{ENCODESummary} object.
 }

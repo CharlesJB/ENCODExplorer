@@ -30,6 +30,7 @@ setMethod("names",
 #' @param x The \linkS4class{ENCODESummary} object.
 #' @param value The new names for the elements of the 
 #'              \linkS4class{ENCODESummary} object.
+#' @return The renamed object.
 setMethod("names<-",
           c(x="ENCODESummary", value="character"),
           function(x, value) {
@@ -109,6 +110,7 @@ setMethod("files",
 #' Prints a summary of a \linkS4class{ENCODESummary} object.
 #'
 #' @param object The \linkS4class{ENCODESummary} object.
+#' @return Nothing.
 #' @export
 setMethod("show", "ENCODESummary",
           function(object) {
@@ -141,6 +143,7 @@ setClass("ENCODEBindingConsensus",
 #' @param x The \linkS4class{ENCODEBindingConsensus} object.
 #' @param value The new names for the elements of the 
 #'              \linkS4class{ENCODEBindingConsensus} object.
+#' @return The renamed object.
 setMethod("names<-",
           c(x="ENCODEBindingConsensus", value="character"),
           function(x, value) {
@@ -189,6 +192,7 @@ setMethod("consensus",
 #' Prints a summary of a \linkS4class{ENCODEBindingConsensus} object.
 #'
 #' @param object The \linkS4class{ENCODEBindingConsensus} object.
+#' @return Nothing.
 #' @export
 setMethod("show", "ENCODEBindingConsensus",
           function(object) {
@@ -221,6 +225,7 @@ setClass("ENCODEExpressionSummary",
 #' @param x The \linkS4class{ENCODEExpressionSummary} object.
 #' @param value The new names for the elements of the 
 #'              \linkS4class{ENCODEExpressionSummary} object.
+#' @return The renamed object.
 setMethod("names<-",
           c(x="ENCODEExpressionSummary", value="character"),
           function(x, value) {
@@ -269,6 +274,7 @@ setMethod("fpkm",
 #' Prints a summary of a \linkS4class{ENCODEExpressionSummary} object.
 #'
 #' @param object The \linkS4class{ENCODEExpressionSummary} object.
+#' @return Nothing.
 #' @export
 setMethod("show", "ENCODEExpressionSummary",
           function(object) {

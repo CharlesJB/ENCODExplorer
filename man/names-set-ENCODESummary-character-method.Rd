@@ -13,6 +13,9 @@
 \item{value}{The new names for the elements of the 
 \linkS4class{ENCODESummary} object.}
 }
+\value{
+The renamed object.
+}
 \description{
 Set names of the elements of a \linkS4class{ENCODESummary} object.
 }
