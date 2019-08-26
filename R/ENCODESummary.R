@@ -205,7 +205,8 @@ setMethod("show", "ENCODEBindingConsensus",
 #' ENCODEExpressionSummary objects represents means of gene- or 
 #' transcript-levels of expression across a set of ENCODE files.
 #'
-#' @slot tpm A \link{data.frame} of the per-condition transcript-per-millions.
+#' @slot metric A \link{data.frame} of the per-condition metric values.
+#' @slot metric_data A \link{data.frame} of the per-condition metric values.
 #' @slot fpkm A \link{data.frame} of the per-condition fragments per kilobase
 #'            of exon model per million reads mapped (FPKM).
 #' @slot expression_type The type of expression which is being reported, either 
@@ -215,8 +216,9 @@ setMethod("show", "ENCODEBindingConsensus",
 #' @rdname ENCODEExpressionSummary-class
 #' @export
 setClass("ENCODEExpressionSummary",
-         slots=list(tpm="data.frame", 
-                    fpkm="data.frame",
+         slots=list(raw_data="list", 
+                    metric="character",
+                    metric_data="data.frame",
                     expression_type="character"),
          contains="ENCODESummary")
 
@@ -229,47 +231,67 @@ setClass("ENCODEExpressionSummary",
 setMethod("names<-",
           c(x="ENCODEExpressionSummary", value="character"),
           function(x, value) {
-            colnames(x@tpm) <- c("id", value)
-            colnames(x@fpkm) <- c("id", value)
+            names(raw_data) <- value
+            colnames(x@metric_data) <- c("id", value)
             methods::callNextMethod()
           })
          
-#' Returns a \link{data.frame} of the per-condition transcript-per-millions 
-#' (TPM).
+#' Returns a \link{data.frame} of the per-condition metric values.
 #'
 #' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @return A \link{data.frame} of the per-condition transcript-per-millions.
+#' @return A \link{data.frame} of the per-condition metric values.
 #' @docType methods
-#' @rdname tpm-methods
+#' @rdname metric_data-methods
 #' @export         
-setGeneric("tpm", function(x) standardGeneric("tpm"))
+setGeneric("metric_data", function(x) standardGeneric("metric_data"))
 
-#' @rdname tpm-methods
-#' @aliases tpm,ENCODEBindingConsensus,ENCODEBindingConsensus-method
-setMethod("tpm",
+#' @rdname metric_data-methods
+#' @aliases metric_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method
+setMethod("metric_data",
           c(x="ENCODEExpressionSummary"),
           function(x) {
-            x@tpm
+            x@metric_data
           })         
 
-#' Returns a \link{data.frame} of the per-condition 
-#' fragments per kilobase of exon model per million reads mapped (FPKM).
+#' Returns the regular expression used to extract metric values from the 
+#' ENCODE files.
+#' 
 #' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @return A \link{data.frame} of the per-condition fragments per kilobase
-#'         of exon model per million reads mapped (FPKM).
+#' @return The regular expression used to extract metric values from the 
+#' ENCODE files.
 #'         
 #' @docType methods
-#' @rdname fpkm-methods
+#' @rdname metric-methods
 #' @export          
-setGeneric("fpkm", function(x) standardGeneric("fpkm"))
+setGeneric("metric", function(x) standardGeneric("metric"))
 
-#' @rdname fpkm-methods
-#' @aliases fpkm,ENCODEBindingConsensus,ENCODEBindingConsensus-method
-setMethod("fpkm",
+#' @rdname metric-methods
+#' @aliases metric,ENCODEBindingConsensus,ENCODEBindingConsensus-method
+setMethod("metric",
           c(x="ENCODEExpressionSummary"),
           function(x) {
-            x@fpkm
+            x@metric
           })     
+
+#' Returns the regular expression used to extract raw_data values from the 
+#' ENCODE files.
+#' 
+#' @param x The \linkS4class{ENCODEExpressionSummary} object.
+#' @return A list with one element per file-group containing a list of the 
+#'         raw imported ENCODE files.
+#'         
+#' @docType methods
+#' @rdname raw_data-methods
+#' @export          
+setGeneric("raw_data", function(x) standardGeneric("raw_data"))
+
+#' @rdname raw_data-methods
+#' @aliases raw_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method
+setMethod("raw_data",
+          c(x="ENCODEExpressionSummary"),
+          function(x) {
+            x@raw_data
+          })
 
 #' Prints a summary of a \linkS4class{ENCODEExpressionSummary} object.
 #'
@@ -280,6 +302,6 @@ setMethod("show", "ENCODEExpressionSummary",
           function(object) {
             cat("An object of class ENCODEExpressionSummary.\n")
             methods::callNextMethod()
-            cat("\nSumarizing", nrow(tpm(object)), object@expression_type, 
+            cat("\nSumarizing", nrow(metric_data(object)), object@expression_type, 
                 "expression levels.\n")
           })          

@@ -26,7 +26,6 @@ buildConsensusCommon = function(query_results, split_by, temp_dir, force,
                 Metadata=split_info$Metadata, 
                 FileMetadata=file_metadata,
                 Indices=split_info$Indices))
-
 }
 
 # Make sure a given column from query_results has only one unique value.
@@ -335,7 +334,7 @@ selectAssembly <- function(input_assemblies) {
         matched_assemblies = prefered_assembly[assembly_matches]
         selected_assembly = matched_assemblies[1]
         message("Found the following assemblies: ", paste0(matched_assemblies, collapse=", "))
-        message("Selecting ", selected_assembly)
+        message("Selecting ", selected_assembly, ". To choose another assembly, specify it in the 'assembly' argument.")
         
         return(selected_assembly)
     }
@@ -350,8 +349,10 @@ selectRNASeqAssay <- function(input_assays) {
     
     assay_matches = which(prefered_assay %in% input_assays)
     matched_assays = prefered_assay[assay_matches]
-    
-    return(prefered_assay[assay_matches[1]])
+    message("Found the following assays: ", paste0(matched_assays, collapse=", "))
+    message("Selecting ", matched_assays[1], ". To choose another assay, specify it in the 'assay' argument.")
+
+    return(matched_assays[1])
 }
 
 DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment", 
@@ -382,6 +383,11 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
                                        file_type="tsv", 
                                        file_status="released",
                                        output_type=level)
+
+    if(nrow(query_results)==0) {
+        message("No results found.")
+        return(NULL)
+    }
                                        
     if(is.null(assembly)) {
         assembly = selectAssembly(query_results$assembly)
@@ -456,15 +462,38 @@ dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
         col_match = grepl(column_name, colnames(x))
         if(sum(col_match) == 0) {
             stop("Column not found!")
-        } else if(col_match > 1) {
+        } else if(sum(col_match) > 1) {
             stop("Multiple columns match the specification")
         } else {
-            return(x[[col_match]])
+            return(x[[which(col_match)]])
         }
     })
     apply(do.call(cbind, col_data), 1, summary_method)
 }
 
+select_metric = function(metric, dt_files) {
+    available_columns = c("^TPM$", "^FPKM$", ".*featurecounts.*", metric)
+    is_available = lapply(available_columns, function(x) {
+        unlist(lapply(dt_files, function(y) {
+            any(grepl(x, colnames(y)))
+        }))
+    })
+    
+    is_available_all = unlist(lapply(is_available, all))
+    if(is.null(metric)) {
+        if(!any(is_available_all)) {
+            stop("No known metric column is available in all files.")
+        } else {
+            metric = available_columns[is_available_all][1]
+        }
+    } else {
+        if(!is_available_all[metric]) {
+            stop("The selected column is not available for all files.")
+        }
+    }
+    
+    return(metric)
+}
 
 #' Calculates average expression levels of the results of a previously
 #' completed ENCODE query.
@@ -507,40 +536,20 @@ buildExpressionMean <- function(query_results, split_by, metric=NULL,
         stop("Some quantification files have different gene/transcript ids.")
     }
     
-    available_columns = c("^TPM$", "^FPKM$", ".*featurecounts.*", metric)
-    is_available = lapply(available_columns, function(x) {
-        unlist(lapply(dt_files, function(y) {
-            any(grepl(x, colnames(y)))
-        }))
-    })
-    
-    is_available_all = unlist(lapply(is_available, all))
-    if(is.null(metric)) {
-        if(!any(is_available_all)) {
-            stop("No known metric column is available in all files.")
-        } else {
-            metric = available_columns[is_available_all][1]
-        }
-    } else {
-        if(!is_available_all[metric]) {
-            stop("The selected column is not available for all files.")
-        }
-    }
+    metric = select_metric(metric, dt_files)
     
     # Build per-condition summaries
     raw_data = lapply(common$Indices, function(x) {dt_files[x]})
     expression_levels = lapply(common$Indices, function(x) {
         dtColumnSummary(dt_files[x], metric, mean)
     })
-    #fpkm = lapply(common$Indices, function(x) {
-    #    dtColumnSummary(dt_files[x], 'FPKM', mean)
-    #})    
     
     methods::new("ENCODEExpressionSummary",
              files=common$Files,
              file_metadata=common$FileMetadata,
              metadata=common$Metadata,
-             tpm=cbind(data.frame(id=example_ids), expression_levels),
-             fpkm=cbind(data.frame(id=example_ids), expression_levels),
+             raw_data=raw_data,
+             metric=metric,
+             metric_data=cbind(data.frame(id=example_ids), expression_levels),
              expression_type=expression_type)
 }

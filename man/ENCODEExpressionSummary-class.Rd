@@ -12,7 +12,9 @@ transcript-levels of expression across a set of ENCODE files.
 \section{Slots}{
 
 \describe{
-\item{\code{tpm}}{A \link{data.frame} of the per-condition transcript-per-millions.}
+\item{\code{metric}}{A \link{data.frame} of the per-condition metric values.}
+
+\item{\code{metric_data}}{A \link{data.frame} of the per-condition metric values.}
 
 \item{\code{fpkm}}{A \link{data.frame} of the per-condition fragments per kilobase
 of exon model per million reads mapped (FPKM).}
