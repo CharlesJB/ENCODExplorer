@@ -42,7 +42,7 @@ downloaded.
 
 This vignette will introduce the main features of the ENCODExplorer package.
 
-# Loading ENCODExplorer package
+# Loading the ENCODExplorer package
 
 ```{r libraryLoad, message=FALSE, warning=FALSE}
 library(ENCODExplorer)
@@ -50,14 +50,14 @@ library(ENCODExplorer)
 
 # Introduction
 
-To use the functionalities of the ENCODExplorer package, you first need to
-download the `data.table` containing all the metadata from ENCODE.
+To use the functionalities of the ENCODExplorer package, you must first
+download the `data.table` containing all of the ENCODE metadata.
 
 This `data.table` is available through the AnnotationHub package. For
 convenience, the latest available version at each release will be downloaded
 and used by default.
 
-We also provide the following function to quickly extract those metadata:
+We also provide the following function to quickly obtain these metadata:
 
 To load `getencode_df` :
 ```{r load_encodeDF, collapse=TRUE}
@@ -88,14 +88,14 @@ a precise query defined according to the following criteria :
 
 
 By default, the query function uses exact string matching to perform the
-selection of  the relevant entries. This behavior can be changed by changing the
+selection of the relevant entries. This behavior can be changed by modifying the
 `fixed` or `fuzzy` parameters. Setting `fixed` to `FALSE` will perform
 case-insensitive regular expression matching. Setting `fuzzy` to `TRUE` will
-retrieve search results where the query string is only a partial match.
+retrieve search results where the query string is a partial match.
 
 The result set is a subset of the `encode_df_lite` table.
 
-For example, to select all the fastq files originating from assays on the MCF-7
+For example, to select all fastq files originating from assays on the MCF-7
 (human breast cancer) cell line:
 
 ```{r query_results, collapse=TRUE, eval =T}
@@ -104,24 +104,26 @@ query_results <- queryEncode(organism = "Homo sapiens",
                       fixed = TRUE)
 ```
 
-The same request with approximate spelling of the biosample name and `fuzzy` option
-to `FALSE`, will give no results :
+The same request with approximate spelling of the biosample name will return 
+no results:
 
 ```{r query_results_2, collapse=TRUE}
 query_results <- queryEncode(organism = "Homo sapiens", biosample_name = "mcf7",
                         file_format = "fastq", fixed = TRUE,
-                       fuzzy = FALSE)
+                        fuzzy = FALSE)
 ```
 
-If you follow the warning guidance and set the `fuzzy` option to `TRUE`:
+However, if you follow the warning guidance and set the `fuzzy` parameter to 
+`TRUE`:
 
 ```{r query_results_3, collapse=TRUE}
 query_results <- queryEncode(organism = "Homo sapiens",
-                    biosample_name = "mcf7", file_format = "fastq", fixed = TRUE,
-                    fuzzy = TRUE)
+                    biosample_name = "mcf7", file_format = "fastq",
+                    fixed = TRUE, fuzzy = TRUE)
 ```
 
-You can also perform matching through regular expressions by setting fixed to `FALSE`.
+You can also perform matching through regular expressions by setting fixed to 
+`FALSE`.
 
 ```{r query_results_4, collapse=TRUE}
 query_results <- queryEncode(assay = ".*RNA-seq",
@@ -140,7 +142,7 @@ query_results <- queryEncodeGeneric(biosample_name="HeLa-S3",
 table(query_results$submitted_by)
 ```
 
-These criteria correspond to the filters that you can find on ENCODE portal :
+These criteria correspond to the filters that you can find on ENCODE portal:
 
 ![results of a filtered search on ENCODE portal](img/query_mcf7.png)
 
@@ -148,10 +150,11 @@ These criteria correspond to the filters that you can find on ENCODE portal :
 ## fuzzySearch
 
 This function is a more user-friendly version of `queryEncode` that also
-searches on the `encode_df_lite` object. The character vector or the list of
-characters specified by the user will be searched for in every column of the
-database. The user can also constrain the query by selecting the specific column
-in which to search for the query term by using the `filterVector` parameter.
+perform searches on the `encode_df_lite` object. The character vector or the 
+list of characters specified by the user will be searched for in every column of
+the database. The user can also constrain the query by selecting the specific 
+columns in which to search for the query term by using the `filterVector` 
+parameter.
 
 The following request will produce a data.table with every files containing
 the term *brca*.
@@ -297,6 +300,103 @@ function.
 
 ![Simple request using Search](img/shiny1.png)
 
+# Summarizing ENCODE data
+
+While queryEncode, searchEncode and downloadEncode gives the user access to
+ENCODE's raw files, ENCODExplorer also provides helper functions which load and 
+summarize ENCODE data for common biological questions.
+
+## Obtaining consensus peaks from ChIP-Seq
+
+The most common question in a ChIP-Seq assay is: "Where does the protein of
+interest bind the genome?" To answer this question, ENCODExplorer provides the
+`queryConsensusPeaks` method. `queryConsensusPeaks` finds all ChIP-seq peak
+files matching the given criteria, split them by treatment group, and determines
+which peaks appear in all replicates:
+
+```{r query_consensus_peaks_call, collapse=TRUE}
+# Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
+# cell line.
+res = queryConsensusPeaks("A549", "GRCh38", "NR3C1")
+
+# The list of downloaded files is available through the files() method.
+files(res)
+
+# The metadata for those file is available through the file_metadata() method.
+# The file metadata are split according to treatment group:
+file_metadata(res)
+
+# A data-frame explaining how each treatment group was split is available
+# through the metadata() method:
+metadata(res)
+
+# The list of all peaks identified in individual files are accessed through 
+# the peaks() method.
+peaks(res)
+
+# Finally, the consensus peaks (those who are present in all individual
+# replicates) are accessed through the consensus() method:
+consensus(peaks)
+```
+
+## Fine-tuning a consensus peaks query
+
+Certain versions of the ENCODE pipeline provide multiple calling algorithms.
+Also, sometimes multiple labs have performed ChIP-seq experiments on the same
+tissue and protein, and these results might not be directly comparable.
+ENCODExplorer uses heuristics to try and determine which set of files will
+provide the most informative results, but the results of these heuristics might 
+prove unsatisfactory. 
+
+In such cases, a user can provide his own set of ENCODE metadata and his own 
+choice of splitting columns using the `buildQueryConsensus` function. The user
+can also specify which proportion of individual replicates a peak must appear in
+to be included in the consensus peaks:
+
+```{r build_consensus_peaks_call, collapse=TRUE}
+query_results = queryEncodeGeneric(biosample_name="A549", assembly="GRCh38",
+                                   file_format="bed", output_type="peaks", 
+                                   target="NR3C1", treatment_duration_unit="minute")
+
+# Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
+# cell line.
+res = buildConsensusPeaks(query_results, split_by=c("treatment_duration"), 
+                          consensus_threshold=0.5)
+
+res
+```
+
+## Obtaining average gene expression
+
+For RNA-Seq experiment, the most straightforward type of results is the 
+expression level of all genes or transcripts. ENCODExplorer provides the 
+`queryGeneExpression` and `queryTranscriptExpression` methods to summarize
+these results.
+
+```{r query_gene_expression, collapse=TRUE}
+# Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
+# cell line.
+res = queryGeneExpression("A549", "GRCh38", "NR3C1")
+
+# The list of downloaded files is available through the files() method.
+files(res)
+
+# The metadata for those file is available through the file_metadata() method.
+# The file metadata are split according to treatment group:
+file_metadata(res)
+
+# A data-frame explaining how each treatment group was split is available
+# through the metadata() method:
+metadata(res)
+
+# The list of all peaks identified in individual files are accessed through 
+# the peaks() method.
+peaks(res)
+
+# Finally, the consensus peaks (those who are present in all individual
+# replicates) are accessed through the consensus() method:
+consensus(peaks)
+```
 # Updating the ENCODE file database
 
 By default, ENCODExplorer retrieves the ENCODE metadata from its sister

@@ -93,7 +93,8 @@ split_by_metadata = function(metadata, split_by) {
     
     # Concatenate the new metadata.
     new_metadata=data.table::rbindlist(new_metadata_list, use.names=TRUE)
-    new_metadata$split_regions = names(new_metadata_list)
+    new_metadata$split_group = names(new_metadata_list)
+    rownames(new_metadata) = names(new_metadata_list)
 
     # Return the results.
     return(list(Indices=out_subsets, Metadata=new_metadata, Partition=partition))        
@@ -451,7 +452,17 @@ queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL)
 }
 
 dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
-    apply(do.call(cbind, lapply(dt_files, '[[', column_name)), 1, summary_method)
+    col_data = lapply(dt_files, function(x) {
+        col_match = grepl(column_name, colnames(x))
+        if(sum(col_match) == 0) {
+            stop("Column not found!")
+        } else if(col_match > 1) {
+            stop("Multiple columns match the specification")
+        } else {
+            return(x[[col_match]])
+        }
+    })
+    apply(do.call(cbind, col_data), 1, summary_method)
 }
 
 
@@ -475,7 +486,7 @@ dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
 #'              redownloaded.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @export
-buildExpressionMean <- function(query_results, split_by, 
+buildExpressionMean <- function(query_results, split_by, metric=NULL,
                                 temp_dir=".", force=FALSE) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
                                   ".tsv")
@@ -496,20 +507,40 @@ buildExpressionMean <- function(query_results, split_by,
         stop("Some quantification files have different gene/transcript ids.")
     }
     
+    available_columns = c("^TPM$", "^FPKM$", ".*featurecounts.*", metric)
+    is_available = lapply(available_columns, function(x) {
+        unlist(lapply(dt_files, function(y) {
+            any(grepl(x, colnames(y)))
+        }))
+    })
+    
+    is_available_all = unlist(lapply(is_available, all))
+    if(is.null(metric)) {
+        if(!any(is_available_all)) {
+            stop("No known metric column is available in all files.")
+        } else {
+            metric = available_columns[is_available_all][1]
+        }
+    } else {
+        if(!is_available_all[metric]) {
+            stop("The selected column is not available for all files.")
+        }
+    }
+    
     # Build per-condition summaries
     raw_data = lapply(common$Indices, function(x) {dt_files[x]})
-    tpm = lapply(common$Indices, function(x) {
-        dtColumnSummary(dt_files[x], 'TPM', mean)
+    expression_levels = lapply(common$Indices, function(x) {
+        dtColumnSummary(dt_files[x], metric, mean)
     })
-    fpkm = lapply(common$Indices, function(x) {
-        dtColumnSummary(dt_files[x], 'FPKM', mean)
-    })    
+    #fpkm = lapply(common$Indices, function(x) {
+    #    dtColumnSummary(dt_files[x], 'FPKM', mean)
+    #})    
     
     methods::new("ENCODEExpressionSummary",
              files=common$Files,
              file_metadata=common$FileMetadata,
              metadata=common$Metadata,
-             tpm=cbind(data.frame(id=example_ids), tpm),
-             fpkm=cbind(data.frame(id=example_ids), fpkm),
+             tpm=cbind(data.frame(id=example_ids), expression_levels),
+             fpkm=cbind(data.frame(id=example_ids), expression_levels),
              expression_type=expression_type)
 }
