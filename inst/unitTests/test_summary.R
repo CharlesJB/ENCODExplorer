@@ -18,12 +18,10 @@ test.query_consensus_peaks <- function() {
   # Test name assignment.
   new_names = letters[seq_along(res)]
   names(res) <- new_names
-  print(names(res))
-  print(new_names)
   checkTrue(all(names(res) == new_names))
 
   # Make sure files are split by the default split.
-  checkTrue(all(colnames(metadata(res)) == c(ENCODExplorer:::DEFAULT_CONSENSUS_SPLIT_BY, "split_regions")))
+  checkTrue(all(colnames(metadata(res)) == c(ENCODExplorer:::DEFAULT_CONSENSUS_SPLIT_BY, "split_group")))
     
   # Test consensus slot.  
   checkTrue(is(consensus(res), "GRangesList"))
@@ -62,21 +60,19 @@ test.query_expression_levels <- function() {
   # Test name assignment.
   new_names = letters[seq_along(res)]
   names(res) <- new_names
-  print(names(res))
-  print(new_names)
   checkTrue(all(names(res) == new_names))
 
   # Make sure files are split by the default split.
   meta_col_names = colnames(metadata(res))
-  expected_names = c(ENCODExplorer:::DEFAULT_EXPRESSION_SPLIT_BY, "split_regions")
+  expected_names = c(ENCODExplorer:::DEFAULT_EXPRESSION_SPLIT_BY, "split_group")
   checkTrue(all(meta_col_names == expected_names))
   
-  # Test tpm, fpkm slots
-  checkTrue(nrow(tpm(res))==nrow(fpkm(res)))
-  checkTrue(all(tpm(res)$id==fpkm(res)$id))
-  checkTrue(nrow(tpm(res)) > 0)
-  checkTrue(all(colnames(tpm(res))==colnames(fpkm(res))))
-  checkTrue(ncol(tpm(res))==(length(res)+1))
+  # Test metric_data, fpkm slots
+  example_raw = raw_data(res)[[1]][[1]]
+  checkTrue(nrow(metric_data(res))==nrow(example_raw))
+  checkTrue(all(metric_data(res)$id==example_raw[[1]]))
+  checkTrue(nrow(metric_data(res)) > 0)
+  checkTrue(ncol(metric_data(res))==(length(res)+1))
   
   print(res)
   
@@ -85,6 +81,6 @@ test.query_expression_levels <- function() {
   res = queryGeneExpression("GM12878")
   checkTrue(length(res) == 3)
   checkTrue(length(files(res))==6)
-  checkTrue(nrow(tpm(res))==61471)
+  checkTrue(nrow(metric_data(res))==61471)
   
 }

@@ -145,7 +145,6 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
     }
 }
 
-
 #' Calculates the consensus peaks defined by the results of a previously
 #' completed ENCODE query.
 #'
@@ -222,26 +221,11 @@ filter_results_by_file_type = function(query_results) {
     query_results[query_results$file_type == chosen_file_type,]
 }
 
-filter_results_by_output_type = function(query_results) {
-    unique_output = unique(query_results$output_type)
-    if(length(unique_output) > 1) {
-        prefered_output = c("optimal idr thresholded peaks",
-                            "conservative idr thresholded peaks",
-                            "peaks",
-                            "replicated peaks",
-                            "stable peaks")
-                           
-        output_matches = which(prefered_output %in% unique_output)
-        if(length(output_matches) > 0) {
-            best_output = prefered_output[output_matches[1]]
-            query_results = query_results[query_results$output_type == best_output]
-        } else {
-            warning("Multiple output types were detected, and we could not choose one automatically.")
-        }
-    }
-    
-    query_results
-}
+PREFERED_OUTPUT_TYPE = c("optimal idr thresholded peaks",
+                         "conservative idr thresholded peaks",
+                         "peaks",
+                         "replicated peaks",
+                         "stable peaks")
 
 DEFAULT_CONSENSUS_SPLIT_BY = c("treatment", 
                                "treatment_amount", "treatment_amount_unit",
@@ -269,7 +253,8 @@ DEFAULT_CONSENSUS_SPLIT_BY = c("treatment",
 #' @importFrom GenomicOperations plot_venn
 #' @importFrom GenomicOperations combined_regions
 #' @export
-queryConsensusPeaks <- function(biosample_name, assembly, target) {
+queryConsensusPeaks <- function(biosample_name, assembly, target, 
+                                use_interactive=FALSE) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        assembly=assembly,
                                        target=target,
@@ -278,7 +263,8 @@ queryConsensusPeaks <- function(biosample_name, assembly, target) {
     
     # Filter the results so we only keep "final" peaks.
     query_results = filter_results_by_file_type(query_results)
-    query_results = filter_results_by_output_type(query_results)
+    query_results = filter_on_values(query_results, "output_type", NULL,
+                                     PREFERED_OUTPUT_TYPE, use_interactive)
 
     if(nrow(query_results)==0) {
         warning("No results found for the specified query.")
@@ -318,42 +304,83 @@ queryConsensusPeaksAll <- function(biosample_name, assembly) {
     })
 }
 
-selectAssembly <- function(input_assemblies) {
-    prefered_assembly = c("GRCh38", "GRCh38-minimal", "hg19",
-                          "mm10", "mm10-minimal", "mm9",
-                          "dm6", "dm3",
-                          "ce11", "ce10",
-                          "J02459.1")
-
-    if(all(is.na(input_assemblies))) {
-        message("Only assembly NA was found. Selecting it.")
-        return(NA)
-    } else {
-        assembly_matches = which(prefered_assembly %in% input_assemblies)
-        
-        matched_assemblies = prefered_assembly[assembly_matches]
-        selected_assembly = matched_assemblies[1]
-        message("Found the following assemblies: ", paste0(matched_assemblies, collapse=", "))
-        message("Selecting ", selected_assembly, ". To choose another assembly, specify it in the 'assembly' argument.")
-        
-        return(selected_assembly)
-    }
-}
-
-selectRNASeqAssay <- function(input_assays) {
-    prefered_assay = c("total RNA-seq",
-                       "polyA RNA-seq",
-                       "polyA depleted RNA-seq",
-                       "single cell RNA-seq",
-                       "small RNA-seq")
+choose_interactive_value = function(values, col_name) {
+    count_table = sort(table(values, useNA="ifany"))
+    count_values = names(count_table)
+    if("NA" %in% count_values) {
+        count_values["NA"] = NA
+    }        
     
-    assay_matches = which(prefered_assay %in% input_assays)
-    matched_assays = prefered_assay[assay_matches]
-    message("Found the following assays: ", paste0(matched_assays, collapse=", "))
-    message("Selecting ", matched_assays[1], ". To choose another assay, specify it in the 'assay' argument.")
-
-    return(matched_assays[1])
+    menu_prompt = paste0("Multiple values for ", col_name,
+                         " found. Which one should we use?")
+    value_prompt = paste0(names(count_table), " (", count_table, " files)")                                 
+    menu_choice = menu(value_prompt, title=menu_prompt)
+    if(menu_choice==0) {
+        menu_choice = 1
+    }
+    chosen_value = count_values[menu_choice]
+    
+    return(chosen_value)
 }
+
+choose_prefered_value = function(values, col_name, preference_order) {
+    value_matches = which(preference_order %in% values)
+    
+    matched_values = preference_order[value_matches]
+    if(length(matched_values)==0) {
+        stop("We could not select a value for", col_name, "automatically.")
+    }
+    chosen_value = matched_values[1]
+    message("Found the following ", col_name, ": ",
+            paste0(unique(values), collapse=", "))
+    message("Selecting ", chosen_value, ". To choose another ", col_name,
+            ", specify it in the '", col_name, "', argument or set ",
+            "use_interactive to TRUE.")
+    
+    return(chosen_value)
+}
+
+filter_on_values <- function(query_results, col_name, chosen_value,
+                             preference_order, use_interactive=FALSE) {
+    stopifnot(col_name %in% colnames(query_results))
+    values = query_results[[col_name]]
+
+    if(is.null(chosen_value)) {
+        # Deal with the edge case where there is only one value.
+        if(length(unique(values)) == 1) {
+            message("Only ", unique(values), " was found. Selecting it.")
+            return(query_results)
+        }
+    
+        # Count the unique values to report them to the user.
+        if(use_interactive) {
+            chosen_value = choose_interactive_value(values, col_name)
+        } else {
+            chosen_value = choose_prefered_value(values, col_name, 
+                                                 preference_order)
+        }
+    }
+    
+    if(is.na(chosen_value)) {
+        query_results = query_results[is.na(values),]
+    } else {
+        query_results = query_results[values == chosen_value,]
+    }
+    
+    return(query_results)
+}
+
+ASSEMBLY_PREFERENCE = c("GRCh38", "GRCh38-minimal", "hg19",
+                        "mm10", "mm10-minimal", "mm9",
+                        "dm6", "dm3",
+                        "ce11", "ce10",
+                        "J02459.1")
+
+ASSAY_PREFERENCE = c("total RNA-seq",
+                     "polyA RNA-seq",
+                     "polyA depleted RNA-seq",
+                     "single cell RNA-seq",
+                     "small RNA-seq")
 
 DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment", 
                                 "treatment_amount", "treatment_amount_unit",
@@ -373,48 +400,36 @@ DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment",
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param use_interactive If TRUE, the user will be prompted to select prefered
+#'                        metadata values when multiple possibilities are
+#'                        available.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionMean}}, 
 #'          \code{\link{queryGeneExpression}}
 #' @export
 queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
-                                   assay=NULL, assembly=NULL) {
+                                   assay=NULL, assembly=NULL, 
+                                   use_interactive=FALSE) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        file_type="tsv", 
                                        file_status="released",
                                        output_type=level)
 
-    if(nrow(query_results)==0) {
-        message("No results found.")
-        return(NULL)
+    query_results = filter_on_values(query_results, "assembly", assembly,
+                                     ASSEMBLY_PREFERENCE, use_interactive)
+                                     
+    query_results = filter_on_values(query_results, "assay", assay,
+                                     ASSAY_PREFERENCE, use_interactive)                                     
+
+    split_by = DEFAULT_EXPRESSION_SPLIT_BY
+    if(use_interactive) {
+        query_results = filter_on_values(query_results, "dataset_description", 
+                                         NULL,
+                                         ASSAY_PREFERENCE, use_interactive)
+        split_by = setdiff(split_by, "dataset_description")
     }
-                                       
-    if(is.null(assembly)) {
-        assembly = selectAssembly(query_results$assembly)
-    }
-    
-    if(is.na(assembly)) {
-        query_results = query_results[is.na(query_results$assembly),]
-    } else {
-        # assembly is a column name. data.table will interpret an "assembly"
-        # variable as refering to the column, so the condition becomes
-        # tautological. We avoid this by renaming the assembly external 
-        # variable.
-        # We could use with=FALSE, but then we'd need to explicitly specify
-        # the columns we want (j-argument).
-        chosen_assembly=assembly
-        query_results = query_results[query_results$assembly==chosen_assembly,]
-    }
-    
-    if(is.null(assay)) {
-        assay = selectRNASeqAssay(query_results$assay)
-    }
-    # See note for chosen_assembly above.
-    chosen_assay = assay
-    query_results = query_results[query_results$assay==chosen_assay,]
-    
-    return(buildExpressionMean(query_results,
-                               split_by=DEFAULT_EXPRESSION_SPLIT_BY))
+
+    return(buildExpressionMean(query_results, split_by=split_by))
 }
 
 #' Queries and returns average gene expression level for a given biosample_name.
@@ -428,12 +443,18 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param use_interactive If TRUE, the user will be prompted to select prefered
+#'                        metadata values when multiple possibilities are
+#'                        available.
+#'                 available assembly is selected.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionMean}}, 
 #'          \code{\link{queryTranscriptExpression}}
 #' @export
-queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL) {
-    queryExpressionGeneric(biosample_name, "gene quantifications", assembly)
+queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
+                                use_interactive=FALSE) {
+    queryExpressionGeneric(biosample_name, "gene quantifications", assay, 
+                           assembly, use_interactive)
 }
 
 #' Queries and returns average transcript expression level for a given 
@@ -449,12 +470,17 @@ queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL) {
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param use_interactive If TRUE, the user will be prompted to select prefered
+#'                        metadata values when multiple possibilities are
+#'                        available.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionMean}}, 
 #'          \code{\link{queryGeneExpression}}
 #' @export
-queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL) {
-    queryExpressionGeneric(biosample_name, "transcript quantifications", assembly)
+queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
+                                use_interactive=FALSE) {
+    queryExpressionGeneric(biosample_name, "transcript quantifications", 
+                           assay, assembly, use_interactive)
 }
 
 dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
