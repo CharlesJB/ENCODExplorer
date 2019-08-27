@@ -50,3 +50,12 @@ NEW FEATURES
     o The encode_df object is now available through the AnnotationHub
     o The functions to interact with the ENCODExplorer API (except the search
       function) were moved to the ENCODExplorerData
+      
+CHANGES IN VERSION 2.10.0
+------------------------
+
+NEW FEATURES
+
+    o Added the queryConsensusPeaks, queryGeneExpression and queryTranscriptExpression
+      methods, along with buildConsensusPeaks and buildExpressionSummary. These
+      methods allow the summarization of ENCODE ChIP-seq and RNA-seq results.
