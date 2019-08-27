@@ -4,7 +4,8 @@
 \alias{queryGeneExpression}
 \title{Queries and returns average gene expression level for a given biosample_name.}
 \usage{
-queryGeneExpression(biosample_name, assay = NULL, assembly = NULL)
+queryGeneExpression(biosample_name, assay = NULL, assembly = NULL,
+  use_interactive = FALSE)
 }
 \arguments{
 \item{biosample_name}{The cell-line/tissue for which average expression 
@@ -14,6 +15,11 @@ levels should be queried.}
 assay type is automatically selected.}
 
 \item{assembly}{The target genomic assembly. If \code{NULL}, the most recent 
+available assembly is selected.}
+
+\item{use_interactive}{If TRUE, the user will be prompted to select prefered
+       metadata values when multiple possibilities are
+       available.
 available assembly is selected.}
 }
 \value{
@@ -25,6 +31,6 @@ separate samples from different cell fractions or sequencing methods) and by
 the treatment columns.
 }
 \seealso{
-\code{\link{buildExpressionMean}}, 
+\code{\link{buildExpressionSummary}}, 
          \code{\link{queryTranscriptExpression}}
 }

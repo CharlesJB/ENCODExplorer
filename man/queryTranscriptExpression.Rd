@@ -6,7 +6,7 @@
 biosample_name.}
 \usage{
 queryTranscriptExpression(biosample_name, assay = NULL,
-  assembly = NULL)
+  assembly = NULL, use_interactive = FALSE)
 }
 \arguments{
 \item{biosample_name}{The cell-line/tissue for which average expression 
@@ -17,6 +17,10 @@ assay type is automatically selected.}
 
 \item{assembly}{The target genomic assembly. If \code{NULL}, the most recent 
 available assembly is selected.}
+
+\item{use_interactive}{If TRUE, the user will be prompted to select prefered
+metadata values when multiple possibilities are
+available.}
 }
 \value{
 An object of class \linkS4class{ENCODEExpressionSummary}.
@@ -27,6 +31,6 @@ separate samples from different cell fractions or sequencing methods) and by
 the treatment columns.
 }
 \seealso{
-\code{\link{buildExpressionMean}}, 
+\code{\link{buildExpressionSummary}}, 
          \code{\link{queryGeneExpression}}
 }

@@ -404,7 +404,7 @@ DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment",
 #'                        metadata values when multiple possibilities are
 #'                        available.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
-#' @seealso \code{\link{buildExpressionMean}}, 
+#' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryGeneExpression}}
 #' @export
 queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
@@ -429,7 +429,7 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
         split_by = setdiff(split_by, "dataset_description")
     }
 
-    return(buildExpressionMean(query_results, split_by=split_by))
+    return(buildExpressionSummary(query_results, split_by=split_by))
 }
 
 #' Queries and returns average gene expression level for a given biosample_name.
@@ -448,7 +448,7 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
 #'                        available.
 #'                 available assembly is selected.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
-#' @seealso \code{\link{buildExpressionMean}}, 
+#' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryTranscriptExpression}}
 #' @export
 queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
@@ -474,7 +474,7 @@ queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL,
 #'                        metadata values when multiple possibilities are
 #'                        available.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
-#' @seealso \code{\link{buildExpressionMean}}, 
+#' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryGeneExpression}}
 #' @export
 queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
@@ -541,7 +541,7 @@ select_metric = function(metric, dt_files) {
 #'              redownloaded.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @export
-buildExpressionMean <- function(query_results, split_by, metric=NULL,
+buildExpressionSummary <- function(query_results, split_by, metric=NULL,
                                 temp_dir=".", force=FALSE) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
                                   ".tsv")

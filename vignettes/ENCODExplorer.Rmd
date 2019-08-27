@@ -336,7 +336,7 @@ peaks(res)
 
 # Finally, the consensus peaks (those who are present in all individual
 # replicates) are accessed through the consensus() method:
-consensus(peaks)
+consensus(res)
 ```
 
 ## Fine-tuning a consensus peaks query
@@ -376,27 +376,53 @@ these results.
 ```{r query_gene_expression, collapse=TRUE}
 # Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
 # cell line.
-res = queryGeneExpression("A549", "GRCh38", "NR3C1")
+res = queryGeneExpression("neural tube")
 
-# The list of downloaded files is available through the files() method.
-files(res)
-
-# The metadata for those file is available through the file_metadata() method.
-# The file metadata are split according to treatment group:
-file_metadata(res)
-
-# A data-frame explaining how each treatment group was split is available
-# through the metadata() method:
+# The files(), file_metadata() and metadata() methods behave the same way as 
+# they do for queryConsensusPeaks:
 metadata(res)
 
-# The list of all peaks identified in individual files are accessed through 
-# the peaks() method.
-peaks(res)
+# You can see which expression metric ENCODExplorer extracted using the
+# metric() method.
+metric(res)
 
-# Finally, the consensus peaks (those who are present in all individual
-# replicates) are accessed through the consensus() method:
-consensus(peaks)
+# Per gene/transcript values for all metrics are available through the
+# metric_data method:
+head(metric_data(res))
+
+# You can also get a list of the raw ENCODE files by calling the raw_data()
+# method.
+head(raw_data(res)[[1]][[1]])
 ```
+
+## Fine tuning expression summaries
+
+Just as it is the case for ChIP-seq assays, it can sometimes be easier for the
+user to perform filtering of the ENCODE results manually. For thse cases, 
+ENCODExplorer provides the `buildExpressionSummary` method.
+
+```{r build_expression_summary, collapse=TRUE}
+query_results = queryEncodeGeneric(biosample_name="neural tube", 
+                                   output_type="gene quantifications",
+                                   file_type="tsv",
+                                   assay="polyA RNA-seq",
+                                   assembly="^mm10$",
+                                   dataset_biosample_summary="(15.5|13.5)",
+                                   fixed=FALSE)
+                                   
+buildExpressionSummary(query_results, split_by="dataset_biosample_summary")                                   
+```
+## Interactive mode
+
+`queryConsensusPeaks`, `queryGeneExpression` and `queryTranscriptExpression` all
+make educated guesses about the assembly, assay and sample types to be used for
+generating the summaries. However, by setting the `use_interactive` argument to 
+`TRUE`, a user can take direct control of some these choices.
+
+```{r query_expression_interactive, eval=FALSE}
+queryGeneExpression("neural tube", use_interactive=TRUE)
+```
+
 # Updating the ENCODE file database
 
 By default, ENCODExplorer retrieves the ENCODE metadata from its sister
