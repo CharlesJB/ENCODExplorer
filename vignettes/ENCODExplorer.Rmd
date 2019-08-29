@@ -312,12 +312,10 @@ The most common question in a ChIP-Seq assay is: "Where does the protein of
 interest bind the genome?" To answer this question, ENCODExplorer provides the
 `queryConsensusPeaks` method. `queryConsensusPeaks` finds all ChIP-seq peak
 files matching the given criteria, split them by treatment group, and builds a
-set of "consensus peaks".
-
-The "consensus peaks" identified by ENCODExplorer are those that were called 
-in a user-defined minimum proportion of all replicate samples within a given 
-condition. By default, this proportion is set to 1, or all replicates. You can
-change it by setting the consensus_threshold parameter.
+set of "consensus peaks". The "consensus peaks" identified by ENCODExplorer are 
+those that appear in all replicates of a given group. Two peaks are considered 
+to belong to the same binding event if at least one of their  nucleotides
+overlap.
 
 ```{r query_consensus_peaks_call, collapse=TRUE}
 # Obtain a summary of all peaks for CTCF ChIP-Seq assays in the 22Rv1
@@ -335,7 +333,7 @@ The file metadata are split according to treatment group:
 ```{r query_consensus_peaks_file_metadata, collapse=TRUE}
 f_meta = file_metadata(res)
 names(f_meta)
-f_meta[[1]][1:5,]
+f_meta[[1]][,1:5]
 ```
 
 A data-frame explaining how each treatment group was split is available
@@ -344,12 +342,18 @@ through the `metadata()` method:
 metadata(res)
 ```
 
-# The list of all peaks identified in individual files are accessed through 
-# the peaks() method.
-peaks(res)
+The list of all peaks identified in individual files are accessed through 
+the `peaks()` method.
+```{r query_consensus_peaks_peaks, collapse=TRUE}
+names(peaks(res))
+names(peaks(res)[[1]])
+peaks(res)[[1]]
+```
 
-# Finally, the consensus peaks (those who are present in all individual
-# replicates) are accessed through the consensus() method:
+Finally, the consensus peaks (those who are present in all individual
+replicates) are accessed through the `consensus()` method:
+```{r query_consensus_peaks_consensus, collapse=TRUE}
+names(consensus(res))
 consensus(res)
 ```
 
@@ -365,12 +369,14 @@ prove unsatisfactory.
 In such cases, a user can provide his own set of ENCODE metadata and his own 
 choice of splitting columns using the `buildQueryConsensus` function. The user
 can also specify which proportion of individual replicates a peak must appear in
-to be included in the consensus peaks:
+to be included in the consensus peaks through the consensus_threshold parameter:
 
 ```{r build_consensus_peaks_call, collapse=TRUE}
 query_results = queryEncodeGeneric(biosample_name="A549", assembly="GRCh38",
-                                   file_format="bed", output_type="peaks", 
-                                   target="NR3C1", treatment_duration_unit="minute")
+                                   file_format="^bed$", output_type="^peaks$", 
+                                   treatment_duration_unit="minute",
+                                   treatment_duration="(^5$|^10$)", 
+                                   target="NR3C1", fixed=FALSE)
 
 # Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
 # cell line.
@@ -391,21 +397,29 @@ these results.
 # Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
 # cell line.
 res = queryGeneExpression("neural tube")
+```
 
-# The files(), file_metadata() and metadata() methods behave the same way as 
-# they do for queryConsensusPeaks:
+The `files()`, `file_metadata()` and `metadata()` methods behave the same way as 
+they do for `queryConsensusPeaks`:
+```{r query_gene_expression_metadata, collapse=TRUE}
 metadata(res)
+```
 
-# You can see which expression metric ENCODExplorer extracted using the
-# metric() method.
+You can see which expression metric ENCODExplorer extracted using the
+`metric()` method.
+```{r query_gene_expression_metric, collapse=TRUE}
 metric(res)
+```
 
-# Per gene/transcript values for all metrics are available through the
-# metric_data method:
+Per gene/transcript values for all metrics are available through the
+`metric_data()` method:
+```{r query_gene_expression_metric_data, collapse=TRUE}
 head(metric_data(res))
+```
 
-# You can also get a list of the raw ENCODE files by calling the raw_data()
-# method.
+You can also get a list of the raw ENCODE files by calling the `raw_data()`
+method.
+```{r query_gene_expression_raw_data, collapse=TRUE}
 head(raw_data(res)[[1]][[1]])
 ```
 
@@ -426,6 +440,7 @@ query_results = queryEncodeGeneric(biosample_name="neural tube",
                                    
 buildExpressionSummary(query_results, split_by="dataset_biosample_summary")                                   
 ```
+
 ## Interactive mode
 
 `queryConsensusPeaks`, `queryGeneExpression` and `queryTranscriptExpression` all
