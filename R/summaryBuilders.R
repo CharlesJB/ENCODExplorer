@@ -227,9 +227,9 @@ PREFERED_OUTPUT_TYPE = c("optimal idr thresholded peaks",
                          "replicated peaks",
                          "stable peaks")
 
-DEFAULT_CONSENSUS_SPLIT_BY = c("treatment", 
-                               "treatment_amount", "treatment_amount_unit",
-                               "treatment_duration", "treatment_duration_unit")
+DEFAULT_SPLIT_BY = c("treatment", 
+                     "treatment_amount", "treatment_amount_unit",
+                     "treatment_duration", "treatment_duration_unit")
 
 #' Queries ENCODE for consensus peaks.
 #'
@@ -271,7 +271,7 @@ queryConsensusPeaks <- function(biosample_name, assembly, target,
         return(NULL)    
     }
     
-    res = buildConsensusPeaks(query_results, DEFAULT_CONSENSUS_SPLIT_BY)
+    res = buildConsensusPeaks(query_results, DEFAULT_SPLIT_BY)
     if(length(res) == 1) {
         names(res) = "All"
     }
@@ -304,7 +304,7 @@ queryConsensusPeaksAll <- function(biosample_name, assembly) {
     })
 }
 
-choose_interactive_value = function(values, col_name) {
+choose_interactive_value = function(values, col_name, allow_all) {
     count_table = sort(table(values, useNA="ifany"))
     count_values = names(count_table)
     if("NA" %in% count_values) {
@@ -313,12 +313,20 @@ choose_interactive_value = function(values, col_name) {
     
     menu_prompt = paste0("Multiple values for ", col_name,
                          " found. Which one should we use?")
+    if(allow_all) {
+        menu_prompt = paste0(menu_prompt, " Enter 0 to select all.")
+    }
+    
     value_prompt = paste0(names(count_table), " (", count_table, " files)")                                 
     menu_choice = menu(value_prompt, title=menu_prompt)
-    if(menu_choice==0) {
-        menu_choice = 1
+    if(menu_choice==0 && !allow_all) {
+        stop("You must make a valid choice.")
+    } else if(menu_choice!=0) {
+        chosen_value = count_values[menu_choice]
+    } else {
+        chosen_value = count_values
     }
-    chosen_value = count_values[menu_choice]
+    
     
     return(chosen_value)
 }
@@ -341,7 +349,8 @@ choose_prefered_value = function(values, col_name, preference_order) {
 }
 
 filter_on_values <- function(query_results, col_name, chosen_value,
-                             preference_order, use_interactive=FALSE) {
+                             preference_order, use_interactive=FALSE,
+                             allow_all=FALSE) {
     stopifnot(col_name %in% colnames(query_results))
     values = query_results[[col_name]]
 
@@ -354,18 +363,16 @@ filter_on_values <- function(query_results, col_name, chosen_value,
     
         # Count the unique values to report them to the user.
         if(use_interactive) {
-            chosen_value = choose_interactive_value(values, col_name)
+            chosen_value = choose_interactive_value(values, col_name, allow_all)
         } else {
             chosen_value = choose_prefered_value(values, col_name, 
                                                  preference_order)
         }
     }
-    
-    if(is.na(chosen_value)) {
-        query_results = query_results[is.na(values),]
-    } else {
-        query_results = query_results[values == chosen_value,]
-    }
+
+    query_results = query_results[values %in% chosen_value |
+                                  (is.na(values) & any(is.na(chosen_value))),]
+
     
     return(query_results)
 }
@@ -381,10 +388,6 @@ ASSAY_PREFERENCE = c("total RNA-seq",
                      "polyA depleted RNA-seq",
                      "single cell RNA-seq",
                      "small RNA-seq")
-
-DEFAULT_EXPRESSION_SPLIT_BY = c("dataset_description", "treatment", 
-                                "treatment_amount", "treatment_amount_unit",
-                                "treatment_duration", "treatment_duration_unit")
 
 #' Queries and returns average expression levels for a given biosample_name.
 #'
@@ -421,12 +424,15 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
     query_results = filter_on_values(query_results, "assay", assay,
                                      ASSAY_PREFERENCE, use_interactive)                                     
 
-    split_by = DEFAULT_EXPRESSION_SPLIT_BY
     if(use_interactive) {
         query_results = filter_on_values(query_results, "dataset_description", 
-                                         NULL,
-                                         ASSAY_PREFERENCE, use_interactive)
-        split_by = setdiff(split_by, "dataset_description")
+                                         NULL, ASSAY_PREFERENCE, 
+                                         use_interactive, allow_all=TRUE)
+    }
+
+    split_by = DEFAULT_SPLIT_BY
+    if(length(unique(query_results$dataset_description)) > 1) {
+        split_by = c("dataset_description", split_by)
     }
 
     return(buildExpressionSummary(query_results, split_by=split_by))
