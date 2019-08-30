@@ -541,6 +541,9 @@ select_metric = function(metric, dt_files) {
 #'                 to split the average expression levels.
 #'                 If \code{NULL}, all elements of query_results are used in the
 #'                 same average expression calculation.
+#' @param aggregate_function A function which takes a vector as input and 
+#'                           returns a single value summarizing the whole. Used
+#'                           to summarize expression metrics. 
 #' @param temp_dir The path to a directory where peak files will be 
 #'                 downloaded.
 #' @param force A logical indicating whether already present files be 
@@ -548,7 +551,8 @@ select_metric = function(metric, dt_files) {
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @export
 buildExpressionSummary <- function(query_results, split_by, metric=NULL,
-                                temp_dir=".", force=FALSE) {
+                                  aggregate_function=mean, temp_dir=".", 
+                                  force=FALSE) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
                                   ".tsv")
     validate_query_results_for_consensus_rna(query_results, split_by)
@@ -573,7 +577,7 @@ buildExpressionSummary <- function(query_results, split_by, metric=NULL,
     # Build per-condition summaries
     raw_data = lapply(common$Indices, function(x) {dt_files[x]})
     expression_levels = lapply(common$Indices, function(x) {
-        dtColumnSummary(dt_files[x], metric, mean)
+        dtColumnSummary(dt_files[x], metric, aggregate_function)
     })
     
     methods::new("ENCODEExpressionSummary",

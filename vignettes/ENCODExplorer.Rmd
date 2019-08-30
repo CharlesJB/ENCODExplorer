@@ -391,7 +391,15 @@ res
 For RNA-Seq experiment, the most straightforward type of results is the 
 expression level of all genes or transcripts. ENCODExplorer provides the 
 `queryGeneExpression` and `queryTranscriptExpression` methods to summarize
-these results.
+these results. ENCODExplorer finds all gene or transcript expression levels
+for a given biosample and calculates per-condition mean values.
+
+Most biosamples in the ENCODE Project have RNA-seq experiments targeting
+different cell fractions, such as whole cells, cytoplasmic fractions, and 
+nuclear fractions. Since it makes no biological sense to aggregate such results, 
+ENCODExplorer automatically splits them by the dataset_description column,
+which details the cell fraction as well as other methodological or biological
+parameters which make samples unfit for aggregation.
 
 ```{r query_gene_expression, collapse=TRUE}
 # Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
