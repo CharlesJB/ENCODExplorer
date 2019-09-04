@@ -43,9 +43,9 @@ Imports:
     stringi,
     utils,
     AnnotationHub,
-    GenomicOperations,
     GenomicRanges,
-    rtracklayer
+    rtracklayer,
+    S4Vectors
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,

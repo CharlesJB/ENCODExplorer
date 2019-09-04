@@ -203,9 +203,6 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
 #' @importFrom rtracklayer import
 #' @importFrom GenomicRanges GRangesList
-#' @importFrom GenomicOperations GenomicOverlaps
-#' @importFrom GenomicOperations plot_venn
-#' @importFrom GenomicOperations combined_regions
 #' @export
 buildConsensusPeaks <- function(query_results, split_by=NULL,
                                 consensus_threshold=1, simplify=FALSE,
@@ -226,8 +223,8 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
     # Build consensus for each condition.
     consensus = list()
     for(i in names(peaks)) {
-        overlap_obj = GenomicOperations::GenomicOverlaps(peaks[[i]])
-        consensus[[i]] = GenomicOperations::consensus_regions(overlap_obj, consensus_threshold)
+        overlap_obj = GenomicOverlaps(peaks[[i]])
+        consensus[[i]] = consensus_regions(overlap_obj, consensus_threshold)
     }
     
     methods::new("ENCODEBindingConsensus",
@@ -287,9 +284,6 @@ DEFAULT_SPLIT_BY = c("treatment",
 #' @seealso \code{\link{buildConsensusPeaks}}
 #' @importFrom rtracklayer import
 #' @importFrom GenomicRanges GRangesList
-#' @importFrom GenomicOperations GenomicOverlaps
-#' @importFrom GenomicOperations plot_venn
-#' @importFrom GenomicOperations combined_regions
 #' @export
 queryConsensusPeaks <- function(biosample_name, assembly, target, 
                                 simplify=FALSE, use_interactive=FALSE) {
