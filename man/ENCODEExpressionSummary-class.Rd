@@ -12,12 +12,13 @@ transcript-levels of expression across a set of ENCODE files.
 \section{Slots}{
 
 \describe{
-\item{\code{metric}}{A \link{data.frame} of the per-condition metric values.}
+\item{\code{raw_data}}{A list of data-frames containing the full raw data of each
+of the downloaded ENCODE files.}
+
+\item{\code{metric}}{A character giving the regular expression used to extract 
+expression metrics from the ENCODE files.}
 
 \item{\code{metric_data}}{A \link{data.frame} of the per-condition metric values.}
-
-\item{\code{fpkm}}{A \link{data.frame} of the per-condition fragments per kilobase
-of exon model per million reads mapped (FPKM).}
 
 \item{\code{expression_type}}{The type of expression which is being reported, either 
 gene or transcripts.}

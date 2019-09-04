@@ -339,6 +339,7 @@ queryConsensusPeaksAll <- function(biosample_name, assembly) {
     })
 }
 
+#' importFrom utils menu
 choose_interactive_value = function(values, col_name, allow_all) {
     count_table = sort(table(values, useNA="ifany"))
     count_values = names(count_table)
@@ -583,6 +584,10 @@ select_metric = function(metric, dt_files) {
 #'                 to split the average expression levels.
 #'                 If \code{NULL}, all elements of query_results are used in the
 #'                 same average expression calculation.
+#' @param metric A regular expression, indicating which column from the ENCODE
+#'               data must be extracted. If NULL, ENCODExplorer data 
+#'               automatically detects and selects one of the TPM, FPKM or
+#'               featurecount columns.
 #' @param aggregate_function A function which takes a vector as input and 
 #'                           returns a single value summarizing the whole. Used
 #'                           to summarize expression metrics. 

@@ -205,10 +205,11 @@ setMethod("show", "ENCODEBindingConsensus",
 #' ENCODEExpressionSummary objects represents means of gene- or 
 #' transcript-levels of expression across a set of ENCODE files.
 #'
-#' @slot metric A \link{data.frame} of the per-condition metric values.
+#' @slot raw_data A list of data-frames containing the full raw data of each
+#'                of the downloaded ENCODE files.
+#' @slot metric A character giving the regular expression used to extract 
+#'              expression metrics from the ENCODE files.
 #' @slot metric_data A \link{data.frame} of the per-condition metric values.
-#' @slot fpkm A \link{data.frame} of the per-condition fragments per kilobase
-#'            of exon model per million reads mapped (FPKM).
 #' @slot expression_type The type of expression which is being reported, either 
 #'                       gene or transcripts.
 #'

@@ -18,6 +18,11 @@ to split the average expression levels.
 If \code{NULL}, all elements of query_results are used in the
 same average expression calculation.}
 
+\item{metric}{A regular expression, indicating which column from the ENCODE
+data must be extracted. If NULL, ENCODExplorer data 
+automatically detects and selects one of the TPM, FPKM or
+featurecount columns.}
+
 \item{simplify}{If TRUE, non-discriminatory columns are removed from the metadata,
 and if only one sample group is found, it is renamed "All".}
 
