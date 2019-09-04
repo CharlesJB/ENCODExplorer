@@ -1,6 +1,6 @@
 # Encapsulates teh common parts for consensus peaks and expression summaries.
 buildConsensusCommon = function(query_results, split_by, temp_dir, force, 
-                                extension) {
+                                extension, simplify) {
     validate_query_results_for_consensus(query_results, split_by)
     
     dir.create(temp_dir, recursive=TRUE, showWarnings=FALSE)
@@ -14,7 +14,7 @@ buildConsensusCommon = function(query_results, split_by, temp_dir, force,
     if(is.null(split_by)) {
         split_indices = list(All=rep(TRUE, nrow(query_results)))
     } else {
-        split_info = split_by_metadata(query_results, split_by)
+        split_info = split_by_metadata(query_results, split_by, simplify)
         split_indices = split_info$Indices
     }
 
@@ -38,31 +38,7 @@ verify_unique <- function(query_results, col_name, label) {
     }
 }
 
-#' Given a metadata data-frame and a vector of column names (split_by),
-#' builds a partition of rows based on all possible combinations
-#' of the columns identified by split_by.
-#'
-#' @param metadata A data.frame with the metadata.
-#' @param split_by The names of the columns in metadata according to which they 
-#'        should be split.
-#' @return A list with information about the new partition.
-#' @keywords internal
-#' importFrom data.table rbindlist
-split_by_metadata = function(metadata, split_by) {
-    if(!all(split_by %in% colnames(metadata))) {
-        stop("split_by must be a character vector of ",
-             "query_results column names.")
-    }
-
-    # Determine all possible values for the split_by columns.
-    split_by_list = as.list(split_by)
-    names(split_by_list) = split_by
-    possible_values = lapply(split_by_list, function(x) {unique(metadata[[x]])})
-    
-    # Determine all possible combinations of the split_by column values.
-    combinations = expand.grid(possible_values)
-
-    # Split rows by iterating over value combinations.
+split_by_combination = function(metadata, combinations, simplify) {
     out_subsets=list()
     new_metadata_list = list()
     partition = rep(NA, nrow(metadata))
@@ -89,14 +65,70 @@ split_by_metadata = function(metadata, split_by) {
             new_metadata_list[[region_name]] = combinations[i,, drop=FALSE]
         }
     }
-    
+
     # Concatenate the new metadata.
     new_metadata=data.table::rbindlist(new_metadata_list, use.names=TRUE)
-    new_metadata$split_group = names(new_metadata_list)
+    if(!(simplify && ncol(new_metadata) == 1)) {
+        new_metadata$split_group = names(new_metadata_list)
+    }
     rownames(new_metadata) = names(new_metadata_list)
 
     # Return the results.
-    return(list(Indices=out_subsets, Metadata=new_metadata, Partition=partition))        
+    return(list(Indices=out_subsets, Metadata=new_metadata, Partition=partition))
+}
+
+
+#' Given a metadata data-frame and a vector of column names (split_by),
+#' builds a partition of rows based on all possible combinations
+#' of the columns identified by split_by.
+#'
+#' @param metadata A data.frame with the metadata.
+#' @param split_by The names of the columns in metadata according to which they 
+#'        should be split.
+#' @param simplify If TRUE, columns with no discriminatory power will be removed
+#'        from the resulting Metadata. Furthermore, if there is only one 
+#'        category left, it will be labeled "All".
+#' @return A list with information about the new partition.
+#' @keywords internal
+#' importFrom data.table rbindlist
+split_by_metadata = function(metadata, split_by, simplify=FALSE) {
+    if(!all(split_by %in% colnames(metadata))) {
+        stop("split_by must be a character vector of ",
+             "query_results column names.")
+    }
+
+    # Determine all possible values for the split_by columns.
+    split_by_list = as.list(split_by)
+    names(split_by_list) = split_by
+    possible_values = lapply(split_by_list, function(x) {unique(metadata[[x]])})
+    
+    if(simplify) {
+        # Determine which columns provide no discriminating information.
+        single_value = lapply(possible_values, function(x) {length(unique(x))==1})
+        
+        if(all(unlist(single_value))) {
+            # If no columns provide discriminatory factors, we won't do 
+            # any splitting and return a simple object where everything is part
+            # of the "All" partition.
+            all_indices = seq_len(nrow(metadata))
+            all_metadata = do.call(cbind.data.frame, possible_values)
+            rownames(all_metadata) = "All"
+            single_partition = rep(1, nrow(metadata))
+            return(list(Indices=list(All=all_indices), 
+                        Metadata=all_metadata,
+                        Partition=single_partition))        
+        } else {
+            # Otherwise, we'll remove the non-discriminatory columns from the 
+            # output.
+            possible_values = possible_values[!unlist(single_value)]
+        }
+    }
+    
+    # Determine all possible combinations of the split_by column values.
+    combinations = expand.grid(possible_values)
+
+    # Split rows by iterating over value combinations.
+    return(split_by_combination(metadata, combinations, simplify))
 }
 
 # Makes sure the provided query_results can be used to build a consensus of 
@@ -162,6 +194,8 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @param consensus_threshold A numeric value between 0 and 1, indicating the
 #'                            proportion of peak files in which a peak must
 #'                            appear for it to be included within the consensus.
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
 #' @param temp_dir The path to a directory where peak files will be 
 #'                 downloaded.
 #' @param force A logical indicating whether already present files be 
@@ -174,10 +208,10 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @importFrom GenomicOperations combined_regions
 #' @export
 buildConsensusPeaks <- function(query_results, split_by=NULL,
-                                consensus_threshold=1,
+                                consensus_threshold=1, simplify=FALSE,
                                 temp_dir=".", force=FALSE) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
-                                  ".bed.gz")
+                                  ".bed.gz", simplify)
     validate_query_results_for_consensus_chip(query_results, split_by)
     
     file_format = gsub("bed ", "", unique(query_results$file_type))
@@ -245,6 +279,10 @@ DEFAULT_SPLIT_BY = c("treatment",
 #'                       be queried.
 #' @param assembly The target genomic assembly.
 #' @param target The target protein.
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
+#' @param use_interactive If TRUE, the user will be prompted when ENCODExplorer 
+#'                        must choose how to filter the available data.
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
 #' @seealso \code{\link{buildConsensusPeaks}}
 #' @importFrom rtracklayer import
@@ -254,7 +292,7 @@ DEFAULT_SPLIT_BY = c("treatment",
 #' @importFrom GenomicOperations combined_regions
 #' @export
 queryConsensusPeaks <- function(biosample_name, assembly, target, 
-                                use_interactive=FALSE) {
+                                simplify=FALSE, use_interactive=FALSE) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        assembly=assembly,
                                        target=target,
@@ -271,11 +309,8 @@ queryConsensusPeaks <- function(biosample_name, assembly, target,
         return(NULL)    
     }
     
-    res = buildConsensusPeaks(query_results, DEFAULT_SPLIT_BY)
-    if(length(res) == 1) {
-        names(res) = "All"
-    }
-    
+    res = buildConsensusPeaks(query_results, DEFAULT_SPLIT_BY, 
+                              simplify=simplify)
     return(res)
 }
 
@@ -403,6 +438,8 @@ ASSAY_PREFERENCE = c("total RNA-seq",
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
 #' @param use_interactive If TRUE, the user will be prompted to select prefered
 #'                        metadata values when multiple possibilities are
 #'                        available.
@@ -411,7 +448,7 @@ ASSAY_PREFERENCE = c("total RNA-seq",
 #'          \code{\link{queryGeneExpression}}
 #' @export
 queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
-                                   assay=NULL, assembly=NULL, 
+                                   assay=NULL, assembly=NULL, simplify=TRUE,
                                    use_interactive=FALSE) {
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        file_type="tsv", 
@@ -435,7 +472,8 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
         split_by = c("dataset_description", split_by)
     }
 
-    return(buildExpressionSummary(query_results, split_by=split_by))
+    return(buildExpressionSummary(query_results, split_by=split_by, 
+                                  simplify=simplify))
 }
 
 #' Queries and returns average gene expression level for a given biosample_name.
@@ -449,6 +487,8 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
 #' @param use_interactive If TRUE, the user will be prompted to select prefered
 #'                        metadata values when multiple possibilities are
 #'                        available.
@@ -458,9 +498,9 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
 #'          \code{\link{queryTranscriptExpression}}
 #' @export
 queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
-                                use_interactive=FALSE) {
+                                simplify=TRUE, use_interactive=FALSE) {
     queryExpressionGeneric(biosample_name, "gene quantifications", assay, 
-                           assembly, use_interactive)
+                           assembly, simplify, use_interactive)
 }
 
 #' Queries and returns average transcript expression level for a given 
@@ -476,6 +516,8 @@ queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL,
 #'              assay type is automatically selected.
 #' @param assembly The target genomic assembly. If \code{NULL}, the most recent 
 #'                 available assembly is selected.
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
 #' @param use_interactive If TRUE, the user will be prompted to select prefered
 #'                        metadata values when multiple possibilities are
 #'                        available.
@@ -484,9 +526,9 @@ queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL,
 #'          \code{\link{queryGeneExpression}}
 #' @export
 queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
-                                use_interactive=FALSE) {
+                                      simplify=TRUE, use_interactive=FALSE) {
     queryExpressionGeneric(biosample_name, "transcript quantifications", 
-                           assay, assembly, use_interactive)
+                           assay, assembly, simplify, use_interactive)
 }
 
 dtColumnSummary = function(dt_files, column_name, summary_method=mean) {
@@ -544,6 +586,8 @@ select_metric = function(metric, dt_files) {
 #' @param aggregate_function A function which takes a vector as input and 
 #'                           returns a single value summarizing the whole. Used
 #'                           to summarize expression metrics. 
+#' @param simplify If TRUE, non-discriminatory columns are removed from the metadata,
+#'           and if only one sample group is found, it is renamed "All".
 #' @param temp_dir The path to a directory where peak files will be 
 #'                 downloaded.
 #' @param force A logical indicating whether already present files be 
@@ -551,10 +595,10 @@ select_metric = function(metric, dt_files) {
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @export
 buildExpressionSummary <- function(query_results, split_by, metric=NULL,
-                                  aggregate_function=mean, temp_dir=".", 
-                                  force=FALSE) {
+                                   simplify=FALSE, aggregate_function=mean, 
+                                   temp_dir=".", force=FALSE) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
-                                  ".tsv")
+                                  ".tsv", simplify=simplify)
     validate_query_results_for_consensus_rna(query_results, split_by)
 
     dt_files = lapply(common$Files, utils::read.table, sep="\t", header=TRUE, 

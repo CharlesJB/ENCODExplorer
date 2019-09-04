@@ -6,13 +6,17 @@
 builds a partition of rows based on all possible combinations
 of the columns identified by split_by.}
 \usage{
-split_by_metadata(metadata, split_by)
+split_by_metadata(metadata, split_by, simplify = FALSE)
 }
 \arguments{
 \item{metadata}{A data.frame with the metadata.}
 
 \item{split_by}{The names of the columns in metadata according to which they 
 should be split.}
+
+\item{simplify}{If TRUE, columns with no discriminatory power will be removed
+from the resulting Metadata. Furthermore, if there is only one 
+category left, it will be labeled "All".}
 }
 \value{
 A list with information about the new partition.

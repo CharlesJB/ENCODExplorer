@@ -4,7 +4,7 @@
 \alias{queryConsensusPeaks}
 \title{Queries ENCODE for consensus peaks.}
 \usage{
-queryConsensusPeaks(biosample_name, assembly, target,
+queryConsensusPeaks(biosample_name, assembly, target, simplify = FALSE,
   use_interactive = FALSE)
 }
 \arguments{
@@ -14,6 +14,12 @@ be queried.}
 \item{assembly}{The target genomic assembly.}
 
 \item{target}{The target protein.}
+
+\item{simplify}{If TRUE, non-discriminatory columns are removed from the metadata,
+and if only one sample group is found, it is renamed "All".}
+
+\item{use_interactive}{If TRUE, the user will be prompted when ENCODExplorer 
+must choose how to filter the available data.}
 }
 \value{
 An object of class \linkS4class{ENCODEBindingConsensus}.

@@ -6,7 +6,8 @@
 completed ENCODE query.}
 \usage{
 buildConsensusPeaks(query_results, split_by = NULL,
-  consensus_threshold = 1, temp_dir = ".", force = FALSE)
+  consensus_threshold = 1, simplify = FALSE, temp_dir = ".",
+  force = FALSE)
 }
 \arguments{
 \item{query_results}{A data.table returned by \code{\link{queryEncode}} or 
@@ -20,6 +21,9 @@ same consensus calculation.}
 \item{consensus_threshold}{A numeric value between 0 and 1, indicating the
 proportion of peak files in which a peak must
 appear for it to be included within the consensus.}
+
+\item{simplify}{If TRUE, non-discriminatory columns are removed from the metadata,
+and if only one sample group is found, it is renamed "All".}
 
 \item{temp_dir}{The path to a directory where peak files will be 
 downloaded.}

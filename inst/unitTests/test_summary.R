@@ -4,7 +4,7 @@ if(FALSE) {
 }
 
 test.query_consensus_peaks <- function() {
-  res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF")
+  res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF", simplify=FALSE)
   
   # These should be true regardless of the actual data, so they should not break
   # if encode_df changes.
@@ -21,7 +21,7 @@ test.query_consensus_peaks <- function() {
   checkTrue(all(names(res) == new_names))
 
   # Make sure files are split by the default split.
-  checkTrue(all(colnames(metadata(res)) == c(ENCODExplorer:::DEFAULT_CONSENSUS_SPLIT_BY, "split_group")))
+  checkTrue(all(colnames(metadata(res)) == c(ENCODExplorer:::DEFAULT_SPLIT_BY, "split_group")))
     
   # Test consensus slot.  
   checkTrue(is(consensus(res), "GRangesList"))
@@ -38,15 +38,17 @@ test.query_consensus_peaks <- function() {
   
   # These were functional when written using version 0.99.1 of ENCODExplorerData
   # (2019-04-12 build). Test we're fetching the right files.
-  res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF")
-  checkTrue(names(res) == "All")
+  res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF", simplify=FALSE)
   checkTrue(length(res) == 1)
   checkTrue(length(files(res))==3)
-  checkTrue(length(consensus(res)$All)==770)
+  checkTrue(length(consensus(res)[[1]])==770)
+  
+  res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF", simplify=TRUE)
+  checkTrue(names(res) == "All")  
 }
 
 test.query_expression_levels <- function() {
-  res = queryGeneExpression("GM12878")
+  res = queryGeneExpression("GM12878", simplify=FALSE)
   
   # These should be true regardless of the actual data, so they should not break
   # if encode_df changes.
@@ -64,7 +66,8 @@ test.query_expression_levels <- function() {
 
   # Make sure files are split by the default split.
   meta_col_names = colnames(metadata(res))
-  expected_names = c(ENCODExplorer:::DEFAULT_EXPRESSION_SPLIT_BY, "split_group")
+  expected_names = c("dataset_description", 
+                     ENCODExplorer:::DEFAULT_SPLIT_BY, "split_group")
   checkTrue(all(meta_col_names == expected_names))
   
   # Test metric_data, fpkm slots
@@ -78,9 +81,11 @@ test.query_expression_levels <- function() {
   
   # These were functional when written using version 0.99.1 of ENCODExplorerData
   # (2019-04-12 build)
-  res = queryGeneExpression("GM12878")
+  res = queryGeneExpression("GM12878", simplify=FALSE)
   checkTrue(length(res) == 3)
   checkTrue(length(files(res))==6)
   checkTrue(nrow(metric_data(res))==61471)
   
+  res = queryGeneExpression("GM12878", simplify=TRUE)
+  checkTrue(ncol(metadata(res))==1)
 }

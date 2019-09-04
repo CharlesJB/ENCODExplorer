@@ -6,7 +6,8 @@
 completed ENCODE query.}
 \usage{
 buildExpressionSummary(query_results, split_by, metric = NULL,
-  aggregate_function = mean, temp_dir = ".", force = FALSE)
+  simplify = FALSE, aggregate_function = mean, temp_dir = ".",
+  force = FALSE)
 }
 \arguments{
 \item{query_results}{A data.table returned by \code{\link{queryEncode}} or 
@@ -16,6 +17,9 @@ buildExpressionSummary(query_results, split_by, metric = NULL,
 to split the average expression levels.
 If \code{NULL}, all elements of query_results are used in the
 same average expression calculation.}
+
+\item{simplify}{If TRUE, non-discriminatory columns are removed from the metadata,
+and if only one sample group is found, it is renamed "All".}
 
 \item{aggregate_function}{A function which takes a vector as input and 
 returns a single value summarizing the whole. Used
