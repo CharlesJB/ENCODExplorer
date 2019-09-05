@@ -3,11 +3,55 @@
 \docType{class}
 \name{ENCODESummary-class}
 \alias{ENCODESummary-class}
-\title{ENCODESummary objects represents a summary derived from multiple ENCODE 
-files.}
+\alias{names,ENCODESummary-method}
+\alias{names<-,ENCODESummary,character-method}
+\alias{length,ENCODESummary-method}
+\alias{metadata}
+\alias{metadata,ENCODESummary-method}
+\alias{metadata,ENCODESummary,ENCODESummary-method}
+\alias{file_metadata}
+\alias{file_metadata,ENCODESummary-method}
+\alias{file_metadata,ENCODESummary,ENCODESummary-method}
+\alias{files}
+\alias{files,ENCODESummary-method}
+\alias{files,ENCODESummary,ENCODESummary-method}
+\alias{show,ENCODESummary-method}
+\title{ENCODESummary objects: summaries of multiple ENCODE files.}
+\usage{
+\S4method{names}{ENCODESummary}(x)
+
+\S4method{names}{ENCODESummary,character}(x) <- value
+
+\S4method{length}{ENCODESummary}(x)
+
+metadata(x)
+
+\S4method{metadata}{ENCODESummary}(x)
+
+file_metadata(x)
+
+\S4method{file_metadata}{ENCODESummary}(x)
+
+files(x)
+
+\S4method{files}{ENCODESummary}(x)
+
+\S4method{show}{ENCODESummary}(object)
+}
+\arguments{
+\item{x}{The \linkS4class{ENCODESummary} object.}
+
+\item{value}{The new names for the elements of the 
+\linkS4class{ENCODESummary} object.}
+
+\item{object}{The \linkS4class{ENCODESummary} object.}
+}
 \description{
-ENCODESummary objects represents a summary derived from multiple ENCODE 
-files.
+ENCODESummary objects is the base class of 
+\link{ENCODEBindingConsensus-class} and 
+\link{ENCODEExpressionSummary-class} objects. It provides methods to query
+which files were used to build the summary, the names of the grouped 
+elements as well as their metadata.
 }
 \section{Slots}{
 
@@ -20,3 +64,31 @@ of the files used to build the per-condition consensus.}
 \item{\code{metadata}}{A data-frame with the metadata of each element in the summary.}
 }}
 
+\section{Methods}{
+
+
+  ENCODESummary object can be accessed through a variety of methods:
+
+  \describe{
+     \item{\code{names}}{Returns the names of the elements.}
+     \item{\code{names<-}}{Sets the names of the elements.}
+     \item{\code{length}}{Returns the number of elements.}
+     \item{\code{files}}{Returns a character vector of the ENCODE files used 
+                         to build this object.}
+     \item{\code{file_metadata}}{Returns a list of per-condition metadata of 
+                                 the ENCODE files used to build the object.}
+     \item{\code{metadata}}{Returns a data-frame of the common per-condition 
+                            metadata of the ENCODE files used to build the 
+                            object.}
+     \item{\code{show}}{Print a summary of the object.}
+  }
+}
+
+\examples{
+  res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
+  names(res)
+  files(res)
+  metadata(res)
+  print(res)
+
+}

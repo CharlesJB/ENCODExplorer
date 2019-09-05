@@ -33,6 +33,9 @@ ENCODE files are automatically split by biosample_description (which will
 separate samples from different cell fractions or sequencing methods) and by
 the treatment columns.
 }
+\examples{
+  queryTranscriptExpression("bone marrow")
+}
 \seealso{
 \code{\link{buildExpressionSummary}}, 
          \code{\link{queryGeneExpression}}

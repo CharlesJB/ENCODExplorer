@@ -34,6 +34,9 @@ by the \code{treatment} column and its adjuncts) consensus peaks.
 If you wish to have more control over the files used to build the consensus,
 use \code{\link{buildConsensusPeaks}}.
 }
+\examples{
+  queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
+}
 \seealso{
 \code{\link{buildConsensusPeaks}}
 }

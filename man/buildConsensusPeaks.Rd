@@ -40,3 +40,13 @@ This function takes the result of a previous call to
 specified by the \code{split_by} argument), then builds consensus peaks for 
 each condition.
 }
+\examples{
+query_results = queryEncodeGeneric(biosample_name="A549", assembly="GRCh38",
+                                  file_format="^bed$", output_type="^peaks$", 
+                                  treatment_duration_unit="minute",
+                                  treatment_duration="(^5$|^10$)", 
+                                  target="NR3C1", fixed=FALSE)
+res = buildConsensusPeaks(query_results, split_by=c("treatment_duration"), 
+                          consensus_threshold=0.5)
+
+}

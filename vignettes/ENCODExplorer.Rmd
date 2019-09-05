@@ -404,7 +404,7 @@ parameters which make samples unfit for aggregation.
 ```{r query_gene_expression, collapse=TRUE}
 # Obtain a summary of all peaks for NR3C1 ChIP-Seq assays in the A549
 # cell line.
-res = queryGeneExpression("neural tube")
+res = queryGeneExpression("bone marrow")
 ```
 
 The `files()`, `file_metadata()` and `metadata()` methods behave the same way as 

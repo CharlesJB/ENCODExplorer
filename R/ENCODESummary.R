@@ -1,10 +1,45 @@
-#' ENCODESummary objects represents a summary derived from multiple ENCODE 
-#' files.
+#' ENCODESummary objects: summaries of multiple ENCODE files.
+#'
+#' ENCODESummary objects is the base class of 
+#' \link{ENCODEBindingConsensus-class} and 
+#' \link{ENCODEExpressionSummary-class} objects. It provides methods to query
+#' which files were used to build the summary, the names of the grouped 
+#' elements as well as their metadata.
 #'
 #' @slot files The path of the files used in this summary.
 #' @slot file_metadata A list of data-frames representing the ENCODE metadata
 #'                     of the files used to build the per-condition consensus.
 #' @slot metadata A data-frame with the metadata of each element in the summary.
+#'
+#' @param x The \linkS4class{ENCODESummary} object.
+#' @param object The \linkS4class{ENCODESummary} object.
+#' @param value The new names for the elements of the 
+#'              \linkS4class{ENCODESummary} object.
+#'
+#' @section Methods:
+#'
+#'   ENCODESummary object can be accessed through a variety of methods:
+#'
+#'   \describe{
+#'      \item{\code{names}}{Returns the names of the elements.}
+#'      \item{\code{names<-}}{Sets the names of the elements.}
+#'      \item{\code{length}}{Returns the number of elements.}
+#'      \item{\code{files}}{Returns a character vector of the ENCODE files used 
+#'                          to build this object.}
+#'      \item{\code{file_metadata}}{Returns a list of per-condition metadata of 
+#'                                  the ENCODE files used to build the object.}
+#'      \item{\code{metadata}}{Returns a data-frame of the common per-condition 
+#'                             metadata of the ENCODE files used to build the 
+#'                             object.}
+#'      \item{\code{show}}{Print a summary of the object.}
+#'   }
+#'
+#' @examples
+#'   res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
+#'   names(res)
+#'   files(res)
+#'   metadata(res)
+#'   print(res)
 #'
 #' @name ENCODESummary-class
 #' @rdname ENCODESummary-class
@@ -14,23 +49,16 @@ setClass("ENCODESummary",
                     file_metadata="list",
                     metadata="data.frame"))
 
-#' Returns the names of the elements of a \linkS4class{ENCODESummary} 
-#' object. 
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @return The names of the elements in \code{x}.
+#' @export
+#' @rdname ENCODESummary-class
 setMethod("names",
           c(x="ENCODESummary"),
           function(x) {
             names(x@file_metadata)
           })
 
-#' Set names of the elements of a \linkS4class{ENCODESummary} object. 
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @param value The new names for the elements of the 
-#'              \linkS4class{ENCODESummary} object.
-#' @return The renamed object.
+#' @export
+#' @rdname ENCODESummary-class
 setMethod("names<-",
           c(x="ENCODESummary", value="character"),
           function(x, value) {
@@ -39,29 +67,21 @@ setMethod("names<-",
             x
           })
 
-#' Returns the number of elements of a \linkS4class{ENCODESummary}
-#' object. 
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @return The number of elements in \code{x}.        
+#' @export
+#' @rdname ENCODESummary-class    
 setMethod("length",
           c(x="ENCODESummary"),
           function(x) {
             length(x@file_metadata)
           }) 
 
-#' Returns a data-frame list of the common per-condition metadata of the ENCODE 
-#' files used to build the \linkS4class{ENCODESummary} object.
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @return A \code{data.frame} of the common per-condition metadata of the 
-#' ENCODE files used to build the \linkS4class{ENCODESummary} object.
+
 #' @docType methods
-#' @rdname metadata-methods
+#' @rdname ENCODESummary-class
 #' @export
 setGeneric("metadata", function(x) standardGeneric("metadata"))
 
-#' @rdname metadata-methods
+#' @rdname ENCODESummary-class
 #' @aliases metadata,ENCODESummary,ENCODESummary-method
 setMethod("metadata",
           c(x="ENCODESummary"),
@@ -69,18 +89,12 @@ setMethod("metadata",
             x@metadata
           })
 
-#' Returns a list of per-condition metadata of the ENCODE files used to build
-#' the \linkS4class{ENCODESummary} object.
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @return A \code{list} of per-condition metadata of the ENCODE files used to 
-#' build the \linkS4class{ENCODESummary} object.
 #' @docType methods
-#' @rdname file_metadata-methods
+#' @rdname ENCODESummary-class
 #' @export
 setGeneric("file_metadata", function(x) standardGeneric("file_metadata"))
 
-#' @rdname file_metadata-methods
+#' @rdname ENCODESummary-class
 #' @aliases file_metadata,ENCODESummary,ENCODESummary-method
 setMethod("file_metadata",
           c(x="ENCODESummary"),
@@ -88,18 +102,12 @@ setMethod("file_metadata",
             x@file_metadata
           })
 
-#' Returns a list of per-condition metadata of the ENCODE files used to build
-#' the \linkS4class{ENCODESummary} object.
-#'
-#' @param x The \linkS4class{ENCODESummary} object.
-#' @return A \code{list} of per-condition metadata of the ENCODE files used to 
-#'         build the \linkS4class{ENCODESummary} object.
 #' @docType methods
-#' @rdname files-methods
+#' @rdname ENCODESummary-class
 #' @export
 setGeneric("files", function(x) standardGeneric("files"))
 
-#' @rdname files-methods
+#' @rdname ENCODESummary-class
 #' @aliases files,ENCODESummary,ENCODESummary-method
 setMethod("files",
           c(x="ENCODESummary"),
@@ -107,11 +115,8 @@ setMethod("files",
             x@files
           })
 
-#' Prints a summary of a \linkS4class{ENCODESummary} object.
-#'
-#' @param object The \linkS4class{ENCODESummary} object.
-#' @return Nothing.
 #' @export
+#' @rdname ENCODESummary-class
 setMethod("show", "ENCODESummary",
           function(object) {
             cat("Summarizing", length(files(object)), "ENCODE files into",
@@ -120,14 +125,41 @@ setMethod("show", "ENCODESummary",
             print(metadata(object))
           })
 
-#' ENCODEBindingConsensus objects represents consensus peaks derived from a 
-#' set of ENCODE files.
+#' ENCODEBindingConsensus: consensus peaks derived from ENCODE files.
+#'
+#' ENCODEBindingConsensus objects represent the intersection of called peaks
+#' across multiple replicates, split by arbitrary metadata columns. They can be
+#' constructed using the \link{queryConsensusPeaks} and 
+#' \link{buildConsensusPeaks} functions.
 #'
 #' @slot peaks The per-condition original peaks used to build the consensus.
 #' @slot consensus The per-condition consensus peaks.
 #' @slot consensus_threshold The proportion of replicates which must bear
 #'                           a specific peak for it to be added to the set of
 #'                           consensus peaks.
+#'
+#' @param x The \linkS4class{ENCODESummary} object.
+#' @param object The \linkS4class{ENCODESummary} object.
+#' @param value The new names for the elements of the 
+#'              \linkS4class{ENCODESummary} object.
+#'
+#' @section Methods:
+#'
+#'   ENCODEBindingConsensus object can be accessed through the methods from the 
+#'   ENCODESummary class, as well as ENCODEBindingConsensus-specific methods:
+#'
+#'   \describe{
+#'      \item{\code{peaks}}{Returns a \code{list} of \linkS4class{GRangesList} 
+#'                          of the per-condition original peaks used to build 
+#'                          the object.}
+#'      \item{\code{consensus}}{Returns a \linkS4class{GRangesList} of the 
+#'                              per-condition consensus peaks.}
+#'   }
+#'
+#' @examples
+#'   res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
+#'   peaks(res)
+#'   consensus(res)
 #'
 #' @name ENCODEBindingConsensus-class
 #' @rdname ENCODEBindingConsensus-class
@@ -138,12 +170,8 @@ setClass("ENCODEBindingConsensus",
                     consensus_threshold="numeric"),
          contains="ENCODESummary")
 
-#' Set names of the elements of a \linkS4class{ENCODEBindingConsensus} object. 
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @param value The new names for the elements of the 
-#'              \linkS4class{ENCODEBindingConsensus} object.
-#' @return The renamed object.
+#' @rdname ENCODEBindingConsensus-class
+#' @export
 setMethod("names<-",
           c(x="ENCODEBindingConsensus", value="character"),
           function(x, value) {
@@ -152,19 +180,12 @@ setMethod("names<-",
             methods::callNextMethod()
           })
 
-#' Returns a \code{list} of \linkS4class{GRangesList} of the per-condition 
-#' original peaks used to build the \linkS4class{ENCODEBindingConsensus} object.
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return A \code{list} of \linkS4class{GRangesList} of the per-condition  
-#'         original peaks usedto build the \linkS4class{ENCODEBindingConsensus} 
-#'         object.
 #' @docType methods
-#' @rdname peaks-methods
+#' @rdname ENCODEBindingConsensus-class
 #' @export
 setGeneric("peaks", function(x) standardGeneric("peaks"))
 
-#' @rdname peaks-methods
+#' @rdname ENCODEBindingConsensus-class
 #' @aliases peaks,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("peaks",
           c(x="ENCODEBindingConsensus"),
@@ -172,16 +193,12 @@ setMethod("peaks",
             x@peaks
           })
 
-#' Returns a \linkS4class{GRangesList} of the per-condition consensus peaks.
-#'
-#' @param x The \linkS4class{ENCODEBindingConsensus} object.
-#' @return A \linkS4class{GRangesList} of the per-condition consensus peaks.
 #' @docType methods
-#' @rdname consensus-methods
+#' @rdname ENCODEBindingConsensus-class
 #' @export
 setGeneric("consensus", function(x) standardGeneric("consensus"))
 
-#' @rdname consensus-methods
+#' @rdname ENCODEBindingConsensus-class
 #' @aliases consensus,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("consensus",
           c(x="ENCODEBindingConsensus"),
@@ -189,10 +206,7 @@ setMethod("consensus",
             x@consensus
           })
 
-#' Prints a summary of a \linkS4class{ENCODEBindingConsensus} object.
-#'
-#' @param object The \linkS4class{ENCODEBindingConsensus} object.
-#' @return Nothing.
+#' @rdname ENCODEBindingConsensus-class
 #' @export
 setMethod("show", "ENCODEBindingConsensus",
           function(object) {
@@ -202,8 +216,12 @@ setMethod("show", "ENCODEBindingConsensus",
             print(consensus(object))
           })
 
-#' ENCODEExpressionSummary objects represents means of gene- or 
-#' transcript-levels of expression across a set of ENCODE files.
+#' ENCODEExpressionSummary summarize means of expression across ENCODE files.
+#'
+#' ENCODEExpressionSummary objects represent means (or medians) of expression
+#' levels across multiple replicate samples, split by arbitrary metadata 
+#' columns. They can be constructed using the \link{queryGeneExpression},
+#' \link{queryTranscriptExpression} and \link{buildExpressionSummary} functions.
 #'
 #' @slot raw_data A list of data-frames containing the full raw data of each
 #'                of the downloaded ENCODE files.
@@ -212,6 +230,32 @@ setMethod("show", "ENCODEBindingConsensus",
 #' @slot metric_data A \link{data.frame} of the per-condition metric values.
 #' @slot expression_type The type of expression which is being reported, either 
 #'                       gene or transcripts.
+#'
+#' @param x The \linkS4class{ENCODESummary} object.
+#' @param object The \linkS4class{ENCODESummary} object.
+#' @param value The new names for the elements of the 
+#'              \linkS4class{ENCODESummary} object.
+#'
+#' @section Methods:
+#'
+#'   ENCODEExpressionSummary object can be accessed through the methods from the 
+#'   ENCODESummary class, as well as ENCODEBindingConsensus-specific methods:
+#'
+#'   \describe{
+#'      \item{\code{raw_data}}{Returns a \code{list} of \linkS4class{GRangesList} 
+#'                             of the per-condition original expression tables
+#'                             used to build the object.}
+#'      \item{\code{metric}}{Returns the regular expression used to select the 
+#'                           column of metric values from the ENCODE files.}
+#'      \item{\code{metric_data}}{Returns a \link{data.frame} of the 
+#'                                per-condition metric values.}
+#'   }
+#'
+#' @examples
+#'   res = queryGeneExpression("bone marrow")
+#'   raw_data(res)
+#'   metric(res)
+#'   metric_data(res)
 #'
 #' @name ENCODEExpressionSummary-class
 #' @rdname ENCODEExpressionSummary-class
@@ -223,12 +267,7 @@ setClass("ENCODEExpressionSummary",
                     expression_type="character"),
          contains="ENCODESummary")
 
-#' Set names of the elements of a \linkS4class{ENCODEExpressionSummary} object. 
-#'
-#' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @param value The new names for the elements of the 
-#'              \linkS4class{ENCODEExpressionSummary} object.
-#' @return The renamed object.
+#' @rdname ENCODEExpressionSummary-class
 setMethod("names<-",
           c(x="ENCODEExpressionSummary", value="character"),
           function(x, value) {
@@ -237,16 +276,12 @@ setMethod("names<-",
             methods::callNextMethod()
           })
          
-#' Returns a \link{data.frame} of the per-condition metric values.
-#'
-#' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @return A \link{data.frame} of the per-condition metric values.
 #' @docType methods
-#' @rdname metric_data-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @export         
 setGeneric("metric_data", function(x) standardGeneric("metric_data"))
 
-#' @rdname metric_data-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @aliases metric_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("metric_data",
           c(x="ENCODEExpressionSummary"),
@@ -254,19 +289,12 @@ setMethod("metric_data",
             x@metric_data
           })         
 
-#' Returns the regular expression used to extract metric values from the 
-#' ENCODE files.
-#' 
-#' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @return The regular expression used to extract metric values from the 
-#' ENCODE files.
-#'         
 #' @docType methods
-#' @rdname metric-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @export          
 setGeneric("metric", function(x) standardGeneric("metric"))
 
-#' @rdname metric-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @aliases metric,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("metric",
           c(x="ENCODEExpressionSummary"),
@@ -274,19 +302,12 @@ setMethod("metric",
             x@metric
           })     
 
-#' Returns the regular expression used to extract raw_data values from the 
-#' ENCODE files.
-#' 
-#' @param x The \linkS4class{ENCODEExpressionSummary} object.
-#' @return A list with one element per file-group containing a list of the 
-#'         raw imported ENCODE files.
-#'         
 #' @docType methods
-#' @rdname raw_data-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @export          
 setGeneric("raw_data", function(x) standardGeneric("raw_data"))
 
-#' @rdname raw_data-methods
+#' @rdname ENCODEExpressionSummary-class
 #' @aliases raw_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method
 setMethod("raw_data",
           c(x="ENCODEExpressionSummary"),
@@ -294,10 +315,7 @@ setMethod("raw_data",
             x@raw_data
           })
 
-#' Prints a summary of a \linkS4class{ENCODEExpressionSummary} object.
-#'
-#' @param object The \linkS4class{ENCODEExpressionSummary} object.
-#' @return Nothing.
+#' @rdname ENCODEExpressionSummary-class
 #' @export
 setMethod("show", "ENCODEExpressionSummary",
           function(object) {

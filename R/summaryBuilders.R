@@ -201,6 +201,16 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @param force A logical indicating whether already present files be 
 #'              redownloaded.
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
+#'
+#' @examples
+#' query_results = queryEncodeGeneric(biosample_name="A549", assembly="GRCh38",
+#'                                   file_format="^bed$", output_type="^peaks$", 
+#'                                   treatment_duration_unit="minute",
+#'                                   treatment_duration="(^5$|^10$)", 
+#'                                   target="NR3C1", fixed=FALSE)
+#' res = buildConsensusPeaks(query_results, split_by=c("treatment_duration"), 
+#'                           consensus_threshold=0.5)
+#'
 #' @importFrom rtracklayer import
 #' @importFrom GenomicRanges GRangesList
 #' @export
@@ -281,6 +291,8 @@ DEFAULT_SPLIT_BY = c("treatment",
 #' @param use_interactive If TRUE, the user will be prompted when ENCODExplorer 
 #'                        must choose how to filter the available data.
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
+#' @examples
+#'   queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
 #' @seealso \code{\link{buildConsensusPeaks}}
 #' @importFrom rtracklayer import
 #' @importFrom GenomicRanges GRangesList
@@ -308,32 +320,42 @@ queryConsensusPeaks <- function(biosample_name, assembly, target,
     return(res)
 }
 
-#' Queries and returns consensus peaks for all available targets of a given 
-#' biosample_name.
-#'
-#' This utility function calls \link{queryConsensusPeaks} in a loop over all
-#' available targets for a given biosample_name, and returns the results in a 
-#' list.
-#'
-#' @param biosample_name The cell-line/tissue for which consensus peaks should 
-#'                       be queried.
-#' @param assembly The target genomic assembly.
+# #' Queries and returns consensus peaks for all available targets of a given 
+# #' biosample_name.
+# #'
+# #' This utility function calls \link{queryConsensusPeaks} in a loop over all
+# #' available targets for a given biosample_name, and returns the results in a 
+# #' list.
+# #'
+# #' @param biosample_name The cell-line/tissue for which consensus peaks should 
+# #'                       be queried.
+# #' @param assembly The target genomic assembly.
+# 
+# #' @return A list of \linkS4class{ENCODEBindingConsensus}, one per available 
+# #'         target.
+# #' @seealso \code{\link{buildConsensusPeaks}}, \code{\link{queryConsensusPeaks}}
+# #' @examples
+# #'   queryConsensusPeaksAll("22Rv1", "GRCh38"))
+# #' @export
+# queryConsensusPeaksAll <- function(biosample_name, assembly) {
+#     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
+#                                        assembly=assembly, assay="ChIP-seq")
+#     
+#     all_targets = unique(query_results$target)
+#     lapply(all_targets, function(x) {
+#         queryConsensusPeaks(biosample_name, assembly, x)
+#     })
+# }
 
-#' @return A list of \linkS4class{ENCODEBindingConsensus}, one per available 
-#'         target.
-#' @seealso \code{\link{buildConsensusPeaks}}, \code{\link{queryConsensusPeaks}}
-#' @export
-queryConsensusPeaksAll <- function(biosample_name, assembly) {
-    query_results = queryEncodeGeneric(biosample_name=biosample_name, 
-                                       assembly=assembly, assay="ChIP-seq")
-    
-    all_targets = unique(query_results$target)
-    lapply(all_targets, function(x) {
-        queryConsensusPeaks(biosample_name, assembly, x)
-    })
-}
-
-#' importFrom utils menu
+#' Interactively select one of many possible metadata values.
+#'
+#' @param values The vector of values which must be chosen from, extracted from 
+#'               the ENCODE metadata.
+#' @param col_name The name of the column the values were extracted from.
+#' @param allow_all Whether or not the user can choose 0 to select all values.
+#'
+#' @importFrom utils menu
+#' @keywords internal
 choose_interactive_value = function(values, col_name, allow_all) {
     count_table = sort(table(values, useNA="ifany"))
     count_values = names(count_table)
@@ -366,7 +388,7 @@ choose_prefered_value = function(values, col_name, preference_order) {
     
     matched_values = preference_order[value_matches]
     if(length(matched_values)==0) {
-        stop("We could not select a value for", col_name, "automatically.")
+        stop("We could not select a value for ", col_name, " automatically.")
     }
     chosen_value = matched_values[1]
     message("Found the following ", col_name, ": ",
@@ -441,6 +463,8 @@ ASSAY_PREFERENCE = c("total RNA-seq",
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryGeneExpression}}
+#' @examples
+#'   queryExpressionGeneric("bone marrow")
 #' @export
 queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
                                    assay=NULL, assembly=NULL, simplify=TRUE,
@@ -491,6 +515,8 @@ queryExpressionGeneric <- function(biosample_name, level="gene quantifications",
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryTranscriptExpression}}
+#' @examples
+#'   queryGeneExpression("bone marrow")
 #' @export
 queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
                                 simplify=TRUE, use_interactive=FALSE) {
@@ -519,6 +545,8 @@ queryGeneExpression <- function(biosample_name, assay=NULL, assembly=NULL,
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
 #' @seealso \code{\link{buildExpressionSummary}}, 
 #'          \code{\link{queryGeneExpression}}
+#' @examples
+#'   queryTranscriptExpression("bone marrow")
 #' @export
 queryTranscriptExpression <- function(biosample_name, assay=NULL, assembly=NULL, 
                                       simplify=TRUE, use_interactive=FALSE) {
@@ -592,6 +620,18 @@ select_metric = function(metric, dt_files) {
 #' @param force A logical indicating whether already present files be 
 #'              redownloaded.
 #' @return An object of class \linkS4class{ENCODEExpressionSummary}.
+#'
+#' @examples
+#' query_results = queryEncodeGeneric(biosample_name="neural tube", 
+#'                                    output_type="gene quantifications",
+#'                                    file_type="tsv",
+#'                                    assay="polyA RNA-seq",
+#'                                    assembly="^mm10$",
+#'                                    dataset_biosample_summary="(15.5|13.5)",
+#'                                    fixed=FALSE)
+#'                                    
+#' buildExpressionSummary(query_results, split_by="dataset_biosample_summary")
+#'
 #' @export
 buildExpressionSummary <- function(query_results, split_by, metric=NULL,
                                    simplify=FALSE, aggregate_function=mean, 

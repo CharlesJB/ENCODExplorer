@@ -45,3 +45,15 @@ This function takes the result of a previous call to
 conditions (as specified by the \code{split_by} argument), then calculates
 average expression levels for each condition.
 }
+\examples{
+query_results = queryEncodeGeneric(biosample_name="neural tube", 
+                                   output_type="gene quantifications",
+                                   file_type="tsv",
+                                   assay="polyA RNA-seq",
+                                   assembly="^mm10$",
+                                   dataset_biosample_summary="(15.5|13.5)",
+                                   fixed=FALSE)
+                                   
+buildExpressionSummary(query_results, split_by="dataset_biosample_summary")
+
+}

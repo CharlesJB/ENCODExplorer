@@ -3,11 +3,48 @@
 \docType{class}
 \name{ENCODEExpressionSummary-class}
 \alias{ENCODEExpressionSummary-class}
-\title{ENCODEExpressionSummary objects represents means of gene- or 
-transcript-levels of expression across a set of ENCODE files.}
+\alias{names<-,ENCODEExpressionSummary,character-method}
+\alias{metric_data}
+\alias{metric_data,ENCODEExpressionSummary-method}
+\alias{metric_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method}
+\alias{metric}
+\alias{metric,ENCODEExpressionSummary-method}
+\alias{metric,ENCODEBindingConsensus,ENCODEBindingConsensus-method}
+\alias{raw_data}
+\alias{raw_data,ENCODEExpressionSummary-method}
+\alias{raw_data,ENCODEBindingConsensus,ENCODEBindingConsensus-method}
+\alias{show,ENCODEExpressionSummary-method}
+\title{ENCODEExpressionSummary summarize means of expression across ENCODE files.}
+\usage{
+\S4method{names}{ENCODEExpressionSummary,character}(x) <- value
+
+metric_data(x)
+
+\S4method{metric_data}{ENCODEExpressionSummary}(x)
+
+metric(x)
+
+\S4method{metric}{ENCODEExpressionSummary}(x)
+
+raw_data(x)
+
+\S4method{raw_data}{ENCODEExpressionSummary}(x)
+
+\S4method{show}{ENCODEExpressionSummary}(object)
+}
+\arguments{
+\item{x}{The \linkS4class{ENCODESummary} object.}
+
+\item{value}{The new names for the elements of the 
+\linkS4class{ENCODESummary} object.}
+
+\item{object}{The \linkS4class{ENCODESummary} object.}
+}
 \description{
-ENCODEExpressionSummary objects represents means of gene- or 
-transcript-levels of expression across a set of ENCODE files.
+ENCODEExpressionSummary objects represent means (or medians) of expression
+levels across multiple replicate samples, split by arbitrary metadata 
+columns. They can be constructed using the \link{queryGeneExpression},
+\link{queryTranscriptExpression} and \link{buildExpressionSummary} functions.
 }
 \section{Slots}{
 
@@ -24,3 +61,27 @@ expression metrics from the ENCODE files.}
 gene or transcripts.}
 }}
 
+\section{Methods}{
+
+
+  ENCODEExpressionSummary object can be accessed through the methods from the 
+  ENCODESummary class, as well as ENCODEBindingConsensus-specific methods:
+
+  \describe{
+     \item{\code{raw_data}}{Returns a \code{list} of \linkS4class{GRangesList} 
+                            of the per-condition original expression tables
+                            used to build the object.}
+     \item{\code{metric}}{Returns the regular expression used to select the 
+                          column of metric values from the ENCODE files.}
+     \item{\code{metric_data}}{Returns a \link{data.frame} of the 
+                               per-condition metric values.}
+  }
+}
+
+\examples{
+  res = queryGeneExpression("bone marrow")
+  raw_data(res)
+  metric(res)
+  metric_data(res)
+
+}

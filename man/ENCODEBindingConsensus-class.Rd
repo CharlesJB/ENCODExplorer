@@ -3,11 +3,41 @@
 \docType{class}
 \name{ENCODEBindingConsensus-class}
 \alias{ENCODEBindingConsensus-class}
-\title{ENCODEBindingConsensus objects represents consensus peaks derived from a 
-set of ENCODE files.}
+\alias{names<-,ENCODEBindingConsensus,character-method}
+\alias{peaks}
+\alias{peaks,ENCODEBindingConsensus-method}
+\alias{peaks,ENCODEBindingConsensus,ENCODEBindingConsensus-method}
+\alias{consensus}
+\alias{consensus,ENCODEBindingConsensus-method}
+\alias{consensus,ENCODEBindingConsensus,ENCODEBindingConsensus-method}
+\alias{show,ENCODEBindingConsensus-method}
+\title{ENCODEBindingConsensus: consensus peaks derived from ENCODE files.}
+\usage{
+\S4method{names}{ENCODEBindingConsensus,character}(x) <- value
+
+peaks(x)
+
+\S4method{peaks}{ENCODEBindingConsensus}(x)
+
+consensus(x)
+
+\S4method{consensus}{ENCODEBindingConsensus}(x)
+
+\S4method{show}{ENCODEBindingConsensus}(object)
+}
+\arguments{
+\item{x}{The \linkS4class{ENCODESummary} object.}
+
+\item{value}{The new names for the elements of the 
+\linkS4class{ENCODESummary} object.}
+
+\item{object}{The \linkS4class{ENCODESummary} object.}
+}
 \description{
-ENCODEBindingConsensus objects represents consensus peaks derived from a 
-set of ENCODE files.
+ENCODEBindingConsensus objects represent the intersection of called peaks
+across multiple replicates, split by arbitrary metadata columns. They can be
+constructed using the \link{queryConsensusPeaks} and 
+\link{buildConsensusPeaks} functions.
 }
 \section{Slots}{
 
@@ -21,3 +51,24 @@ a specific peak for it to be added to the set of
 consensus peaks.}
 }}
 
+\section{Methods}{
+
+
+  ENCODEBindingConsensus object can be accessed through the methods from the 
+  ENCODESummary class, as well as ENCODEBindingConsensus-specific methods:
+
+  \describe{
+     \item{\code{peaks}}{Returns a \code{list} of \linkS4class{GRangesList} 
+                         of the per-condition original peaks used to build 
+                         the object.}
+     \item{\code{consensus}}{Returns a \linkS4class{GRangesList} of the 
+                             per-condition consensus peaks.}
+  }
+}
+
+\examples{
+  res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
+  peaks(res)
+  consensus(res)
+
+}
