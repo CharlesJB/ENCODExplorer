@@ -646,11 +646,18 @@ buildExpressionSummary <- function(query_results, split_by, metric=NULL,
     expression_type = ifelse("transcript quantifications" %in% query_results$output_type,
                              "transcript", 
                              "gene")
-    id_column = ifelse(expression_type=="transcript", "transcript_id.s.", "gene_id")
+    
+    id_column = ifelse(expression_type=="transcript", "transcript_id.*", "gene_id")
+    id_column_index = which(grepl(id_column, colnames(dt_files[[1]])))
+    if(length(id_column_index)==0) {
+        stop("Could not identify id column.")
+    } else if(length(id_column_index)>1) {
+        stop("Ambiguous id column.")
+    }
                        
     # Make sure the id-columns are identical across all files.
-    example_ids = dt_files[[1]][[id_column]]
-    all_same_ids = lapply(dt_files, function(x) { all(x[[id_column]] == example_ids) })
+    example_ids = dt_files[[1]][[id_column_index]]
+    all_same_ids = lapply(dt_files, function(x) { all(x[[id_column_index]] == example_ids) })
     if(!all(unlist(all_same_ids))) {
         stop("Some quantification files have different gene/transcript ids.")
     }
