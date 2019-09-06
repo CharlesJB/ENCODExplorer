@@ -354,6 +354,8 @@ queryConsensusPeaks <- function(biosample_name, assembly, target,
 #' @param col_name The name of the column the values were extracted from.
 #' @param allow_all Whether or not the user can choose 0 to select all values.
 #'
+#' @return A character vector of chosen values.
+#'   
 #' @importFrom utils menu
 #' @keywords internal
 choose_interactive_value = function(values, col_name, allow_all) {

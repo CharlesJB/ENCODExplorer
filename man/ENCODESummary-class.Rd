@@ -46,6 +46,13 @@ files(x)
 
 \item{object}{The \linkS4class{ENCODESummary} object.}
 }
+\value{
+For \code{names}, \code{names<-}, a copy of the object. For \code{length},
+   the number of elements. For \code{files}, a character vector. For 
+   \code{file_metadata}, a list of data-frames with each file's metadata. For
+   \code{metadata}, a data-frame with the discriminating metadata of each 
+   sample group.
+}
 \description{
 ENCODESummary objects is the base class of 
 \link{ENCODEBindingConsensus-class} and 

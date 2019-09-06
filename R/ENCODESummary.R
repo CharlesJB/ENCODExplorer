@@ -34,6 +34,14 @@
 #'      \item{\code{show}}{Print a summary of the object.}
 #'   }
 #'
+#'
+#' @return
+#'    For \code{names}, \code{names<-}, a copy of the object. For \code{length},
+#'    the number of elements. For \code{files}, a character vector. For 
+#'    \code{file_metadata}, a list of data-frames with each file's metadata. For
+#'    \code{metadata}, a data-frame with the discriminating metadata of each 
+#'    sample group.
+#'
 #' @examples
 #'   res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
 #'   names(res)
@@ -156,6 +164,12 @@ setMethod("show", "ENCODESummary",
 #'                              per-condition consensus peaks.}
 #'   }
 #'
+#' @return
+#'   For \code{peaks}, a \code{list} of \linkS4class{GRangesList} of the 
+#'   per-condition original peaks used to build the object. For 
+#'   \code{consensus}, a \linkS4class{GRangesList} of the per-condition
+#'   consensus peaks.
+#'
 #' @examples
 #'   res = queryConsensusPeaks("22Rv1", "GRCh38", "CTCF")
 #'   peaks(res)
@@ -250,6 +264,13 @@ setMethod("show", "ENCODEBindingConsensus",
 #'      \item{\code{metric_data}}{Returns a \link{data.frame} of the 
 #'                                per-condition metric values.}
 #'   }
+#'
+#' @return
+#'   For \code{raw_data}, a \code{list} of \linkS4class{GRangesList} 
+#'   of the per-condition original expression tables used to build the object.
+#'   For \code{metric}, the regular expression used to select the 
+#'   column of metric values from the ENCODE files. For \code{metric_data},
+#'   a \link{data.frame} of the per-condition metric values.
 #'
 #' @examples
 #'   res = queryGeneExpression("bone marrow")

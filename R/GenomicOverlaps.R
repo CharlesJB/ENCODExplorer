@@ -28,6 +28,7 @@ setMethod("names",
 #' @param x The \linkS4class{GenomicOverlaps} object.
 #' @param value The new names for the elements of the 
 #'              \linkS4class{GenomicOverlaps} object.
+#' @return A copy of the object.
 #' @keywords internal
 setMethod("names<-",
           c(x="GenomicOverlaps", value="character"),
@@ -71,7 +72,6 @@ setMethod("combined_regions",
 #' importFrom GenomicRanges end
 #' importFrom GenomicRanges strand
 #' importFrom GenomicRanges seqnames
-#' importFrom GenomicRanges mcols
 #' @keywords internal
 setMethod("combined_regions<-",
           c(x="GenomicOverlaps", value="GRanges"),
@@ -114,7 +114,7 @@ import_column <- function(grl, all_regions, col_name, aggregate_func) {
             # index so we can identify which ones have a many-to-one
             # mapping.
             col.values.df <- data.frame(from = S4Vectors::from(indices), 
-                                        value = mcols(x)[[col_name]][S4Vectors::to(indices)])
+                                        value = S4Vectors::mcols(x)[[col_name]][S4Vectors::to(indices)])
     
             # Apply the summarizing function to all groups of values
             # with the same target region.
@@ -156,7 +156,7 @@ import_column <- function(grl, all_regions, col_name, aggregate_func) {
 #'                    column.
 #' @return An object of class \code{GenomicOverlaps}.
 #' @importFrom GenomicRanges reduce
-#' @importFrom GenomicRanges mcols
+#' @importFrom S4Vectors mcols
 #' @importFrom methods is
 #' @importMethodsFrom GenomicRanges countOverlaps findOverlaps
 #' @importMethodsFrom S4Vectors from to aggregate
@@ -165,7 +165,7 @@ GenomicOverlaps <- function(grl, import_spec=list()) {
     # Validate input parameters.
     stopifnot(is(grl, "GRangesList"))
     stopifnot(is(import_spec, "list"))
-    stopifnot(all(names(import_spec) %in% names(mcols(grl))))
+    stopifnot(all(names(import_spec) %in% names(S4Vectors::mcols(grl))))
     
     # Flatten the GRangesList so we can get a list of all possible regions.
     all_regions = GenomicRanges::reduce(unlist(grl))
@@ -183,7 +183,7 @@ GenomicOverlaps <- function(grl, import_spec=list()) {
     for(col_name in names(import_spec)) {
         col_df = import_column(grl, all_regions, col_name, import_spec[[col_name]])
         
-        mcols(all_regions) <- cbind(mcols(all_regions), col_df)
+        S4Vectors::mcols(all_regions) <- cbind(S4Vectors::mcols(all_regions), col_df)
     }
 
     methods::new("GenomicOverlaps",

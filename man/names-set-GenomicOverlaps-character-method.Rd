@@ -13,6 +13,9 @@
 \item{value}{The new names for the elements of the 
 \linkS4class{GenomicOverlaps} object.}
 }
+\value{
+A copy of the object.
+}
 \description{
 Set names of the elements of a \linkS4class{GenomicOverlaps} object.
 }

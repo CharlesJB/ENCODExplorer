@@ -14,6 +14,9 @@ the ENCODE metadata.}
 
 \item{allow_all}{Whether or not the user can choose 0 to select all values.}
 }
+\value{
+A character vector of chosen values.
+}
 \description{
 Interactively select one of many possible metadata values.
 }

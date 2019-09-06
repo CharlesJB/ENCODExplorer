@@ -33,6 +33,12 @@ consensus(x)
 
 \item{object}{The \linkS4class{ENCODESummary} object.}
 }
+\value{
+For \code{peaks}, a \code{list} of \linkS4class{GRangesList} of the 
+  per-condition original peaks used to build the object. For 
+  \code{consensus}, a \linkS4class{GRangesList} of the per-condition
+  consensus peaks.
+}
 \description{
 ENCODEBindingConsensus objects represent the intersection of called peaks
 across multiple replicates, split by arbitrary metadata columns. They can be

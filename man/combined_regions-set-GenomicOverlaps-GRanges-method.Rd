@@ -16,7 +16,6 @@ importFrom GenomicRanges start
 importFrom GenomicRanges end
 importFrom GenomicRanges strand
 importFrom GenomicRanges seqnames
-importFrom GenomicRanges mcols
 }
 \description{
 The new region must have the same length as the old one. This is useful

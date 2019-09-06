@@ -40,6 +40,13 @@ raw_data(x)
 
 \item{object}{The \linkS4class{ENCODESummary} object.}
 }
+\value{
+For \code{raw_data}, a \code{list} of \linkS4class{GRangesList} 
+  of the per-condition original expression tables used to build the object.
+  For \code{metric}, the regular expression used to select the 
+  column of metric values from the ENCODE files. For \code{metric_data},
+  a \link{data.frame} of the per-condition metric values.
+}
 \description{
 ENCODEExpressionSummary objects represent means (or medians) of expression
 levels across multiple replicate samples, split by arbitrary metadata 
