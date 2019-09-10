@@ -116,6 +116,7 @@ download_dt_file <- function(input_dt, dir, force, show_experiment=FALSE) {
 #' @import tools
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
+#' @importFrom methods is
 #' @export
 downloadEncode <- function (file_acc = NULL, df = get_encode_df(), format ="all", dir= ".",
                              force = TRUE) {
@@ -132,7 +133,7 @@ downloadEncode <- function (file_acc = NULL, df = get_encode_df(), format ="all"
     }
   }
   #If the input is a list of design (split option set to TRUE)
-  if(is(file_acc, "list")){
+  if(methods::is(file_acc, "list")){
     if(all(sapply(file_acc, is.data.table))){
      file_acc <- rbindlist(file_acc)
      file_acc <- sapply(file_acc$File, function(i){
