@@ -6,7 +6,6 @@
 \alias{names,ENCODESummary-method}
 \alias{names<-,ENCODESummary,character-method}
 \alias{length,ENCODESummary-method}
-\alias{metadata}
 \alias{metadata,ENCODESummary-method}
 \alias{metadata,ENCODESummary,ENCODESummary-method}
 \alias{file_metadata}
@@ -23,8 +22,6 @@
 \S4method{names}{ENCODESummary,character}(x) <- value
 
 \S4method{length}{ENCODESummary}(x)
-
-metadata(x)
 
 \S4method{metadata}{ENCODESummary}(x)
 

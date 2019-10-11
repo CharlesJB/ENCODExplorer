@@ -319,7 +319,7 @@ consensus_indices <- function(x, consensus_threshold) {
     stopifnot(is(x, "GenomicOverlaps"))
     stopifnot(is(consensus_threshold, "numeric"))
     
-    return((rowSums(x@matrix) / length(x)) > consensus_threshold)
+    return((rowSums(x@matrix) / length(x)) >= consensus_threshold)
 }
 
 #' Determines which regions form a "consensus" from all input regions.

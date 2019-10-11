@@ -84,11 +84,13 @@ setMethod("length",
           }) 
 
 
-#' @docType methods
-#' @rdname ENCODESummary-class
-#' @export
-setGeneric("metadata", function(x) standardGeneric("metadata"))
+##' @docType methods
+##' @rdname ENCODESummary-class
+##' @export
+#setGeneric("metadata", function(x) standardGeneric("metadata"))
 
+#' @importMethodsFrom S4Vectors metadata
+#' @export
 #' @rdname ENCODESummary-class
 #' @aliases metadata,ENCODESummary,ENCODESummary-method
 setMethod("metadata",
