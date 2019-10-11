@@ -222,7 +222,7 @@ clean_column <- function(column_name, table) {
   type <- c("character", "data.frame", "logical",
             "numeric", "integer", "NULL")
   stopifnot(class(column) %in% type)
-  if(is(column, "data.frame")) {
+  if(methods::is(column, "data.frame")) {
       stopifnot(nrow(column) == nrow(table))
   }else if((class(column) %in% type) & !(is.null(column))){
       stopifnot(length(column) == nrow(table))

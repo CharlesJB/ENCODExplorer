@@ -6,6 +6,7 @@
 #' @importFrom tidyr spread
 #' @importFrom dplyr filter
 #' @importFrom dplyr setdiff
+#' @importFrom DT renderDataTable
 #' 
 library(shiny)
 library(shinythemes)
