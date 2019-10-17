@@ -14,7 +14,7 @@ full_db_cache_env=new.env()
 get_encode_df_full <- function() {
     if(!exists("full_db_cache", envir=full_db_cache_env)) {
         ah = AnnotationHub()
-        full_db = query(ah, "ENCODExplorerData")[["AH69291"]]
+        full_db = query(ah, "ENCODExplorerData")[["AH75132"]]
         assign("full_db_cache", full_db, envir=full_db_cache_env)
     }
     return(get("full_db_cache", envir=full_db_cache_env))
@@ -34,7 +34,7 @@ get_encode_df_full <- function() {
 get_encode_df <- function() {
     if(!exists("light_db_cache", envir=full_db_cache_env)) {
 	ah = AnnotationHub()
-	light_db = query(ah, "ENCODExplorerData")[["AH69290"]]
+	light_db = query(ah, "ENCODExplorerData")[["AH75131"]]
         assign("light_db_cache", light_db, envir=full_db_cache_env)
     }
     return(get("light_db_cache", envir=full_db_cache_env))
