@@ -200,6 +200,10 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #'                 downloaded.
 #' @param force A logical indicating whether already present files be 
 #'              redownloaded.
+#' @param consensus_threshold_n An integer indicating the number of peak files
+#'                              in which a peak must appear for it to be 
+#'                              included within the consensus. IF this argument 
+#'                              is provided, it supercedes consensus_threshold.
 #' @return An object of class \linkS4class{ENCODEBindingConsensus}.
 #'
 #' @examples
@@ -216,7 +220,8 @@ validate_query_results_for_consensus_rna <- function(query_results, split_by) {
 #' @export
 buildConsensusPeaks <- function(query_results, split_by=NULL,
                                 consensus_threshold=1, simplify=FALSE,
-                                temp_dir=".", force=FALSE) {
+                                temp_dir=".", force=FALSE,
+                                consensus_threshold_n=NULL) {
     common = buildConsensusCommon(query_results, split_by, temp_dir, force, 
                                   ".bed.gz", simplify)
     validate_query_results_for_consensus_chip(query_results, split_by)
@@ -234,7 +239,9 @@ buildConsensusPeaks <- function(query_results, split_by=NULL,
     consensus = list()
     for(i in names(peaks)) {
         overlap_obj = GenomicOverlaps(peaks[[i]])
-        consensus[[i]] = consensus_regions(overlap_obj, consensus_threshold)
+        consensus[[i]] = consensus_regions(overlap_obj, 
+                                           consensus_threshold, 
+                                           consensus_threshold_n)
     }
     
     methods::new("ENCODEBindingConsensus",

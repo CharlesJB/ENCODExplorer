@@ -311,15 +311,21 @@ union_regions <- function(x, indices=names(x)) {
 #' @param x A \linkS4class{GenomicOverlaps} object.
 #' @param consensus_threshold The fraction of input regions which must have
 #'                            a given region for it to be selected.
+#' @param consensus_threshold_n The absolute number of input regions which must 
+#'                              have a given region for it to be selected.
 #' @return A vector of the numeric indices of the element of \code{regions(x)} 
 #'         which fit the given criteria.
 #' @importFrom methods is
 #' @keywords internal
-consensus_indices <- function(x, consensus_threshold) {
+consensus_indices <- function(x, consensus_threshold=1, consensus_threshold_n=NULL) {
     stopifnot(is(x, "GenomicOverlaps"))
     stopifnot(is(consensus_threshold, "numeric"))
     
-    return((rowSums(x@matrix) / length(x)) >= consensus_threshold)
+    if(is.null(consensus_threshold_n)) {
+        return((rowSums(x@matrix) / length(x)) >= consensus_threshold)
+    } else {
+        return(rowSums(x@matrix) >= consensus_threshold_n)
+    }
 }
 
 #' Determines which regions form a "consensus" from all input regions.
@@ -327,11 +333,13 @@ consensus_indices <- function(x, consensus_threshold) {
 #' @param x A \linkS4class{GenomicOverlaps} object.
 #' @param consensus_threshold The fraction of input regions which must have
 #'                            a given region for it to be selected.
+#' @param consensus_threshold_n The absolute number of input regions which must 
+#'                              have a given region for it to be selected.
 #' @return A \code{GRanges} objects containing the ranges from \code{regions(x)} 
 #'         which fit the given criteria.
 #' @importFrom methods is
 #' @keywords internal
-consensus_regions <- function(x, consensus_threshold) {
+consensus_regions <- function(x, consensus_threshold=1, consensus_threshold_n=NULL) {
     stopifnot(is(x, "GenomicOverlaps"))
     res_indices = consensus_indices(x, consensus_threshold)
     
