@@ -45,7 +45,8 @@ Imports:
     AnnotationHub,
     GenomicRanges,
     rtracklayer,
-    S4Vectors
+    S4Vectors,
+    GenomeInfoDb
 Suggests:
     RUnit,BiocGenerics,knitr,
     curl,
