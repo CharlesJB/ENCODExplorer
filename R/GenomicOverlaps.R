@@ -318,9 +318,9 @@ consensus_indices <- function(x, consensus_threshold=1, consensus_threshold_n=NU
     stopifnot(is(consensus_threshold, "numeric"))
     
     if(is.null(consensus_threshold_n)) {
-        return((rowSums(x@matrix) / length(x)) >= consensus_threshold)
+        return((rowSums(x@matrix > 0) / length(x)) >= consensus_threshold)
     } else {
-        return(rowSums(x@matrix) >= consensus_threshold_n)
+        return(rowSums(x@matrix > 0) >= consensus_threshold_n)
     }
 }
 

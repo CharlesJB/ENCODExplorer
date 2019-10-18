@@ -41,7 +41,7 @@ test.query_consensus_peaks <- function() {
   res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF", simplify=FALSE)
   checkTrue(length(res) == 1)
   checkTrue(length(files(res))==3)
-  checkTrue(length(consensus(res)[[1]])==770)
+  checkTrue(length(consensus(res)[[1]])==31922)
   
   res = queryConsensusPeaks("GM12878", "GRCh38", "CTCF", simplify=TRUE)
   checkTrue(names(res) == "All")  
