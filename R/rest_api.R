@@ -298,6 +298,8 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
     } else {
       warning("No result found", call. = TRUE)
     }
+  } else {
+    stop("Could not connect to www.encodeproject.org")
   }
   search_results = suppressWarnings(clean_table(r))
   if(!quiet) {cat(paste0("results : ",length(unique(search_results$accession)),"\n"))}
