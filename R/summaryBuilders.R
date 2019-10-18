@@ -309,8 +309,9 @@ queryConsensusPeaks <- function(biosample_name, assembly, target,
     query_results = queryEncodeGeneric(biosample_name=biosample_name, 
                                        assembly=assembly,
                                        target=target,
-                                       assay="ChIP-seq",
-                                       file_status="released")
+                                       assay=".*ChIP-seq",
+                                       file_status="released",
+                                       fixed=FALSE)
     
     # Filter the results so we only keep "final" peaks.
     query_results = filter_results_by_file_type(query_results)
@@ -393,7 +394,7 @@ choose_interactive_value = function(values, col_name, allow_all) {
 }
 
 choose_prefered_value = function(values, col_name, preference_order) {
-    value_matches = which(preference_order %in% values)
+    value_matches = which(toupper(preference_order) %in% toupper(values))
     
     matched_values = preference_order[value_matches]
     if(length(matched_values)==0) {
@@ -431,7 +432,7 @@ filter_on_values <- function(query_results, col_name, chosen_value,
         }
     }
 
-    query_results = query_results[values %in% chosen_value |
+    query_results = query_results[toupper(values) %in% toupper(chosen_value) |
                                   (is.na(values) & any(is.na(chosen_value))),]
 
     
@@ -445,8 +446,8 @@ ASSEMBLY_PREFERENCE = c("GRCh38", "GRCh38-minimal", "hg19",
                         "J02459.1")
 
 ASSAY_PREFERENCE = c("total RNA-seq",
-                     "polyA RNA-seq",
-                     "polyA depleted RNA-seq",
+                     "polyA plus RNA-seq",
+                     "polyA minus RNA-seq",
                      "single cell RNA-seq",
                      "small RNA-seq")
 
@@ -634,7 +635,7 @@ select_metric = function(metric, dt_files) {
 #' query_results = queryEncodeGeneric(biosample_name="neural tube", 
 #'                                    output_type="gene quantifications",
 #'                                    file_type="tsv",
-#'                                    assay="polyA RNA-seq",
+#'                                    assay="polyA plus RNA-seq",
 #'                                    assembly="^mm10$",
 #'                                    dataset_biosample_summary="(15.5|13.5)",
 #'                                    fixed=FALSE)

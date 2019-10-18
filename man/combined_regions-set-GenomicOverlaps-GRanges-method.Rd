@@ -12,10 +12,6 @@
 }
 \value{
 A \code{GRanges} object representing the combined regions.
-importFrom GenomicRanges start
-importFrom GenomicRanges end
-importFrom GenomicRanges strand
-importFrom GenomicRanges seqnames
 }
 \description{
 The new region must have the same length as the old one. This is useful

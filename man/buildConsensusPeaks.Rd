@@ -7,7 +7,7 @@ completed ENCODE query.}
 \usage{
 buildConsensusPeaks(query_results, split_by = NULL,
   consensus_threshold = 1, simplify = FALSE, temp_dir = ".",
-  force = FALSE)
+  force = FALSE, consensus_threshold_n = NULL)
 }
 \arguments{
 \item{query_results}{A data.table returned by \code{\link{queryEncode}} or 
@@ -30,6 +30,11 @@ downloaded.}
 
 \item{force}{A logical indicating whether already present files be 
 redownloaded.}
+
+\item{consensus_threshold_n}{An integer indicating the number of peak files
+in which a peak must appear for it to be 
+included within the consensus. IF this argument 
+is provided, it supercedes consensus_threshold.}
 }
 \value{
 An object of class \linkS4class{ENCODEBindingConsensus}.

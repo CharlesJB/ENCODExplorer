@@ -52,9 +52,8 @@ test.query_revoked_file <- function() {
 }
 
 test.query_two_terms <- function() {
-  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
-  assay2 = "polyA RNA-seq"
+  assay2 = "polyA plus RNA-seq"
   res_two_terms = queryEncode(assay = c(assay1, assay2), biosample_name = "HeLa-S3", fixed = TRUE)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
@@ -62,9 +61,8 @@ test.query_two_terms <- function() {
 }
 
 test.query_fuzzy_prefix <- function() {
-  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
-  assay2 = "polyA RNA-seq"
+  assay2 = "polyA plus RNA-seq"
   res_fuzzy = queryEncode(assay = "RNA-seq", biosample_name = "HeLa-S3", fixed = TRUE, fuzzy = TRUE)
 
   checkTrue(assay1 %in% res_fuzzy$assay && assay2 %in% res_fuzzy$assay,
@@ -72,9 +70,8 @@ test.query_fuzzy_prefix <- function() {
 }
 
 test.query_regex <- function() {
-  encode_df <- encodexplorer_data 
   assay1 = "small RNA-seq"
-  assay2 = "polyA RNA-seq"
+  assay2 = "polyA plus RNA-seq"
   res_two_terms = queryEncode(assay = ".*RNA-seq", biosample_name = "HeLa-S3", fixed = FALSE)
 
   checkTrue(assay1 %in% res_two_terms$assay && assay2 %in% res_two_terms$assay,
@@ -82,13 +79,11 @@ test.query_regex <- function() {
 }
 
 test.query_na <- function() {
-  encode_df <- encodexplorer_data 
-
   # Run a query twice: once with all treatment values, and once only with NA treatment.
-  res_null = queryEncodeGeneric(assay="ChIP-seq", biosample_name="A549", 
+  res_null = queryEncodeGeneric(assay="TF ChIP-seq", biosample_name="A549", 
                                 file_format="bed", status="released", assembly="GRCh38",
                                 target="NR3C1")
-  res_na = queryEncodeGeneric(assay="ChIP-seq", biosample_name="A549", 
+  res_na = queryEncodeGeneric(assay="TF ChIP-seq", biosample_name="A549", 
                               file_format="bed", status="released", assembly="GRCh38",
                               target="NR3C1", treatment=NA)
 

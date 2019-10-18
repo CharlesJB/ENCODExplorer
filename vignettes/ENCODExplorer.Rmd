@@ -78,7 +78,7 @@ a precise query defined according to the following criteria :
 |file_accession|The accesion for one specific file|
 |biosample_name|The biosample name ("GM12878", "kidney")|
 |biosample_type|The biosample type ("tissue", "cell line")|
-|assay|The assay type ("ChIP-seq", "polyA RNA-seq")|
+|assay|The assay type ("ChIP-seq", "polyA plus RNA-seq")|
 |file_format|The file format. Some currently available formats include *bam*, *bed*, *fastq*, *bigBed*, *bigWig*, *CEL*, *csfasta*, *csqual*, *fasta*, *gff*, *gtf*, *idat*, *rcc*, *sam*, *tagAlign*, *tar*, *tsv*, *vcf*, *wig*.|
 |lab|The laboratory|
 |organism|The donor organism ("Homo sapiens", "Mus musculus")|
@@ -441,7 +441,7 @@ ENCODExplorer provides the `buildExpressionSummary` method.
 query_results = queryEncodeGeneric(biosample_name="neural tube", 
                                    output_type="gene quantifications",
                                    file_type="tsv",
-                                   assay="polyA RNA-seq",
+                                   assay="polyA plus RNA-seq",
                                    assembly="^mm10$",
                                    dataset_biosample_summary="(15.5|13.5)",
                                    fixed=FALSE)

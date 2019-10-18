@@ -68,19 +68,15 @@ setMethod("combined_regions",
 #' for replacing annotations.
 #' @param x The \linkS4class{GenomicOverlaps} object.
 #' @return A \code{GRanges} object representing the combined regions.
-#' importFrom GenomicRanges start
-#' importFrom GenomicRanges end
-#' importFrom GenomicRanges strand
-#' importFrom GenomicRanges seqnames
 #' @keywords internal
 setMethod("combined_regions<-",
           c(x="GenomicOverlaps", value="GRanges"),
           function(x, value) {
             stopifnot(length(value)==length(x@regions))
-            stopifnot(all(seqnames(value)==seqnames(x@regions)))
-            stopifnot(all(start(value)==start(x@regions)))
-            stopifnot(all(end(value)==end(x@regions)))
-            stopifnot(all(strand(value)==strand(x@regions)))
+            stopifnot(all(GenomeInfoDb::seqnames(value)==GenomeInfoDb::seqnames(x@regions)))
+            stopifnot(all(BiocGenerics::start(value)==BiocGenerics::start(x@regions)))
+            stopifnot(all(BiocGenerics::end(value)==BiocGenerics::end(x@regions)))
+            stopifnot(all(BiocGenerics::strand(value)==BiocGenerics::strand(x@regions)))
             x@regions = value
             x
           })

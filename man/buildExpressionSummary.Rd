@@ -49,7 +49,7 @@ average expression levels for each condition.
 query_results = queryEncodeGeneric(biosample_name="neural tube", 
                                    output_type="gene quantifications",
                                    file_type="tsv",
-                                   assay="polyA RNA-seq",
+                                   assay="polyA plus RNA-seq",
                                    assembly="^mm10$",
                                    dataset_biosample_summary="(15.5|13.5)",
                                    fixed=FALSE)
