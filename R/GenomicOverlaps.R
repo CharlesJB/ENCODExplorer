@@ -68,6 +68,7 @@ setMethod("combined_regions",
 #' for replacing annotations.
 #' @param x The \linkS4class{GenomicOverlaps} object.
 #' @return A \code{GRanges} object representing the combined regions.
+#' @importFrom GenomeInfoDb seqnames
 #' @keywords internal
 setMethod("combined_regions<-",
           c(x="GenomicOverlaps", value="GRanges"),
