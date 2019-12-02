@@ -37,6 +37,8 @@ clean_column <- function(column_name, table) {
     if (is.data.frame(column)) {
         if (nrow(column) == nrow(table) & ncol(column) >= 1) {
             for (i in 1:ncol(column)){
+                # Don't go two level deeps. We could try to set-up
+                # something recursive, but I'm not sure it's worth it.
                 if(!is.data.frame(column[[i]])) {
                     column[[i]]<-lapply(column[[i]], unlist)
                     column[[i]] <- sapply(column[[i]], function(x) {
