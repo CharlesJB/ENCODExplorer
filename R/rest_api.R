@@ -6,7 +6,7 @@
 #' This function will either remove columns that are not relevant and convert
 #' columns to a vector or data.frame.
 #'
-#' @param column_name The name of the column for the table that is been process.
+#' @param column_name The name of the column being processed.
 #' @param table The table produced by the \code{extract_table} function.
 #'
 #' @return a \code{data.frame} corresponding to the cleaned version of the
@@ -37,14 +37,16 @@ clean_column <- function(column_name, table) {
     if (is.data.frame(column)) {
         if (nrow(column) == nrow(table) & ncol(column) >= 1) {
             for (i in 1:ncol(column)){
-              column[[i]]<-lapply(column[[i]], unlist)
-              column[[i]] <- sapply(column[[i]], function(x) {
-                if (length(x) > 0) {
-                  paste(x, collapse="; ")
-                } else {
-                  NA
+                if(!is.data.frame(column[[i]])) {
+                    column[[i]]<-lapply(column[[i]], unlist)
+                    column[[i]] <- sapply(column[[i]], function(x) {
+                      if (length(x) > 0) {
+                        paste(x, collapse="; ")
+                      } else {
+                        NA
+                      }
+                    })
                 }
-              })
             }
         } else {
             column <- NULL
