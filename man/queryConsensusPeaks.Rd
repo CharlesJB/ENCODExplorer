@@ -4,8 +4,13 @@
 \alias{queryConsensusPeaks}
 \title{Queries ENCODE for consensus peaks.}
 \usage{
-queryConsensusPeaks(biosample_name, assembly, target, simplify = FALSE,
-  use_interactive = FALSE)
+queryConsensusPeaks(
+  biosample_name,
+  assembly,
+  target,
+  simplify = FALSE,
+  use_interactive = FALSE
+)
 }
 \arguments{
 \item{biosample_name}{The cell-line/tissue for which consensus peaks should 

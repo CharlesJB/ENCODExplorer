@@ -6,8 +6,13 @@
 within the encode_df \code{data.table}. For faster processing, pass encode_df
 object as database parameter.}
 \usage{
-fuzzySearch(searchTerm = NULL, database = get_encode_df(),
-  filterVector = NULL, multipleTerm = FALSE, ignore_case = TRUE)
+fuzzySearch(
+  searchTerm = NULL,
+  database = get_encode_df(),
+  filterVector = NULL,
+  multipleTerm = FALSE,
+  ignore_case = TRUE
+)
 }
 \arguments{
 \item{searchTerm}{The keyword or a \code{list} of keyword to search.}

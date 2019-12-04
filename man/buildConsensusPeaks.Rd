@@ -5,9 +5,15 @@
 \title{Calculates the consensus peaks defined by the results of a previously
 completed ENCODE query.}
 \usage{
-buildConsensusPeaks(query_results, split_by = NULL,
-  consensus_threshold = 1, simplify = FALSE, temp_dir = ".",
-  force = FALSE, consensus_threshold_n = NULL)
+buildConsensusPeaks(
+  query_results,
+  split_by = NULL,
+  consensus_threshold = 1,
+  simplify = FALSE,
+  temp_dir = ".",
+  force = FALSE,
+  consensus_threshold_n = NULL
+)
 }
 \arguments{
 \item{query_results}{A data.table returned by \code{\link{queryEncode}} or 

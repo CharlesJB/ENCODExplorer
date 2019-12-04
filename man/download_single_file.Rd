@@ -4,8 +4,13 @@
 \alias{download_single_file}
 \title{download_single_file Downloads a single file and checks if md5 checksums match.}
 \usage{
-download_single_file(file_url, file_md5, dir = ".",
-  experiment_name = NULL, force = TRUE)
+download_single_file(
+  file_url,
+  file_md5,
+  dir = ".",
+  experiment_name = NULL,
+  force = TRUE
+)
 }
 \arguments{
 \item{file_url}{A \code{character} giving the URL of the file to be downloaded.}

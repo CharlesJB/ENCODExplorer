@@ -5,8 +5,13 @@
 \title{Queries and returns average transcript expression level for a given 
 biosample_name.}
 \usage{
-queryTranscriptExpression(biosample_name, assay = NULL,
-  assembly = NULL, simplify = TRUE, use_interactive = FALSE)
+queryTranscriptExpression(
+  biosample_name,
+  assay = NULL,
+  assembly = NULL,
+  simplify = TRUE,
+  use_interactive = FALSE
+)
 }
 \arguments{
 \item{biosample_name}{The cell-line/tissue for which average expression 

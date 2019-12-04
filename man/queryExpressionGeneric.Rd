@@ -4,9 +4,14 @@
 \alias{queryExpressionGeneric}
 \title{Queries and returns average expression levels for a given biosample_name.}
 \usage{
-queryExpressionGeneric(biosample_name, level = "gene quantifications",
-  assay = NULL, assembly = NULL, simplify = TRUE,
-  use_interactive = FALSE)
+queryExpressionGeneric(
+  biosample_name,
+  level = "gene quantifications",
+  assay = NULL,
+  assembly = NULL,
+  simplify = TRUE,
+  use_interactive = FALSE
+)
 }
 \arguments{
 \item{biosample_name}{The cell-line/tissue for which average expression 

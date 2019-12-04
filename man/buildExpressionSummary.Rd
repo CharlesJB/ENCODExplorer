@@ -5,9 +5,15 @@
 \title{Calculates average expression levels of the results of a previously
 completed ENCODE query.}
 \usage{
-buildExpressionSummary(query_results, split_by, metric = NULL,
-  simplify = FALSE, aggregate_function = mean, temp_dir = ".",
-  force = FALSE)
+buildExpressionSummary(
+  query_results,
+  split_by,
+  metric = NULL,
+  simplify = FALSE,
+  aggregate_function = mean,
+  temp_dir = ".",
+  force = FALSE
+)
 }
 \arguments{
 \item{query_results}{A data.table returned by \code{\link{queryEncode}} or 

@@ -4,8 +4,7 @@
 \alias{consensus_indices}
 \title{Determines which regions form a "consensus" from all input regions.}
 \usage{
-consensus_indices(x, consensus_threshold = 1,
-  consensus_threshold_n = NULL)
+consensus_indices(x, consensus_threshold = 1, consensus_threshold_n = NULL)
 }
 \arguments{
 \item{x}{A \linkS4class{GenomicOverlaps} object.}

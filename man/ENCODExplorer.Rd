@@ -3,7 +3,6 @@
 \docType{package}
 \name{ENCODExplorer}
 \alias{ENCODExplorer}
-\alias{ENCODExplorer-package}
 \title{ENCODExplorer}
 \description{
 ENCODExplorer

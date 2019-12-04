@@ -5,9 +5,16 @@
 \title{Create a design for the files associated with the result of a queryEncode,
  fuzzySearch research or a \code{data.table} from createDesign.}
 \usage{
-createDesign(input = NULL, df = get_encode_df(), split = FALSE,
-  fileFormat = "bam", dataset_type = "experiments", format = "long",
-  output_type = "data.table", ID = c(1, 2))
+createDesign(
+  input = NULL,
+  df = get_encode_df(),
+  split = FALSE,
+  fileFormat = "bam",
+  dataset_type = "experiments",
+  format = "long",
+  output_type = "data.table",
+  ID = c(1, 2)
+)
 }
 \arguments{
 \item{input}{The \code{data.table} created by a queryEncode or
