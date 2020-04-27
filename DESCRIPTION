@@ -2,7 +2,7 @@ Package: ENCODExplorer
 Name: ENCODExplorer
 Type: Package
 Title: A compilation of ENCODE metadata
-Version: 2.13.1
+Version: 2.14.0
 Date: 2015-02-25
 Authors@R: c(
     person("Charles","Joly Beauparlant",
