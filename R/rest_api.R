@@ -42,7 +42,7 @@ searchEncode <- function(searchTerm = NULL, limit = 10, quiet = FALSE) {
     stop("Could not connect to www.encodeproject.org")
   }
   search_results = suppressWarnings(ENCODExplorerData::clean_table(jsonlite::flatten(r)))
-  if(!quiet) {cat(paste0("results : ",length(unique(search_results$accession)),"\n"))}
+  if(!quiet) {cat(paste0("results : ",length(unique(search_results$id)),"\n"))}
   
   search_results
 }

@@ -3,7 +3,7 @@ if(FALSE) {
   library( "ENCODExplorer" )
 }
 
-limit = 4
+limit = 50
 searchTerm = "MCF7"
 res = searchEncode(searchTerm, limit)
 
@@ -16,6 +16,6 @@ test.limit <- function() {
 }
 
 test.ret_content <- function() {
-  checkTrue(expr = !is.null(res$accession), 
-            msg = "res should be get an accession entry")
+  checkTrue(expr = !is.null(res$id), 
+            msg = "res should contain ids")
 }
