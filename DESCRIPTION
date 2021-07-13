@@ -54,7 +54,8 @@ Suggests:
     httr,
     shiny,
     shinythemes,
-    DT    
+    DT,
+	rmarkdown    
 LazyData: true
 biocViews: Infrastructure, DataImport
 RoxygenNote: 7.0.2
